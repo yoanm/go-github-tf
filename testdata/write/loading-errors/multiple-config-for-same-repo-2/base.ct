@@ -1,0 +1,5 @@
+$ cd testdata
+$ github-tf --no-ansi --> FAIL 1
+Error | Error during workspace loading:
+Error during configs loading:
+	 - file config/repos/repo1.yml imports repo1, but already imported by config/repos/repo2.yml

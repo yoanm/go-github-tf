@@ -1,0 +1,5 @@
+$ cd testdata
+$ github-tf --no-ansi --> FAIL 1
+Error | Error during workspace loading:
+Error during configs loading:
+	 - file config/repos/repo.yml: EOF

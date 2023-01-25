@@ -1,0 +1,22 @@
+pattern: a-pattern1
+_templates: [ "branch-protection-template1" ]
+forbid: true # TO ADD -> blocks_creations: (forbid !== true)
+enforce-admins: true
+deletion: true # allowsDeletions: true
+linear-history: true # requiredLinearHistory: true
+signed-commits: true # requireSignedCommits: true
+pushes:
+  force-push: true # allowsForcePushes: true
+  restrict-to: [ branch-protection-pushRestriction1 ] # pushRestrictions
+status-checks: # requiredStatusChecks:
+  strict: true
+  required: [ branch-protection-context1 ] # contexts
+pull-request-reviews: # requiredPullRequestReviews:
+  bypassers: [ branch-protection-bypasser1 ] # TO ADD -> pull_request_bypassers
+  resolved-conversations: true # TO ADD -> require_conversation_resolution
+  codeowner-approvals: true # requireCodeOwnerReviews: true
+  approval-count: 0 # requiredApprovingReviewCount: 3
+  dismissals:
+    staled: true # dismissStaleReviews: true
+    restrict: true # restrictDismissals
+    restrict-to: [ branch-protection-dismissalRestriction1 ] # dismissalRestrictions
