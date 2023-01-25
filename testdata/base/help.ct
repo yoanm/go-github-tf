@@ -1,0 +1,10 @@
+$ github-tf -h
+  -c, --config string         Config directory (default "config")
+  -h, --help                  Display this help
+      --no-ansi               Disable ANSI output
+  -q, --quiet                 Disable output
+  -t, --templates string      Template directory (default "templates")
+  -v, --verbose count         Enable verbose output. -v for Info, -vv for Debug and -vvv for Trace
+  -V, --version               Print current version
+  -w, --workspace string      Workspace directory (default ".")
+      --yaml-anchors string   YAML anchors directory (default "yaml-anchors")

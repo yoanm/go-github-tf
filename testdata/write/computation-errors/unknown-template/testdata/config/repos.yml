@@ -1,0 +1,11 @@
+- name: repo-name
+  _templates: [unknown-template]
+- name: repo-name2
+  default-branch:
+    name: master
+    protection:
+      _templates: [default]
+- name: repo-name3
+  branch-protections:
+    - _templates: [default]
+      pattern: d

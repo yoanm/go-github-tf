@@ -1,0 +1,8 @@
+$ cd testdata
+$ github-tf --no-ansi --> FAIL 1
+Error | Error during workspace loading:
+Error during configs loading:
+	 - file config/repos/test.yml: /unexpected-property not allowed
+Error during templates loading:
+	 - file templates/test.branch-protection.yml: /enforce-admins expected boolean, but got string
+	 - file templates/test.repo.yml: /name not allowed

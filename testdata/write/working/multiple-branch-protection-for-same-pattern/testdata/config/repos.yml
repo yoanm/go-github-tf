@@ -1,0 +1,6 @@
+- name: repo1
+  branch-protections:
+    - enforce-admins: true
+      pattern: d
+    - enforce-admins: false
+      pattern: d

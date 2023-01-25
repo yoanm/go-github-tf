@@ -1,0 +1,6 @@
+terraform:
+  archive-on-destroy: true
+default-branch:
+  name: master
+  protection:
+    _templates: [default-branch]

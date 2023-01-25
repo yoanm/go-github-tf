@@ -1,0 +1,17 @@
+enforce-admins: true
+deletion: true
+linear-history: true
+signed-commits: true
+pushes:
+  force-push: true
+  restrict-to: [pushRestriction]
+status-checks:
+  strict: true
+  required: [context1]
+pull-request-reviews:
+  approval-count: 2
+  codeowner-approvals: true
+  dismissals:
+    staled: false
+    restrict: true
+    restrict-to: [dismissalRestriction]

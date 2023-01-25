@@ -1,0 +1,31 @@
+- name: repo1
+  _templates: [default]
+  description: "a description"
+  pull-requests:
+    merge-strategy:
+      merge: false
+      rebase: false
+      squash: false
+    branch:
+      delete-on-merge: false
+  misc:
+    archived: true
+    downloads: true
+    projects: true
+    wiki: true
+    issues: false
+- name: repo2
+  pull-requests:
+    merge-strategy:
+      merge: false
+      rebase: false
+      squash: false
+    branch:
+      delete-on-merge: false
+  security:
+    vulnerability-alerts: true
+  misc:
+    downloads: true
+    projects: true
+    wiki: true
+    issues: true

@@ -1,0 +1,6 @@
+- name: repo1
+  default-branch:
+    name: d
+    protection:
+      enforce-admins: false
+      _templates: [default-branch]

@@ -1,0 +1,33 @@
+- name: repo1
+  description: "a description"
+  pull-requests:
+    merge-strategy:
+      merge: false
+      rebase: false
+      squash: false
+    branch:
+      delete-on-merge: false
+  misc:
+    archived: true
+    downloads: true
+    projects: true
+    wiki: true
+    issues: false
+- name: repo2
+  branch-protections:
+    - enforce-admins: true
+      pattern: d
+  pull-requests:
+    merge-strategy:
+      merge: false
+      rebase: false
+      squash: false
+    branch:
+      delete-on-merge: false
+  security:
+    vulnerability-alerts: true
+  misc:
+    downloads: true
+    projects: true
+    wiki: true
+    issues: true

@@ -1,0 +1,55 @@
+name: repo1
+description: "a description"
+visibility: visibility
+security:
+  vulnerability-alerts: true
+terraform:
+  archive-on-destroy: false
+default-branch:
+  name: master
+branch-protections:
+  - pattern: master
+    enforce-admins: true
+    deletion: true
+    linear-history: true
+    signed-commits: true
+    pushes:
+      force-push: true
+      restrict-to: [pushRestriction]
+    status-checks:
+      strict: true
+      required: [context1]
+    pull-request-reviews:
+      approval-count: 1
+      codeowner-approvals: true
+      dismissals:
+        staled: true
+        restrict: true
+        restrict-to: [dismissalRestriction]
+misc:
+  archived: true
+  template:
+    source: owner/repository
+  homepage-url: http://localhost
+  topics: [topic1, topic2]
+  pages:
+    source-branch: branch
+    source-path: path
+  downloads: true
+  projects: true
+  wiki: true
+  issues: false
+pull-requests:
+  merge-strategy:
+    merge: false
+    rebase: false
+    squash: false
+    auto-merge: false
+  branch:
+    delete-on-merge: false
+  merge-commit:
+    title: "aMergeCommitTitle"
+    message: "aMergeCommitMessage"
+  squash-commit:
+    title: "aSquashMergeCommitTitle"
+    message: "aSquashMergeCommitMessage"

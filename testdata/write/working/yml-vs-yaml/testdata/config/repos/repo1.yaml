@@ -1,0 +1,15 @@
+name: repo1
+description: "a description"
+pull-requests:
+  merge-strategy:
+    merge: false
+    rebase: false
+    squash: false
+  branch:
+    delete-on-merge: false
+misc:
+  archived: true
+  downloads: true
+  projects: true
+  wiki: true
+  issues: false

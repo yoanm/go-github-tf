@@ -1,0 +1,6 @@
+$ cd testdata
+$ github-tf --no-ansi --> FAIL
+Error | error during computation:
+	 - repository repo-name: unknown repository template unknown-template
+	 - repository repo-name2: default branch: unknown branch protection template default
+	 - repository repo-name3: branch protection #0: unknown branch protection template default

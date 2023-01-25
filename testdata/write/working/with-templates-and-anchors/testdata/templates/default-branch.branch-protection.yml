@@ -1,0 +1,6 @@
+status-checks:
+  strict: true
+pull-request-reviews:
+  dismissals:
+    staled: false
+  approval-count: *default-requiredApprovingReviewCount

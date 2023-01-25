@@ -1,0 +1,29 @@
+$ cd testdata
+$ github-tf -v --no-ansi
+Info | Found: 1 repos / 0 repo templates / 0 branch templates / 1 branch protection templates
+
+$ cd terraform
+$ cat repo.repo1.tf
+resource "github_repository" "repo1" {
+  name = "repo1"
+}
+
+resource "github_branch_default" "repo1" {
+  repository = github_repository.repo1.name
+  branch     = "d"
+}
+
+resource "github_branch_protection" "repo1-default" {
+  repository_id  = github_repository.repo1.node_id
+  pattern        = github_branch_default.repo1.branch
+  enforce_admins = false
+
+  required_status_checks {
+    strict = true
+  }
+
+  required_pull_request_reviews {
+    dismiss_stale_reviews           = false
+    required_approving_review_count = 2
+  }
+}

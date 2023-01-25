@@ -1,0 +1,7 @@
+enforce-admins: true
+status-checks:
+  strict: true
+pull-request-reviews:
+  approval-count: 2
+  dismissals:
+    staled: false
