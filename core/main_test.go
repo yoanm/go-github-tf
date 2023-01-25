@@ -25,6 +25,7 @@ func EnsureConfigMatching(t *testing.T, expectedConf, actualConf interface{}, ex
 		t.Errorf("No conf or error expected by the case !")
 	}
 }
+
 func EnsureErrorMatching(t *testing.T, expectedErr error, actualErr error) {
 	if actualErr == nil && expectedErr != nil {
 		t.Errorf("Expected an error but everything went well !")

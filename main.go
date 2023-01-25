@@ -43,7 +43,7 @@ import (
 // LATER LATER MAYBE
 // @TODO manage organization (user role, team + membership)
 
-// Build time variables
+// Build time variables.
 var (
 	version = "dev"
 	commit  = "none"
@@ -51,7 +51,7 @@ var (
 )
 
 var (
-	// Base flags
+	// Base flags.
 	workspacePathFlag        string
 	defaultWorkspacePathFlag = "."
 	configDirFlag            string
@@ -63,14 +63,14 @@ var (
 
 	// printImportsFlag          bool
 	// skipImportListFlag        []string
-	// defaultSkipImportListFlag []string = nil
+	// defaultSkipImportListFlag []string = nil.
 
-	// Logging flags
+	// Logging flags.
 	verboseFlag     int
 	quietFlag       bool
 	disableAnsiFlag bool
 
-	// Miscellaneous flags
+	// Miscellaneous flags.
 	helpFlag    bool
 	versionFlag bool
 )

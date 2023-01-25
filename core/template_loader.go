@@ -5,8 +5,10 @@ import (
 	"strings"
 )
 
-const TemplateMaxDepth = 10
-const TemplateMaxCount = 10
+const (
+	TemplateMaxDepth = 10
+	TemplateMaxCount = 10
+)
 
 func loadTemplate[T any](tplName string, loaderFn func(s string) *T, finderFn func(c *T) *[]string, tplType string, path ...string) (tplList []*T, err error) {
 	if len(path) > TemplateMaxDepth {

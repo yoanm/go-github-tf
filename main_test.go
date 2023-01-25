@@ -153,6 +153,7 @@ func chmodCmd(args []string, inputFile string) ([]byte, error) {
 	}
 	return nil, nil
 }
+
 func checkPath(path string) error {
 	if strings.ContainsRune(path, '/') || strings.ContainsRune(path, '\\') {
 		return fmt.Errorf("argument must be in the current directory (%q contains '/')", path)

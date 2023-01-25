@@ -1,4 +1,4 @@
-# github-tf - terraform gitHub resources helper
+# go-github-tf - terraform gitHub resources helper
 
 [![License](https://img.shields.io/github/license/yoanm/github-tf.svg)](https://github.com/yoanm/github-tf)
 [![Code size](https://img.shields.io/github/languages/code-size/yoanm/github-tf.svg)](https://github.com/yoanm/github-tf)

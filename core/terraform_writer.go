@@ -138,8 +138,10 @@ type errorCollectorItem struct {
 	File string
 	Err  error
 }
-type fileCollector chan fileCollectorItem
-type errorCollector chan errorCollectorItem
+type (
+	fileCollector  chan fileCollectorItem
+	errorCollector chan errorCollectorItem
+)
 
 func generateHclRepoFileAsync(c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string, collector fileCollector, wg *sync.WaitGroup) {
 	defer wg.Done()

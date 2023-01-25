@@ -4,12 +4,13 @@ import (
 	"sort"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
+
+	"github.com/yoanm/go-tfsig"
+
 	"github.com/yoanm/go-gh2tf/ghbranch"
 	"github.com/yoanm/go-gh2tf/ghbranchdefault"
 	"github.com/yoanm/go-gh2tf/ghbranchprotect"
 	"github.com/yoanm/go-gh2tf/ghrepository"
-
-	"github.com/yoanm/go-tfsig"
 )
 
 /** Public **/
@@ -139,7 +140,6 @@ func appendBranchProtectionResourceContent(body *hclwrite.Body, c *GhRepoConfig,
 					MapToBranchProtectionRes(branchProtectionConfig, valGen, c, repoTfId, LinkToRepository),
 				),
 			)
-
 		}
 	}
 }

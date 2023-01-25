@@ -125,6 +125,7 @@ func readConfigDirectory(config *core.Config, rootPath string, decoderOpts []yam
 
 	return nil
 }
+
 func readRepositoryDirectory(config *core.Config, rootPath string, decoderOpts []yaml.DecodeOption) (visited map[string]string, errList map[string]error) {
 	dirName := filepath.Base(rootPath)
 	filenames, readErr := readDirectory(rootPath)
@@ -155,6 +156,7 @@ func readRepositoryDirectory(config *core.Config, rootPath string, decoderOpts [
 
 	return visited, errList
 }
+
 func readTemplateDirectory(config *core.Config, rootPath string, decoderOpts []yaml.DecodeOption) error {
 	if _, err := os.Stat(rootPath); os.IsNotExist(err) {
 		// Nothing to do

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/yoanm/go-tfsig"
+
 	"github.com/yoanm/go-gh2tf/ghbranch"
 	"github.com/yoanm/go-gh2tf/ghbranchdefault"
 	"github.com/yoanm/go-gh2tf/ghbranchprotect"
-	"github.com/yoanm/go-tfsig"
-
 	"github.com/yoanm/go-gh2tf/ghrepository"
 )
 

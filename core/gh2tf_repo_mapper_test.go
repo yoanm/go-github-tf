@@ -5,14 +5,15 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/yoanm/go-tfsig"
+	"github.com/yoanm/go-tfsig/testutils"
+
 	"github.com/yoanm/go-gh2tf"
 	"github.com/yoanm/go-gh2tf/ghbranch"
 	"github.com/yoanm/go-gh2tf/ghbranchdefault"
 	"github.com/yoanm/go-gh2tf/ghbranchprotect"
 	"github.com/yoanm/go-gh2tf/ghrepository"
-	"github.com/yoanm/go-tfsig/testutils"
-
-	"github.com/yoanm/go-tfsig"
 )
 
 func TestMapToRepositoryRes(t *testing.T) {
@@ -176,6 +177,7 @@ func TestMapToBranchRes(t *testing.T) {
 		)
 	}
 }
+
 func TestMapToBranchRes_panic(t *testing.T) {
 	valGen := gh2tf.NewValueGenerator()
 	tfId := "an_id"
@@ -260,6 +262,7 @@ func TestMapToDefaultBranchRes(t *testing.T) {
 		)
 	}
 }
+
 func TestMapToDefaultBranchRes_panic(t *testing.T) {
 	valGen := gh2tf.NewValueGenerator()
 	tfId := "an_id"
@@ -541,6 +544,7 @@ func TestMapToBranchProtectionRes(t *testing.T) {
 		)
 	}
 }
+
 func TestMapToBranchProtectionRes_panic(t *testing.T) {
 	valGen := gh2tf.NewValueGenerator()
 	tfId := "an_id"

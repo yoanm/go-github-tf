@@ -154,7 +154,7 @@ func ApplyBranchTemplate(c *GhBranchConfig, templates *TemplatesConfig) (*GhBran
 
 /** Private **/
 
-// Not easily doable with json-schema and applying templates might create duplicates
+// Not easily doable with json-schema and applying templates might create duplicates.
 func mapDuplicatedBranchProtection(conf *GhRepoConfig) {
 	if conf.BranchProtections != nil {
 		knowPattern := map[string]int{}
@@ -204,6 +204,7 @@ func applyBranchTemplate(to *GhBranchConfig, tplList []*GhBranchConfig) *GhBranc
 
 	return newConfig
 }
+
 func applyBranchProtectionTemplate(to *GhBranchProtectionConfig, tplList []*GhBranchProtectionConfig) *GhBranchProtectionConfig {
 	if len(tplList) == 0 {
 		return to

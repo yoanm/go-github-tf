@@ -278,7 +278,6 @@ func (to *GhRepoPRBranchConfig) Merge(from *GhRepoPRBranchConfig) {
 
 	mergeStringIfNotNil(&to.SuggestUpdate, from.SuggestUpdate)
 	mergeStringIfNotNil(&to.DeleteBranchOnMerge, from.DeleteBranchOnMerge)
-
 }
 
 type BaseGhBranchConfig struct {
@@ -490,7 +489,7 @@ func (to *GhRepoTerraformConfig) Merge(from *GhRepoTerraformConfig) {
 }
 
 // mergeStringIfNotNil ensures that updating 'from' afterward doesn't affect 'to' and vice versa
-// It override the string behind 'to' pointer by the string behind 'from' pointer
+// It override the string behind 'to' pointer by the string behind 'from' pointer.
 func mergeStringIfNotNil(to **string, from *string) {
 	if from != nil {
 		// !! to != nil is assume here !!
@@ -504,7 +503,7 @@ func mergeStringIfNotNil(to **string, from *string) {
 }
 
 // mergeSliceIfNotNil ensures that updating 'from' afterward doesn't affect 'to' and vice versa
-// It use append function to create a new slice combining 'from' and 'to' items
+// It use append function to create a new slice combining 'from' and 'to' items.
 func mergeSliceIfNotNil(to **[]string, from *[]string) {
 	if from != nil {
 		// !! to != nil is assume here !!

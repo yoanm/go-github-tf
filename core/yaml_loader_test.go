@@ -289,7 +289,7 @@ func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 		"Unexpected property": {
 			"testdata/invalid-config-files/repos/repos.unexpected-property.yml",
 			[]*GhRepoConfig{
-				&GhRepoConfig{
+				{
 					&repoName, nil, nil, nil, nil, nil, nil,
 					nil, nil, nil, nil,
 				},

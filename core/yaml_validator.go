@@ -1,7 +1,6 @@
 package core
 
 import (
-	_ "embed"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +9,8 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog/log"
 	"github.com/santhosh-tekuri/jsonschema/v5"
+
+	_ "embed"
 )
 
 var (
@@ -135,7 +136,7 @@ func loadAsInterface(filePath string, v *interface{}, decoderOpts ...yaml.Decode
 
 // USE ONLY ON THAT FILE - START
 // e is expected to be an 'error' from jsonschema lib, which is supposed to be a '*jsonschema.ValidationError'
-// (but error type can't be cast to jsonschema.ValidationError type as is)
+// (but error type can't be cast to jsonschema.ValidationError type as is).
 func _normalizeValidationError(filePath string, e interface{}) error {
 	if e == nil {
 		return nil
