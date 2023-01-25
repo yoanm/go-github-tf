@@ -1,2 +1,4 @@
 # Go generated binary
 github-tf
+# Coverage file
+coverage.out
