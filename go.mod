@@ -4,8 +4,7 @@ go 1.18
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/goccy/go-yaml v1.9.5
-	github.com/google/go-cmdtest v0.4.0
+	github.com/goccy/go-yaml v1.9.8
 	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/hcl/v2 v2.15.0
 	github.com/rs/zerolog v1.26.0
@@ -19,7 +18,6 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/fatih/color v1.10.0 // indirect
-	github.com/google/renameio v0.1.0 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
