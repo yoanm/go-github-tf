@@ -1,11 +1,15 @@
-package core
+package core_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/yoanm/github-tf/core"
 )
 
 func TestValidateRepositoryConfig(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
 		filename string
 		error    error
@@ -29,16 +33,22 @@ func TestValidateRepositoryConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				EnsureErrorMatching(t, tc.error, ValidateRepositoryConfig(tc.filename))
+				t.Parallel()
+				EnsureErrorMatching(t, tc.error, core.ValidateRepositoryConfig(tc.filename))
 			},
 		)
 	}
 }
 
 func TestValidateRepositoryConfigs(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
 		filename string
 		error    error
@@ -62,16 +72,22 @@ func TestValidateRepositoryConfigs(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				EnsureErrorMatching(t, tc.error, ValidateRepositoryConfigs(tc.filename))
+				t.Parallel()
+				EnsureErrorMatching(t, tc.error, core.ValidateRepositoryConfigs(tc.filename))
 			},
 		)
 	}
 }
 
 func TestValidateRepositoryTemplateConfig(t *testing.T) {
+	t.Parallel()
+
 	full := GetFullConfig(0)
 	// Template can't have a Name
 	full.Name = nil
@@ -98,18 +114,24 @@ func TestValidateRepositoryTemplateConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				EnsureErrorMatching(t, tc.error, ValidateRepositoryTemplateConfig(tc.filename))
+				t.Parallel()
+				EnsureErrorMatching(t, tc.error, core.ValidateRepositoryTemplateConfig(tc.filename))
 			},
 		)
 	}
 }
 
 func TestValidateBranchProtectionTemplateConfig(t *testing.T) {
+	t.Parallel()
+
 	// Reset YamlAnchorDirectory, so it's certain to cover getYamlValidatorDecoderOptions default return
-	YamlAnchorDirectory = nil
+	core.YamlAnchorDirectory = nil
 
 	cases := map[string]struct {
 		filename string
@@ -134,10 +156,14 @@ func TestValidateBranchProtectionTemplateConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				EnsureErrorMatching(t, tc.error, ValidateBranchProtectionTemplateConfig(tc.filename))
+				t.Parallel()
+				EnsureErrorMatching(t, tc.error, core.ValidateBranchProtectionTemplateConfig(tc.filename))
 			},
 		)
 	}

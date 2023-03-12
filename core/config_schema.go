@@ -43,6 +43,7 @@ func (c *TemplatesConfig) GetRepo(name string) *GhRepoConfig {
 	if c.Repos == nil {
 		return nil
 	}
+
 	if tpl, ok := c.Repos[name]; ok {
 		return tpl
 	}
@@ -54,6 +55,7 @@ func (c *TemplatesConfig) GetBranch(name string) *GhBranchConfig {
 	if c.Branches == nil {
 		return nil
 	}
+
 	if tpl, ok := c.Branches[name]; ok {
 		return tpl
 	}
@@ -65,6 +67,7 @@ func (c *TemplatesConfig) GetBranchProtection(name string) *GhBranchProtectionCo
 	if c.BranchProtections == nil {
 		return nil
 	}
+
 	if tpl, ok := c.BranchProtections[name]; ok {
 		return tpl
 	}

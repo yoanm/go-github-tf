@@ -1,4 +1,4 @@
-package core
+package core_test
 
 import (
 	"fmt"
@@ -6,41 +6,50 @@ import (
 
 	differ "github.com/andreyvit/diff"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/yoanm/github-tf/core"
 )
 
 func EnsureConfigMatching(t *testing.T, expectedConf, actualConf interface{}, expectedError error, actualErr error) {
-	if expectedError != nil {
+	t.Helper()
+
+	switch {
+	case expectedError != nil:
 		if actualErr == nil {
 			t.Errorf("Expected an error but everything went well !")
 		} else if actualErr.Error() != expectedError.Error() {
 			t.Errorf("Error mismatch\n- expected\n+ actual\n\n%v", differ.LineDiff(expectedError.Error(), actualErr.Error()))
 		}
-	} else if expectedConf != nil {
+	case expectedConf != nil:
 		if actualErr != nil {
 			t.Errorf("Error %s", actualErr)
 		} else if diff := cmp.Diff(expectedConf, actualConf); diff != "" {
 			t.Errorf("Config mismatch (-want +got):\n%s", diff)
 		}
-	} else {
+	default:
 		t.Errorf("No conf or error expected by the case !")
 	}
 }
 
 func EnsureErrorMatching(t *testing.T, expectedErr error, actualErr error) {
-	if actualErr == nil && expectedErr != nil {
+	t.Helper()
+
+	switch {
+	case actualErr == nil && expectedErr != nil:
 		t.Errorf("Expected an error but everything went well !")
-	} else if expectedErr != nil && actualErr != nil {
+	case expectedErr != nil && actualErr != nil:
 		if actualErr.Error() != expectedErr.Error() {
 			t.Errorf("Error mismatch\n- expected\n+ actual\n\n%v", differ.LineDiff(expectedErr.Error(), actualErr.Error()))
 		}
-	} else if actualErr != nil {
+	case actualErr != nil:
 		t.Errorf("Error %s", actualErr)
 	}
 }
 
-func GetFullConfig(id int) *GhRepoConfig {
+func GetFullConfig(id int) *core.GhRepoConfig {
 	bool1 := "false"
 	bool2 := "true"
+
 	if id%2 == 0 {
 		bool1 = "true"
 		bool2 = "false"
@@ -123,6 +132,7 @@ func GetFullConfig(id int) *GhRepoConfig {
 	branch2BranchProtectionContext := fmt.Sprintf("branch%d-context%d", 1+id, id)
 	// Repo->Branches[1]->Protection->PullRequestReviews
 	branch2BranchProtectionBypasser := fmt.Sprintf("branch%d-bypasser%d", 1+id, id)
+	// nolint:forbidigo // Test file
 	branch2BranchProtectionRequiredApprovingReviewCount := fmt.Sprintf("%d", (approvalCount+2)%7)
 	branch2BranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool1)
 	branch2BranchProtectionResolvedConversations := fmt.Sprintf("%s", bool1)
@@ -199,35 +209,35 @@ func GetFullConfig(id int) *GhRepoConfig {
 	archiveOnDestroy := fmt.Sprintf("%s", bool2)
 	ignoreVulnerabilityAlertsDuringRead := fmt.Sprintf("%s", bool2)
 
-	return &GhRepoConfig{
+	return &core.GhRepoConfig{
 		&name,
 		&[]string{repoTemplate},
 		&visibility,
 		&description,
-		&GhDefaultBranchConfig{
+		&core.GhDefaultBranchConfig{
 			&defaultBranchName,
-			BaseGhBranchConfig{
+			core.BaseGhBranchConfig{
 				&[]string{defaultBranchBranchTemplate},
-				&BaseGhBranchProtectionConfig{
+				&core.BaseGhBranchProtectionConfig{
 					&[]string{defaultBranchBranchProtectionTemplate},
 					&defaultBranchBranchProtectionEnforceAdmins,
 					&defaultBranchBranchProtectionAllowsDeletions,
 					&defaultBranchBranchProtectionRequiredLinearHistory,
 					&defaultBranchBranchProtectionRequireSignedCommits,
-					&GhBranchProtectPushesConfig{
+					&core.GhBranchProtectPushesConfig{
 						&defaultBranchBranchProtectionAllowsForcePushes,
 						&[]string{defaultBranchBranchProtectionPushRestriction},
 					},
-					&GhBranchProtectStatusChecksConfig{
+					&core.GhBranchProtectStatusChecksConfig{
 						&defaultBranchBranchProtectionStrict,
 						&[]string{defaultBranchBranchProtectionContext},
 					},
-					&GhBranchProtectPRReviewConfig{
+					&core.GhBranchProtectPRReviewConfig{
 						&[]string{defaultBranchBranchProtectionBypasser},
 						&defaultBranchBranchProtectionRequireCodeOwnerReviews,
 						&defaultBranchBranchProtectionResolvedConversations,
 						&defaultBranchBranchProtectionRequiredApprovingReviewCount,
-						&GhBranchProtectPRReviewDismissalsConfig{
+						&core.GhBranchProtectPRReviewDismissalsConfig{
 							&defaultBranchBranchProtectionDismissStaleReviews,
 							&defaultBranchBranchProtectionRestrictDismissal,
 							&[]string{defaultBranchBranchProtectionDismissalRestriction},
@@ -236,32 +246,32 @@ func GetFullConfig(id int) *GhRepoConfig {
 				},
 			},
 		},
-		&GhBranchesConfig{
+		&core.GhBranchesConfig{
 			branch1Name: {
 				nil, // No base for first branch to be able to test that case when converting to terraform
 				nil, // No base for first branch to be able to test that case when converting to terraform
-				BaseGhBranchConfig{
+				core.BaseGhBranchConfig{
 					&[]string{branch1BranchTemplate},
-					&BaseGhBranchProtectionConfig{
+					&core.BaseGhBranchProtectionConfig{
 						&[]string{branch1BranchProtectionTemplate},
 						&branch1BranchProtectionEnforceAdmins,
 						&branch1BranchProtectionAllowsDeletions,
 						&branch1BranchProtectionRequiredLinearHistory,
 						&branch1BranchProtectionRequireSignedCommits,
-						&GhBranchProtectPushesConfig{
+						&core.GhBranchProtectPushesConfig{
 							&branch1BranchProtectionAllowsForcePushes,
 							&[]string{branch1BranchProtectionPushRestriction},
 						},
-						&GhBranchProtectStatusChecksConfig{
+						&core.GhBranchProtectStatusChecksConfig{
 							&branch1BranchProtectionStrict,
 							&[]string{branch1BranchProtectionContext},
 						},
-						&GhBranchProtectPRReviewConfig{
+						&core.GhBranchProtectPRReviewConfig{
 							&[]string{branch1BranchProtectionBypasser},
 							&branch1BranchProtectionRequireCodeOwnerReviews,
 							&branch1BranchProtectionResolvedConversations,
 							&branch1BranchProtectionRequiredApprovingReviewCount,
-							&GhBranchProtectPRReviewDismissalsConfig{
+							&core.GhBranchProtectPRReviewDismissalsConfig{
 								&branch1BranchProtectionDismissStaleReviews,
 								&branch1BranchProtectionRestrictDismissal,
 								&[]string{branch1BranchProtectionDismissalRestriction},
@@ -273,28 +283,28 @@ func GetFullConfig(id int) *GhRepoConfig {
 			branch2Name: {
 				&branch2SourceBranch,
 				&branch2SourceSha,
-				BaseGhBranchConfig{
+				core.BaseGhBranchConfig{
 					&[]string{branch2BranchTemplate},
-					&BaseGhBranchProtectionConfig{
+					&core.BaseGhBranchProtectionConfig{
 						&[]string{branch2BranchProtectionTemplate},
 						&branch2BranchProtectionEnforceAdmins,
 						&branch2BranchProtectionAllowsDeletions,
 						&branch2BranchProtectionRequiredLinearHistory,
 						&branch2BranchProtectionRequireSignedCommits,
-						&GhBranchProtectPushesConfig{
+						&core.GhBranchProtectPushesConfig{
 							&branch2BranchProtectionAllowsForcePushes,
 							&[]string{branch2BranchProtectionPushRestriction},
 						},
-						&GhBranchProtectStatusChecksConfig{
+						&core.GhBranchProtectStatusChecksConfig{
 							&branch2BranchProtectionStrict,
 							&[]string{branch2BranchProtectionContext},
 						},
-						&GhBranchProtectPRReviewConfig{
+						&core.GhBranchProtectPRReviewConfig{
 							&[]string{branch2BranchProtectionBypasser},
 							&branch2BranchProtectionRequireCodeOwnerReviews,
 							&branch2BranchProtectionResolvedConversations,
 							&branch2BranchProtectionRequiredApprovingReviewCount,
-							&GhBranchProtectPRReviewDismissalsConfig{
+							&core.GhBranchProtectPRReviewDismissalsConfig{
 								&branch2BranchProtectionDismissStaleReviews,
 								&branch2BranchProtectionRestrictDismissal,
 								&[]string{branch2BranchProtectionDismissalRestriction},
@@ -304,30 +314,30 @@ func GetFullConfig(id int) *GhRepoConfig {
 				},
 			},
 		},
-		&GhBranchProtectionsConfig{
+		&core.GhBranchProtectionsConfig{
 			{
 				&pattern,
 				&forbid,
-				BaseGhBranchProtectionConfig{
+				core.BaseGhBranchProtectionConfig{
 					&[]string{branchProtectionTemplate},
 					&branchProtectionEnforceAdmins,
 					&branchProtectionAllowsDeletions4,
 					&branchProtectionRequiredLinearHistory,
 					&branchProtectionRequireSignedCommits,
-					&GhBranchProtectPushesConfig{
+					&core.GhBranchProtectPushesConfig{
 						&branchProtectionAllowsForcePushes,
 						&[]string{branchProtectionPushRestriction},
 					},
-					&GhBranchProtectStatusChecksConfig{
+					&core.GhBranchProtectStatusChecksConfig{
 						&branchProtectionStrict,
 						&[]string{branchProtectionContext},
 					},
-					&GhBranchProtectPRReviewConfig{
+					&core.GhBranchProtectPRReviewConfig{
 						&[]string{branchProtectionBypasser},
 						&branchProtectionRequireCodeOwnerReviews,
 						&branchProtectionResolvedConversations,
 						&branchProtectionRequiredApprovingReviewCount,
-						&GhBranchProtectPRReviewDismissalsConfig{
+						&core.GhBranchProtectPRReviewDismissalsConfig{
 							&branchProtectionDismissStaleReviews,
 							&branchProtectionRestrictDismissal,
 							&[]string{branchProtectionDismissalRestriction},
@@ -336,28 +346,28 @@ func GetFullConfig(id int) *GhRepoConfig {
 				},
 			},
 		},
-		&GhRepoPullRequestConfig{
-			&GhRepoPRMergeStrategyConfig{
+		&core.GhRepoPullRequestConfig{
+			&core.GhRepoPRMergeStrategyConfig{
 				&allowMergeCommit,
 				&allowRebaseMerge,
 				&allowSquashMerge,
 				&allowAutoMerge,
 			},
-			&GhRepoPRCommitConfig{
+			&core.GhRepoPRCommitConfig{
 				&mergeCommitTitle,
 				&mergeCommitMessage,
 			},
-			&GhRepoPRCommitConfig{
+			&core.GhRepoPRCommitConfig{
 				&squashMergeCommitTitle,
 				&squashMergeCommitMessage,
 			},
-			&GhRepoPRBranchConfig{
+			&core.GhRepoPRBranchConfig{
 				&suggestUpdate,
 				&deleteBranchOnMerge,
 			},
 		},
-		&GhRepoSecurityConfig{&vulnerabilityAlerts},
-		&GhRepoMiscellaneousConfig{
+		&core.GhRepoSecurityConfig{&vulnerabilityAlerts},
+		&core.GhRepoMiscellaneousConfig{
 			&[]string{topic1, topic2},
 			&autoInit,
 			&archived,
@@ -367,20 +377,20 @@ func GetFullConfig(id int) *GhRepoConfig {
 			&hasWiki,
 			&hasProjects,
 			&hasDownloads,
-			&GhRepoTemplateConfig{
+			&core.GhRepoTemplateConfig{
 				&templateSource,
 				&fullClone,
 			},
-			&GhRepoPagesConfig{
+			&core.GhRepoPagesConfig{
 				&domain,
 				&branch,
 				&path,
 			},
-			&GhRepoFileTemplatesConfig{
+			&core.GhRepoFileTemplatesConfig{
 				&gitignore,
 				&license,
 			},
 		},
-		&GhRepoTerraformConfig{&archiveOnDestroy, &ignoreVulnerabilityAlertsDuringRead},
+		&core.GhRepoTerraformConfig{&archiveOnDestroy, &ignoreVulnerabilityAlertsDuringRead},
 	}
 }

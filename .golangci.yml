@@ -42,7 +42,6 @@ linters-settings:
       - standard # Standard section: captures all standard packages.
       - default # Default section: contains all imports that could not be matched to another section type.
       - prefix(github.com/yoanm) # Custom section: groups all imports with the specified Prefix.
-      - prefix(github.com/yoanm/go-gh2tf) # Custom section: groups all imports with the specified Prefix.
       - blank # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
       - dot # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
     # Enable custom order of sections.
@@ -137,6 +136,16 @@ linters-settings:
     # Enable to require nolint directives to mention the specific linter being suppressed.
     # Default: false
     require-specific: true
+  tagliatelle:
+    # Check the struck tag name case.
+    case:
+      # Use the struct field name to check the name of the struct tag.
+      # Default: false
+      use-field-name: true
+      rules:
+        # Any struct tag type can be used.
+        # Support string case: `camel`, `pascal`, `kebab`, `snake`, `goCamel`, `goPascal`, `goKebab`, `goSnake`, `upper`, `lower`
+        yaml: kebab
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.
@@ -149,3 +158,16 @@ issues:
         - gosec
         - noctx
         - wrapcheck
+        - errcheck
+        - gocognit
+        - exhaustruct
+        - lll
+        - nestif
+        - goerr113
+        - forcetypeassert
+        - gosimple
+        - maintidx
+    - path: "example_test\\.go"
+      linters:
+        - exhaustruct # Deactivated for examples as it's easier and looks better
+        - forbidigo # fmt.PrintXXX can be used

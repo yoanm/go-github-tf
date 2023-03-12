@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,11 +14,47 @@ import (
 	"github.com/yoanm/github-tf/core"
 )
 
-func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (config *core.Config, err error) {
-	config = core.NewConfig()
+var (
+	errInputDirectoryDoesntExist = errors.New("input directory doesn't exist")
+	errDuringWorkspaceLoading    = errors.New("error during configs loading")
+)
+
+func InputDirectoryDoesntExist(path string) error {
+	return fmt.Errorf("%w: %s", errInputDirectoryDoesntExist, path)
+}
+
+func ConfigDirectoryLoadingReadError(readErr error) error {
+	return fmt.Errorf("%w\n\t - %w", errDuringWorkspaceLoading, readErr)
+}
+
+func ConfigDirectoryLoadingError(errList map[string]error) error {
+	msgList := []string{}
+	// sort file to always get a predictable output (for tests mostly)
+	keys := make([]string, 0, len(errList))
+	for k := range errList {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	for _, file := range keys {
+		msgList = append(msgList, fmt.Sprintf("\t - %s", errList[file].Error()))
+	}
+
+	return fmt.Errorf("%w\n%s", errDuringWorkspaceLoading, strings.Join(msgList, "\n"))
+}
+
+func AlreadyImportedRepositoryError(fName string, repoName string, firstFName string) error {
+	return fmt.Errorf("file %s imports %s, but already imported by %s", fName, repoName, firstFName)
+}
+
+func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*core.Config, error) {
+	var err error
+
+	config := core.NewConfig()
 
 	if _, err = os.Stat(rootPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("input directory '%s' doesn't exist", rootPath)
+		return nil, InputDirectoryDoesntExist(rootPath)
 	}
 
 	configureYamlAnchorDirectory(rootPath, yamlAnchorDir)
@@ -28,13 +65,14 @@ func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (conf
 	tplErr := readTemplateDirectory(config, filepath.Join(rootPath, templateDir), decoderOpts)
 
 	if confErr != nil || tplErr != nil {
-		e := confErr
+		err2 := confErr
 		if confErr != nil && tplErr != nil {
-			e = fmt.Errorf("%s\n%s", confErr, tplErr)
+			err2 = fmt.Errorf("%w\n%w", confErr, tplErr)
 		} else if tplErr != nil {
-			e = tplErr
+			err2 = tplErr
 		}
-		return nil, fmt.Errorf("Error during workspace loading:\n%v", e)
+
+		return nil, fmt.Errorf("error during workspace loading:\n%w", err2)
 	}
 
 	return config, nil
@@ -43,8 +81,10 @@ func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (conf
 func configureYamlAnchorDirectory(path string, yamlAnchorDir string) {
 	anchorDir := filepath.Join(path, yamlAnchorDir)
 	fs, err := os.Stat(anchorDir)
+
 	exists := !os.IsNotExist(err)
 	isDir := exists && err == nil && fs.IsDir()
+
 	if !exists || !isDir {
 		return
 	}
@@ -58,87 +98,126 @@ func readConfigDirectory(config *core.Config, rootPath string, decoderOpts []yam
 		return nil
 	}
 
-	errList := map[string]error{}
-	filenames, readErr := readDirectory(rootPath)
-	visited := map[string]string{}
+	var (
+		filenames []string
+		readErr   error
+	)
 
-	if readErr == nil {
-		for _, filename := range filenames {
-			path := filepath.Join(rootPath, filename)
-			if filename == "repos.yaml" || filename == "repos.yml" {
-				repoConfigs, loadErr := core.LoadRepositoriesFromFile(path, decoderOpts...)
-				if loadErr != nil {
-					errList[filename] = loadErr
-				} else {
-					log.Debug().Msgf("Loaded '%s' as repositories config", path)
-					for k, v := range repoConfigs {
-						config.AppendRepo(v)
-						visited[fmt.Sprintf("%s[%d]", path, k)] = *v.Name
-					}
-				}
-			} else if filename == "repos" {
-				subVisited, loadErrList := readRepositoryDirectory(config, path, decoderOpts)
-				if loadErrList != nil {
-					for k, v := range loadErrList {
-						errList[k] = v
-					}
-				}
-				if subVisited != nil {
-					for k, v := range subVisited {
-						visited[k] = v
-					}
-				}
-			} else {
-				log.Debug().Msgf("%s is not a known file or directory => ignored", path)
-			}
-		}
+	if filenames, readErr = readDirectory(rootPath); readErr != nil {
+		return ConfigDirectoryLoadingReadError(readErr)
 	}
 
-	uniqRepoList := map[string]string{}
-	for fName, repoName := range visited {
-		if firstFName, ok := uniqRepoList[repoName]; ok {
-			errList[fName] = fmt.Errorf("file %s imports %s, but already imported by %s", fName, repoName, firstFName)
-		} else {
-			uniqRepoList[repoName] = fName
-		}
-	}
-
-	if len(errList) > 0 || readErr != nil {
-		msgList := []string{"Error during configs loading:"}
-		if readErr != nil {
-			msgList = append(msgList, fmt.Sprintf("\t - %s", readErr))
-		} else {
-			// sort file to always get a predictable output (for tests mostly)
-			keys := make([]string, 0, len(errList))
-			for k := range errList {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-
-			for _, file := range keys {
-				msgList = append(msgList, fmt.Sprintf("\t - %s", errList[file]))
-			}
-		}
-
-		return fmt.Errorf(strings.Join(msgList, "\n"))
+	if err := loadConfigDirectoryFiles(config, rootPath, decoderOpts, filenames); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func readRepositoryDirectory(config *core.Config, rootPath string, decoderOpts []yaml.DecodeOption) (visited map[string]string, errList map[string]error) {
+func loadConfigDirectoryFiles(
+	config *core.Config,
+	rootPath string,
+	decoderOpts []yaml.DecodeOption,
+	filenames []string,
+) error {
+	visited := map[string]string{}
+	errList := map[string]error{}
+
+	for _, filename := range filenames {
+		loadConfigDirectoryFile(config, filename, filepath.Join(rootPath, filename), decoderOpts, errList, visited)
+	}
+
+	uniqRepoList := map[string]string{}
+	for fName, repoName := range visited {
+		if firstFName, ok := uniqRepoList[repoName]; ok {
+			errList[fName] = AlreadyImportedRepositoryError(fName, repoName, firstFName)
+		} else {
+			uniqRepoList[repoName] = fName
+		}
+	}
+
+	if len(errList) > 0 {
+		return ConfigDirectoryLoadingError(errList)
+	}
+
+	return nil
+}
+
+func loadConfigDirectoryFile(
+	config *core.Config,
+	filename string,
+	path string,
+	decoderOpts []yaml.DecodeOption,
+	errList map[string]error,
+	visited map[string]string,
+) {
+	switch {
+	case filename == "repos.yaml" || filename == "repos.yml":
+		loadReposConfigFile(config, filename, path, decoderOpts, errList, visited)
+	case filename == "repos":
+		loadReposConfigDirectory(config, path, decoderOpts, errList, visited)
+	default:
+		log.Debug().Msgf("%s is not a known file or directory => ignored", path)
+	}
+}
+
+func loadReposConfigDirectory(
+	config *core.Config,
+	path string,
+	decoderOpts []yaml.DecodeOption,
+	errList map[string]error,
+	visited map[string]string,
+) {
+	subVisited, loadErrList := readRepositoryDirectory(config, path, decoderOpts)
+	for k, v := range loadErrList {
+		errList[k] = v
+	}
+
+	for k, v := range subVisited {
+		visited[k] = v
+	}
+}
+
+func loadReposConfigFile(
+	config *core.Config,
+	filename string,
+	path string,
+	decoderOpts []yaml.DecodeOption,
+	errList map[string]error,
+	visited map[string]string,
+) {
+	repoConfigs, loadErr := core.LoadRepositoriesFromFile(path, decoderOpts...)
+	if loadErr != nil {
+		errList[filename] = loadErr
+	} else {
+		log.Debug().Msgf("Loaded '%s' as repositories config", path)
+		for k, v := range repoConfigs {
+			config.AppendRepo(v)
+			visited[fmt.Sprintf("%s[%d]", path, k)] = *v.Name
+		}
+	}
+}
+
+func readRepositoryDirectory(
+	config *core.Config,
+	rootPath string,
+	decoderOpts []yaml.DecodeOption,
+) (map[string]string, map[string]error) {
 	dirName := filepath.Base(rootPath)
+
 	filenames, readErr := readDirectory(rootPath)
 	if readErr != nil {
 		return nil, map[string]error{dirName: readErr}
 	}
 
-	errList = map[string]error{}
-	visited = map[string]string{}
+	errList := map[string]error{}
+	visited := map[string]string{}
 
 	log.Debug().Msgf("Reading repository directory: %s", rootPath)
+
 	for _, filename := range filenames {
 		filePath := filepath.Join(rootPath, filename)
+
 		ext := filepath.Ext(filename)
 		if ext == ".yml" || ext == ".yaml" {
 			repoConfig, loadErr := core.LoadRepositoryFromFile(filePath, decoderOpts...)
@@ -157,18 +236,25 @@ func readRepositoryDirectory(config *core.Config, rootPath string, decoderOpts [
 	return visited, errList
 }
 
-func readTemplateDirectory(config *core.Config, rootPath string, decoderOpts []yaml.DecodeOption) error {
+func readTemplateDirectory(
+	config *core.Config,
+	rootPath string,
+	decoderOpts []yaml.DecodeOption,
+) error {
 	if _, err := os.Stat(rootPath); os.IsNotExist(err) {
 		// Nothing to do
 		return nil
 	}
 
 	errList := map[string]error{}
+
 	dirContents, readErr := readDirectory(rootPath)
 	if readErr == nil {
 		log.Debug().Msgf("Reading template directory: %s", rootPath)
+
 		for _, filename := range dirContents {
 			path := filepath.Join(rootPath, filename)
+
 			ext := filepath.Ext(filename)
 			if ext == ".yml" || ext == ".yaml" {
 				loadErr := loadTemplateFromFile(config, path, decoderOpts)
@@ -182,60 +268,75 @@ func readTemplateDirectory(config *core.Config, rootPath string, decoderOpts []y
 	}
 
 	if len(errList) > 0 || readErr != nil {
-		msgList := []string{"Error during templates loading:"}
-		if readErr != nil {
-			msgList = append(msgList, fmt.Sprintf("\t - %s", readErr))
-		} else {
-			// sort file to always get a predictable output (for tests mostly)
-			keys := make([]string, 0, len(errList))
-			for k := range errList {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
+		msgList := generateTemplateLoadingErrorMessages(readErr, errList)
 
-			for _, file := range keys {
-				decodeErr := errList[file]
-				msgList = append(msgList, fmt.Sprintf("\t - %s", decodeErr))
-			}
-		}
 		return fmt.Errorf(strings.Join(msgList, "\n"))
 	}
 
 	return nil
 }
 
+func generateTemplateLoadingErrorMessages(readErr error, errList map[string]error) []string {
+	msgList := []string{"Error during templates loading:"}
+	if readErr != nil {
+		msgList = append(msgList, fmt.Sprintf("\t - %s", readErr))
+	} else {
+		// sort file to always get a predictable output (for tests mostly)
+		keys := make([]string, 0, len(errList))
+		for k := range errList {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, file := range keys {
+			decodeErr := errList[file]
+			msgList = append(msgList, fmt.Sprintf("\t - %s", decodeErr))
+		}
+	}
+
+	return msgList
+}
+
 func loadTemplateFromFile(config *core.Config, filePath string, decoderOpts []yaml.DecodeOption) error {
 	filename := filepath.Base(filePath)
 	ext := filepath.Ext(filename)
 	tplName := filename[:strings.LastIndex(filename, ext)]
-	if strings.HasSuffix(tplName, ".repo") {
+
+	switch {
+	case strings.HasSuffix(tplName, ".repo"):
 		tplName = strings.TrimSuffix(tplName, ".repo")
+
 		tpl, err := core.LoadRepositoryTemplateFromFile(filePath, decoderOpts...)
 		if err != nil {
+			//nolint:wrapcheck // Expecred to return error as is
 			return err
 		} else {
 			config.Templates.Repos[tplName] = tpl
 			log.Debug().Msgf("Loaded '%s' as repository template", filePath)
 		}
-	} else if strings.HasSuffix(tplName, ".branch-protection") {
+	case strings.HasSuffix(tplName, ".branch-protection"):
 		tplName = strings.TrimSuffix(tplName, ".branch-protection")
+
 		tpl, err := core.LoadBranchProtectionTemplateFromFile(filePath, decoderOpts...)
 		if err != nil {
+			//nolint:wrapcheck // Expecred to return error as is
 			return err
 		} else {
 			config.Templates.BranchProtections[tplName] = tpl
 			log.Debug().Msgf("Loaded '%s' as branch protection template", filePath)
 		}
-	} else if strings.HasSuffix(tplName, ".branch") {
+	case strings.HasSuffix(tplName, ".branch"):
 		tplName = strings.TrimSuffix(tplName, ".branch")
+
 		tpl, err := core.LoadBranchTemplateFromFile(filePath, decoderOpts...)
 		if err != nil {
+			//nolint:wrapcheck // Expecred to return error as is
 			return err
 		} else {
 			config.Templates.Branches[tplName] = tpl
 			log.Debug().Msgf("Loaded '%s' as branch protection template", filePath)
 		}
-	} else {
+	default:
 		log.Debug().Msgf("%s is not a known template type => ignored", filePath)
 	}
 

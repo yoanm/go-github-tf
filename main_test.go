@@ -14,11 +14,14 @@ import (
 )
 
 func TestCLIFlags(t *testing.T) {
+	t.Parallel()
 	ts := configure(t, "testdata/base")
 	ts.Run(t, false)
 }
 
 func TestCLIWrite_withLoadingErrors(t *testing.T) {
+	t.Parallel()
+
 	cases := []string{
 		"invalid-config-files",
 		"invalid-config-files-2",
@@ -33,54 +36,69 @@ func TestCLIWrite_withLoadingErrors(t *testing.T) {
 		"invalid-yaml",
 		"invalid-yaml-2",
 	}
-	for _, cname := range cases {
+	for _, tcname := range cases {
+		tcname := tcname // Reinit var for parallel test
+
 		t.Run(
-			cname,
-			func(t2 *testing.T) {
-				ts := configure(t2, filepath.Join("testdata/write/loading-errors", cname))
+			tcname,
+			func(t *testing.T) {
+				t.Parallel()
+				ts := configure(t, filepath.Join("testdata/write/loading-errors", tcname))
 				// ts.KeepRootDirs = true
-				ts.Run(t2, false)
+				ts.Run(t, false)
 			},
 		)
 	}
 }
 
 func TestCLIWrite_withComputationErrors(t *testing.T) {
+	t.Parallel()
+
 	cases := []string{
 		"unknown-template",
 		"default-branch-template-without-default-branch",
 	}
-	for _, cname := range cases {
+	for _, tcname := range cases {
+		tcname := tcname // Reinit var for parallel test
+
 		t.Run(
-			cname,
-			func(t2 *testing.T) {
-				ts := configure(t2, filepath.Join("testdata/write/computation-errors", cname))
+			tcname,
+			func(t *testing.T) {
+				t.Parallel()
+				ts := configure(t, filepath.Join("testdata/write/computation-errors", tcname))
 				// ts.KeepRootDirs = true
-				ts.Run(t2, false)
+				ts.Run(t, false)
 			},
 		)
 	}
 }
 
 func TestCLIWrite_withTerraformErrors(t *testing.T) {
+	t.Parallel()
+
 	cases := []string{
 		"missing-terraform-directory",
 		"terraform-directory-as-file",
 		"permission-issue",
 	}
-	for _, cname := range cases {
+	for _, tcname := range cases {
+		tcname := tcname // Reinit var for parallel test
+
 		t.Run(
-			cname,
-			func(t2 *testing.T) {
-				ts := configure(t2, filepath.Join("testdata/write/terraform-errors", cname))
+			tcname,
+			func(t *testing.T) {
+				t.Parallel()
+				ts := configure(t, filepath.Join("testdata/write/terraform-errors", tcname))
 				// ts.KeepRootDirs = true
-				ts.Run(t2, false)
+				ts.Run(t, false)
 			},
 		)
 	}
 }
 
 func TestCLIWrite_working(t *testing.T) {
+	t.Parallel()
+
 	cases := []string{
 		"base",
 		"full",
@@ -90,19 +108,24 @@ func TestCLIWrite_working(t *testing.T) {
 		"multiple-branch-protection-for-same-pattern",
 		"default-branch-branch-protection-template-with-existing-config",
 	}
-	for _, cname := range cases {
+	for _, tcname := range cases {
+		tcname := tcname // Reinit var for parallel test
+
 		t.Run(
-			cname,
-			func(t2 *testing.T) {
-				ts := configure(t2, filepath.Join("testdata/write/working", cname))
+			tcname,
+			func(t *testing.T) {
+				t.Parallel()
+				ts := configure(t, filepath.Join("testdata/write/working", tcname))
 				// ts.KeepRootDirs = true
-				ts.Run(t2, false)
+				ts.Run(t, false)
 			},
 		)
 	}
 }
 
 func configure(t *testing.T, testdataPath string) *cmdtest.TestSuite {
+	t.Helper()
+
 	ts, err := cmdtest.Read(testdataPath)
 	if err != nil {
 		t.Fatal(err)
@@ -123,11 +146,14 @@ func configure(t *testing.T, testdataPath string) *cmdtest.TestSuite {
 		// copy {testdataPath}/testdata to ROOTDIR/testdata if it exists
 		testdataSourcePath := filepath.Join(projectRootDir, testdataPath, "testdata")
 		if _, err = os.Stat(testdataSourcePath); !os.IsNotExist(err) {
+			//nolint:forbidigo // Test file
 			fmt.Printf("Copy testdata %s\n", testdataSourcePath)
+
 			testdataTargetPath := filepath.Join(rootDir, "testdata")
+
 			cmd := exec.Command("cp", "-r", testdataSourcePath, testdataTargetPath)
 			if _, err = cmd.Output(); err != nil {
-				return fmt.Errorf("Error during testdata copy (%s -> %s): %s", testdataSourcePath, testdataTargetPath, err)
+				return fmt.Errorf("Error during testdata copy (%s -> %s): %w", testdataSourcePath, testdataTargetPath, err)
 			}
 		}
 
@@ -141,16 +167,20 @@ func chmodCmd(args []string, inputFile string) ([]byte, error) {
 	if inputFile != "" {
 		return nil, fmt.Errorf("input redirection not supported")
 	}
+
 	if err := checkPath(args[0]); err != nil {
 		return nil, err
 	}
+
 	perm, err := strconv.Atoi(args[1])
 	if err != nil {
 		return nil, err
 	}
+
 	if err = os.Chmod(args[0], os.FileMode(perm)); err != nil {
 		return nil, err
 	}
+
 	return nil, nil
 }
 
@@ -158,5 +188,6 @@ func checkPath(path string) error {
 	if strings.ContainsRune(path, '/') || strings.ContainsRune(path, '\\') {
 		return fmt.Errorf("argument must be in the current directory (%q contains '/')", path)
 	}
+
 	return nil
 }

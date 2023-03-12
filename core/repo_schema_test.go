@@ -1,4 +1,4 @@
-package core
+package core_test
 
 import (
 	"fmt"
@@ -6,26 +6,29 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/yoanm/github-tf/core"
 )
 
 // ==> Repo
 
-func updateGhRepoConfigHelper(c *GhRepoConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoConfigHelper(c *core.GhRepoConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Name, stringToCopy, updatePtr)
 	updateSlicePtrHelper(&c.ConfigTemplates, newSliceToCopy, updatePtr)
 	updateStringPtrHelper(&c.Visibility, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.Description, stringToCopy, updatePtr)
 
 	if c.DefaultBranch == nil {
-		c.DefaultBranch = &GhDefaultBranchConfig{}
+		c.DefaultBranch = &core.GhDefaultBranchConfig{}
 	}
+
 	updateGhDefaultBranchConfigHelper(c.DefaultBranch, stringToCopy, newSliceToCopy, updatePtr)
 
 	/*
 		// Do nothing with Branches as it's complicated to test it with that way
 		// See TestGhBranchesConfig_Merge instead
 		if c.Branches == nil {
-			c.Branches = &GhBranchesConfig{}
+			c.Branches = &core.GhBranchesConfig{}
 		}
 		updateGhBranchesConfigHelper(c.Branches, stringToCopy, newSliceToCopy, updatePtr)
 	*/
@@ -34,38 +37,43 @@ func updateGhRepoConfigHelper(c *GhRepoConfig, stringToCopy *string, newSliceToC
 		// Do nothing with BranchProtections as it's complicated to test it with that way
 		// See TestGhBranchProtectionsConfig_Merge instead
 		if c.BranchProtections == nil {
-			c.BranchProtections = &GhBranchProtectionsConfig{}
+			c.BranchProtections = &core.GhBranchProtectionsConfig{}
 		}
 		updateGhBranchProtectionsConfigHelper(c.BranchProtections, stringToCopy, newSliceToCopy, updatePtr)
 	*/
 
 	if c.PullRequests == nil {
-		c.PullRequests = &GhRepoPullRequestConfig{}
+		c.PullRequests = &core.GhRepoPullRequestConfig{}
 	}
+
 	updateGhRepoPullRequestConfigHelper(c.PullRequests, stringToCopy, newSliceToCopy, updatePtr)
 
 	if c.Security == nil {
-		c.Security = &GhRepoSecurityConfig{}
+		c.Security = &core.GhRepoSecurityConfig{}
 	}
+
 	updateGhRepoSecurityConfigHelper(c.Security, stringToCopy, newSliceToCopy, updatePtr)
 
 	if c.Miscellaneous == nil {
-		c.Miscellaneous = &GhRepoMiscellaneousConfig{}
+		c.Miscellaneous = &core.GhRepoMiscellaneousConfig{}
 	}
+
 	updateGhRepoMiscellaneousConfigHelper(c.Miscellaneous, stringToCopy, newSliceToCopy, updatePtr)
 
 	if c.Terraform == nil {
-		c.Terraform = &GhRepoTerraformConfig{}
+		c.Terraform = &core.GhRepoTerraformConfig{}
 	}
+
 	updateGhRepoTerraformConfigHelper(c.Terraform, stringToCopy, newSliceToCopy, updatePtr)
 }
 
 func TestGhRepoConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoConfig{},
-		func(to, from *GhRepoConfig) {
+		core.GhRepoConfig{},
+		func(to, from *core.GhRepoConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoConfigHelper,
@@ -73,6 +81,8 @@ func TestGhRepoConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := GetFullConfig(0)
 	toWithNilSlicesAndStruct.ConfigTemplates = nil
 	toWithNilSlicesAndStruct.DefaultBranch = nil
@@ -86,73 +96,90 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 	full2 := GetFullConfig(2)
 	// manually generate result of full2 into full1
 	fullMergeResult := GetFullConfig(2)
+
 	*fullMergeResult.ConfigTemplates = append(
 		*(full1.ConfigTemplates),
 		*(full2.ConfigTemplates)...,
 	)
+
 	*fullMergeResult.DefaultBranch.ConfigTemplates = append(
 		*(full1.DefaultBranch.ConfigTemplates),
 		*(full2.DefaultBranch.ConfigTemplates)...,
 	)
+
 	*fullMergeResult.DefaultBranch.Protection.ConfigTemplates = append(
 		*(full1.DefaultBranch.Protection.ConfigTemplates),
 		*(full2.DefaultBranch.Protection.ConfigTemplates)...,
 	)
+
 	*fullMergeResult.DefaultBranch.Protection.Pushes.PushRestrictions = append(
 		*(full1.DefaultBranch.Protection.Pushes.PushRestrictions),
 		*(full2.DefaultBranch.Protection.Pushes.PushRestrictions)...,
 	)
+
 	*fullMergeResult.DefaultBranch.Protection.StatusChecks.Required = append(
 		*(full1.DefaultBranch.Protection.StatusChecks.Required),
 		*(full2.DefaultBranch.Protection.StatusChecks.Required)...,
 	)
+
 	*fullMergeResult.DefaultBranch.Protection.PullRequestReviews.BypasserList = append(
 		*(full1.DefaultBranch.Protection.PullRequestReviews.BypasserList),
 		*(full2.DefaultBranch.Protection.PullRequestReviews.BypasserList)...,
 	)
+
 	*fullMergeResult.DefaultBranch.Protection.PullRequestReviews.Dismissals.RestrictTo = append(
 		*(full1.DefaultBranch.Protection.PullRequestReviews.Dismissals.RestrictTo),
 		*(full2.DefaultBranch.Protection.PullRequestReviews.Dismissals.RestrictTo)...,
 	)
 	(*fullMergeResult.Branches)["feature/branch1"] = (*full1.Branches)["feature/branch1"]
 	(*fullMergeResult.Branches)["feature/branch2"].SourceBranch = (*full1.Branches)["feature/branch2"].SourceBranch
+
 	*(*fullMergeResult.Branches)["feature/branch2"].ConfigTemplates = append(
 		*((*full1.Branches)["feature/branch2"].ConfigTemplates),
 		*((*full2.Branches)["feature/branch2"].ConfigTemplates)...,
 	)
+
 	(*fullMergeResult.Branches)["feature/branch2"].SourceSha = (*full1.Branches)["feature/branch2"].SourceSha
+
 	*(*fullMergeResult.Branches)["feature/branch2"].Protection.ConfigTemplates = append(
 		*((*full1.Branches)["feature/branch2"].Protection.ConfigTemplates),
 		*((*full2.Branches)["feature/branch2"].Protection.ConfigTemplates)...,
 	)
+
 	*(*fullMergeResult.Branches)["feature/branch2"].Protection.Pushes.PushRestrictions = append(
 		*((*full1.Branches)["feature/branch2"].Protection.Pushes.PushRestrictions),
 		*((*full2.Branches)["feature/branch2"].Protection.Pushes.PushRestrictions)...,
 	)
+
 	*(*fullMergeResult.Branches)["feature/branch2"].Protection.StatusChecks.Required = append(
 		*((*full1.Branches)["feature/branch2"].Protection.StatusChecks.Required),
 		*((*full2.Branches)["feature/branch2"].Protection.StatusChecks.Required)...,
 	)
+
 	*(*fullMergeResult.Branches)["feature/branch2"].Protection.PullRequestReviews.BypasserList = append(
 		*((*full1.Branches)["feature/branch2"].Protection.PullRequestReviews.BypasserList),
 		*((*full2.Branches)["feature/branch2"].Protection.PullRequestReviews.BypasserList)...,
 	)
+
 	*(*fullMergeResult.Branches)["feature/branch2"].Protection.PullRequestReviews.Dismissals.RestrictTo = append(
 		*((*full1.Branches)["feature/branch2"].Protection.PullRequestReviews.Dismissals.RestrictTo),
 		*((*full2.Branches)["feature/branch2"].Protection.PullRequestReviews.Dismissals.RestrictTo)...,
 	)
+
 	*fullMergeResult.BranchProtections = append(
 		*(full1.BranchProtections),
 		*(full2.BranchProtections)...,
 	)
+
 	*fullMergeResult.Miscellaneous.Topics = append(
 		*(full1.Miscellaneous.Topics),
 		*(full2.Miscellaneous.Topics)...,
 	)
+
 	cases := map[string]struct {
-		value    *GhRepoConfig
-		from     *GhRepoConfig
-		expected *GhRepoConfig
+		value    *core.GhRepoConfig
+		from     *core.GhRepoConfig
+		expected *core.GhRepoConfig
 	}{
 		"full": {
 			full1,
@@ -172,9 +199,13 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -186,18 +217,19 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->DefaultBranch
 
-func updateGhDefaultBranchConfigHelper(c *GhDefaultBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhDefaultBranchConfigHelper(c *core.GhDefaultBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Name, stringToCopy, updatePtr)
 
 	updateBaseGhBranchConfigHelper(&c.BaseGhBranchConfig, stringToCopy, newSliceToCopy, updatePtr)
 }
 
 func TestGhDefaultBranchConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhDefaultBranchConfig{},
-		func(to, from *GhDefaultBranchConfig) {
+		core.GhDefaultBranchConfig{},
+		func(to, from *core.GhDefaultBranchConfig) {
 			to.Merge(from)
 		},
 		updateGhDefaultBranchConfigHelper,
@@ -205,14 +237,16 @@ func TestGhDefaultBranchConfig_Merge(t *testing.T) {
 }
 
 func TestGhDefaultBranchConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := GetFullConfig(0).DefaultBranch
 	toWithNilSlicesAndStruct.ConfigTemplates = nil
 	toWithNilSlicesAndStruct.Protection = nil
 
 	cases := map[string]struct {
-		value    *GhDefaultBranchConfig
-		from     *GhDefaultBranchConfig
-		expected *GhDefaultBranchConfig
+		value    *core.GhDefaultBranchConfig
+		from     *core.GhDefaultBranchConfig
+		expected *core.GhDefaultBranchConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -227,9 +261,13 @@ func TestGhDefaultBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -241,17 +279,8 @@ func TestGhDefaultBranchConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Branches
 
-func updateGhBranchesConfigHelper(c *GhBranchesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
-	v := &GhBranchConfig{}
-	updateGhBranchConfigHelper(v, stringToCopy, newSliceToCopy, updatePtr)
-	// If nil pointer or nil map
-	if c == nil || *c == nil {
-		*c = GhBranchesConfig{}
-	}
-	(*c)[*stringToCopy] = v
-}
-
 func TestGhBranchesConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Init variables
 	initialToStringValue := "initial_to_value"
 
@@ -278,28 +307,28 @@ func TestGhBranchesConfig_Merge(t *testing.T) {
 	// toDismissalRestrictions := append([]string{}, initialToSliceValue...)
 	// Do nothing with ConfigTemplates, see TestGhRepoConfig_Merge2
 	// toConfigTemplates := append([]string{}, initialFromSliceValue...)
-	to := &GhBranchesConfig{
-		"to_branch": &GhBranchConfig{
+	to := &core.GhBranchesConfig{
+		"to_branch": &core.GhBranchConfig{
 			SourceBranch: &toSourceBranch,
 			SourceSha:    &toSourceSha,
-			BaseGhBranchConfig: BaseGhBranchConfig{
+			BaseGhBranchConfig: core.BaseGhBranchConfig{
 				// ConfigTemplates: &toConfigTemplates,
-				Protection: &BaseGhBranchProtectionConfig{
+				Protection: &core.BaseGhBranchProtectionConfig{
 					// ConfigTemplates:       &toConfigTemplates,
 					EnforceAdmins:  &toEnforceAdmins,
 					AllowsDeletion: &toAllowsDeletions,
-					Pushes: &GhBranchProtectPushesConfig{
+					Pushes: &core.GhBranchProtectPushesConfig{
 						AllowsForcePushes: &toAllowsForcePushes,
 						// PushRestrictions:      &toPushRestrictions,
 					},
 					RequireLinearHistory: &toRequiredLinearHistory,
 					RequireSignedCommits: &toRequireSignedCommits,
-					StatusChecks: &GhBranchProtectStatusChecksConfig{
+					StatusChecks: &core.GhBranchProtectStatusChecksConfig{
 						Strict: &toStrict,
 						//	Contexts: &toContext,
 					},
-					PullRequestReviews: &GhBranchProtectPRReviewConfig{
-						Dismissals: &GhBranchProtectPRReviewDismissalsConfig{
+					PullRequestReviews: &core.GhBranchProtectPRReviewConfig{
+						Dismissals: &core.GhBranchProtectPRReviewDismissalsConfig{
 							Staled: &toDismissStaleReviews,
 							// RestrictTo:  &toDismissalRestrictions,
 						},
@@ -333,28 +362,28 @@ func TestGhBranchesConfig_Merge(t *testing.T) {
 	// fromDismissalRestrictions := append([]string{}, initialFromSliceValue...)
 	// Do nothing with ConfigTemplates, see TestGhRepoConfig_Merge2
 	// fromConfigTemplates := append([]string{}, initialFromSliceValue...)
-	from := &GhBranchesConfig{
-		"from_branch": &GhBranchConfig{
+	from := &core.GhBranchesConfig{
+		"from_branch": &core.GhBranchConfig{
 			SourceBranch: &fromSourceBranch,
 			SourceSha:    &fromSourceSha,
-			BaseGhBranchConfig: BaseGhBranchConfig{
+			BaseGhBranchConfig: core.BaseGhBranchConfig{
 				// ConfigTemplates: &fromConfigTemplates,
-				Protection: &BaseGhBranchProtectionConfig{
+				Protection: &core.BaseGhBranchProtectionConfig{
 					// ConfigTemplates:       &fromConfigTemplates,
 					EnforceAdmins:  &fromEnforceAdmins,
 					AllowsDeletion: &fromAllowsDeletions,
-					Pushes: &GhBranchProtectPushesConfig{
+					Pushes: &core.GhBranchProtectPushesConfig{
 						AllowsForcePushes: &fromAllowsForcePushes,
 						// PushRestrictions:      &fromPushRestrictions,
 					},
 					RequireLinearHistory: &fromRequiredLinearHistory,
 					RequireSignedCommits: &fromRequireSignedCommits,
-					StatusChecks: &GhBranchProtectStatusChecksConfig{
+					StatusChecks: &core.GhBranchProtectStatusChecksConfig{
 						Strict: &fromStrict,
 						// Contexts: &fromContext,
 					},
-					PullRequestReviews: &GhBranchProtectPRReviewConfig{
-						Dismissals: &GhBranchProtectPRReviewDismissalsConfig{
+					PullRequestReviews: &core.GhBranchProtectPRReviewConfig{
+						Dismissals: &core.GhBranchProtectPRReviewDismissalsConfig{
 							Staled: &fromDismissStaleReviews,
 							// RestrictTo: &fromDismissalRestrictions,
 						},
@@ -366,18 +395,21 @@ func TestGhBranchesConfig_Merge(t *testing.T) {
 			},
 		},
 	}
-	expected := &GhBranchesConfig{
+	expected := &core.GhBranchesConfig{
 		"to_branch":   (*to)["to_branch"],
 		"from_branch": (*from)["from_branch"],
 	}
 
 	to.Merge(from)
+
 	if diff := cmp.Diff(expected, to); diff != "" {
 		t.Fatalf("Config mismatch (-want +got):\n%s", diff)
 	}
 }
 
 func TestGhBranchesConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := GetFullConfig(0).Branches
 	(*toWithNilSlicesAndStruct)["feature/branch0"].ConfigTemplates = nil
 	(*toWithNilSlicesAndStruct)["feature/branch0"].Protection = nil
@@ -390,9 +422,9 @@ func TestGhBranchesConfig_Merge_2(t *testing.T) {
 	(*expectedToWithNilSlicesAndStruct)["feature/branch1"].SourceSha = (*toWithNilSlicesAndStruct)["feature/branch1"].SourceSha
 
 	cases := map[string]struct {
-		value    *GhBranchesConfig
-		from     *GhBranchesConfig
-		expected *GhBranchesConfig
+		value    *core.GhBranchesConfig
+		from     *core.GhBranchesConfig
+		expected *core.GhBranchesConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -407,9 +439,13 @@ func TestGhBranchesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -421,7 +457,7 @@ func TestGhBranchesConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Branches[...]
 
-func updateGhBranchConfigHelper(c *GhBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhBranchConfigHelper(c *core.GhBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.SourceBranch, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.SourceSha, stringToCopy, updatePtr)
 
@@ -429,11 +465,12 @@ func updateGhBranchConfigHelper(c *GhBranchConfig, stringToCopy *string, newSlic
 }
 
 func TestGhBranchConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhBranchConfig{},
-		func(to, from *GhBranchConfig) {
+		core.GhBranchConfig{},
+		func(to, from *core.GhBranchConfig) {
 			to.Merge(from)
 		},
 		updateGhBranchConfigHelper,
@@ -441,14 +478,16 @@ func TestGhBranchConfig_Merge(t *testing.T) {
 }
 
 func TestGhBranchConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).Branches)["feature/branch0"]
 	toWithNilSlicesAndStruct.ConfigTemplates = nil
 	toWithNilSlicesAndStruct.Protection = nil
 
 	cases := map[string]struct {
-		value    *GhBranchConfig
-		from     *GhBranchConfig
-		expected *GhBranchConfig
+		value    *core.GhBranchConfig
+		from     *core.GhBranchConfig
+		expected *core.GhBranchConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -463,9 +502,13 @@ func TestGhBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -477,21 +520,23 @@ func TestGhBranchConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Branches[...]{BaseGhBranchConfig}
 
-func updateBaseGhBranchConfigHelper(c *BaseGhBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateBaseGhBranchConfigHelper(c *core.BaseGhBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateSlicePtrHelper(&c.ConfigTemplates, newSliceToCopy, updatePtr)
 
 	if c.Protection == nil {
-		c.Protection = &BaseGhBranchProtectionConfig{}
+		c.Protection = &core.BaseGhBranchProtectionConfig{}
 	}
+
 	updateBaseGhBranchProtectionConfigHelper(c.Protection, stringToCopy, newSliceToCopy, updatePtr)
 }
 
 func TestBaseGhBranchConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		BaseGhBranchConfig{},
-		func(to, from *BaseGhBranchConfig) {
+		core.BaseGhBranchConfig{},
+		func(to, from *core.BaseGhBranchConfig) {
 			to.Merge(from)
 		},
 		updateBaseGhBranchConfigHelper,
@@ -499,14 +544,16 @@ func TestBaseGhBranchConfig_Merge(t *testing.T) {
 }
 
 func TestBaseGhBranchConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).Branches)["feature/branch0"].BaseGhBranchConfig
 	toWithNilSlicesAndStruct.ConfigTemplates = nil
 	toWithNilSlicesAndStruct.Protection = nil
 
 	cases := map[string]struct {
-		value    *BaseGhBranchConfig
-		from     *BaseGhBranchConfig
-		expected *BaseGhBranchConfig
+		value    *core.BaseGhBranchConfig
+		from     *core.BaseGhBranchConfig
+		expected *core.BaseGhBranchConfig
 	}{
 		"to has nil slices and struct": {
 			&toWithNilSlicesAndStruct,
@@ -521,9 +568,13 @@ func TestBaseGhBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -534,17 +585,9 @@ func TestBaseGhBranchConfig_Merge_2(t *testing.T) {
 }
 
 // ==> Repo->BranchProtections.
-func updateGhBranchProtectionsConfigHelper(c *GhBranchProtectionsConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
-	v := &GhBranchProtectionConfig{}
-	updateGhBranchProtectionConfigHelper(v, stringToCopy, newSliceToCopy, updatePtr)
-	// If nil pointer or nil slice
-	if c == nil || *c == nil {
-		*c = GhBranchProtectionsConfig{}
-	}
-	*c = append(*c, v)
-}
 
 func TestGhBranchProtectionsConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Init variables
 	initialToStringValue := "initial_to_value"
 	initialToSliceValue := []string{"initial_to_slice_value1", "initial_to_slice_value2"}
@@ -566,35 +609,41 @@ func TestGhBranchProtectionsConfig_Merge(t *testing.T) {
 	toRequireCodeOwnerReviews := fmt.Sprintf("%s", initialToStringValue)
 	toResolvedConversations := fmt.Sprintf("%s", initialToStringValue)
 	toRequiredApprovingReviewCount := fmt.Sprintf("%s", initialToStringValue)
+
 	toBypasserList := append([]string{}, initialToSliceValue...)
+
 	toPushRestrictions := append([]string{}, initialToSliceValue...)
+
 	toContext := append([]string{}, initialToSliceValue...)
+
 	toDismissalRestrictions := append([]string{}, initialToSliceValue...)
+
 	toConfigTemplates := append([]string{}, initialFromSliceValue...)
-	to := &GhBranchProtectionsConfig{
+
+	to := &core.GhBranchProtectionsConfig{
 		{
 			&toPattern,
 			&toForbid,
-			BaseGhBranchProtectionConfig{
+			core.BaseGhBranchProtectionConfig{
 				&toConfigTemplates,
 				&toEnforceAdmins,
 				&toAllowsDeletions,
 				&toRequiredLinearHistory,
 				&toRequireSignedCommits,
-				&GhBranchProtectPushesConfig{
+				&core.GhBranchProtectPushesConfig{
 					&toAllowsForcePushes,
 					&toPushRestrictions,
 				},
-				&GhBranchProtectStatusChecksConfig{
+				&core.GhBranchProtectStatusChecksConfig{
 					&toStrict,
 					&toContext,
 				},
-				&GhBranchProtectPRReviewConfig{
+				&core.GhBranchProtectPRReviewConfig{
 					&toBypasserList,
 					&toRequireCodeOwnerReviews,
 					&toResolvedConversations,
 					&toRequiredApprovingReviewCount,
-					&GhBranchProtectPRReviewDismissalsConfig{
+					&core.GhBranchProtectPRReviewDismissalsConfig{
 						&toDismissStaleReviews,
 						&toRestrict,
 						&toDismissalRestrictions,
@@ -618,35 +667,41 @@ func TestGhBranchProtectionsConfig_Merge(t *testing.T) {
 	fromRequireCodeOwnerReviews := fmt.Sprintf("%s", initialFromStringValue)
 	fromResolvedConversations := fmt.Sprintf("%s", initialFromStringValue)
 	fromRequiredApprovingReviewCount := fmt.Sprintf("%s", initialFromStringValue)
+
 	fromPushRestrictions := append([]string{}, initialFromSliceValue...)
+
 	fromContext := append([]string{}, initialFromSliceValue...)
+
 	fromBypasserList := append([]string{}, initialFromSliceValue...)
+
 	fromDismissalRestrictions := append([]string{}, initialFromSliceValue...)
+
 	fromConfigTemplates := append([]string{}, initialFromSliceValue...)
-	from := &GhBranchProtectionsConfig{
+
+	from := &core.GhBranchProtectionsConfig{
 		{
 			&fromPattern,
 			&fromForbid,
-			BaseGhBranchProtectionConfig{
+			core.BaseGhBranchProtectionConfig{
 				&fromConfigTemplates,
 				&fromEnforceAdmins,
 				&fromAllowsDeletions,
 				&fromRequiredLinearHistory,
 				&fromRequireSignedCommits,
-				&GhBranchProtectPushesConfig{
+				&core.GhBranchProtectPushesConfig{
 					&fromAllowsForcePushes,
 					&fromPushRestrictions,
 				},
-				&GhBranchProtectStatusChecksConfig{
+				&core.GhBranchProtectStatusChecksConfig{
 					&fromStrict,
 					&fromContext,
 				},
-				&GhBranchProtectPRReviewConfig{
+				&core.GhBranchProtectPRReviewConfig{
 					&fromBypasserList,
 					&fromRequireCodeOwnerReviews,
 					&fromResolvedConversations,
 					&fromRequiredApprovingReviewCount,
-					&GhBranchProtectPRReviewDismissalsConfig{
+					&core.GhBranchProtectPRReviewDismissalsConfig{
 						&fromDismissStaleReviews,
 						&fromRestrict,
 						&fromDismissalRestrictions,
@@ -665,11 +720,10 @@ func TestGhBranchProtectionsConfig_Merge(t *testing.T) {
 	// Ensure added item to 'to' is not linked anymore to 'from' item
 	fromItem := (*from)[0]
 	toItem := (*to)[1]
-
 	updateFn := updateGhBranchProtectionConfigHelper
 
-	createCopyWithFn := func(stringVal *string, sliceVal *[]string) *GhBranchProtectionConfig {
-		v := reflect.New(reflect.TypeOf(GhBranchProtectionConfig{})).Interface().(*GhBranchProtectionConfig)
+	createCopyWithFn := func(stringVal *string, sliceVal *[]string) *core.GhBranchProtectionConfig {
+		v := reflect.New(reflect.TypeOf(core.GhBranchProtectionConfig{})).Interface().(*core.GhBranchProtectionConfig)
 		updateFn(v, stringVal, sliceVal, true)
 
 		return v
@@ -682,6 +736,8 @@ func TestGhBranchProtectionsConfig_Merge(t *testing.T) {
 }
 
 func TestGhBranchProtectionsConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := GetFullConfig(0).BranchProtections
 	(*toWithNilSlicesAndStruct)[0].ConfigTemplates = nil
 	(*toWithNilSlicesAndStruct)[0].Pushes = nil
@@ -692,9 +748,9 @@ func TestGhBranchProtectionsConfig_Merge_2(t *testing.T) {
 	*expectedToWithNilSlicesAndStruct = append(*toWithNilSlicesAndStruct, *expectedToWithNilSlicesAndStruct...)
 
 	cases := map[string]struct {
-		value    *GhBranchProtectionsConfig
-		from     *GhBranchProtectionsConfig
-		expected *GhBranchProtectionsConfig
+		value    *core.GhBranchProtectionsConfig
+		from     *core.GhBranchProtectionsConfig
+		expected *core.GhBranchProtectionsConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -709,9 +765,13 @@ func TestGhBranchProtectionsConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -723,7 +783,7 @@ func TestGhBranchProtectionsConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->BranchProtections[...]
 
-func updateGhBranchProtectionConfigHelper(c *GhBranchProtectionConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhBranchProtectionConfigHelper(c *core.GhBranchProtectionConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Pattern, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.Forbid, stringToCopy, updatePtr)
 
@@ -731,11 +791,12 @@ func updateGhBranchProtectionConfigHelper(c *GhBranchProtectionConfig, stringToC
 }
 
 func TestGhBranchProtectionConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhBranchProtectionConfig{},
-		func(to, from *GhBranchProtectionConfig) {
+		core.GhBranchProtectionConfig{},
+		func(to, from *core.GhBranchProtectionConfig) {
 			to.Merge(from)
 		},
 		updateGhBranchProtectionConfigHelper,
@@ -743,6 +804,8 @@ func TestGhBranchProtectionConfig_Merge(t *testing.T) {
 }
 
 func TestGhBranchProtectionConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0]
 	toWithNilSlicesAndStruct.ConfigTemplates = nil
 	toWithNilSlicesAndStruct.Pushes = nil
@@ -750,9 +813,9 @@ func TestGhBranchProtectionConfig_Merge_2(t *testing.T) {
 	toWithNilSlicesAndStruct.PullRequestReviews = nil
 
 	cases := map[string]struct {
-		value    *GhBranchProtectionConfig
-		from     *GhBranchProtectionConfig
-		expected *GhBranchProtectionConfig
+		value    *core.GhBranchProtectionConfig
+		from     *core.GhBranchProtectionConfig
+		expected *core.GhBranchProtectionConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -767,9 +830,13 @@ func TestGhBranchProtectionConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -782,7 +849,7 @@ func TestGhBranchProtectionConfig_Merge_2(t *testing.T) {
 // ==> Repo->Branches[...]{BaseGhBranchConfig->Protection}
 // and Repo->BranchProtection[...]{BaseGhBranchProtectionConfig}
 
-func updateBaseGhBranchProtectionConfigHelper(c *BaseGhBranchProtectionConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateBaseGhBranchProtectionConfigHelper(c *core.BaseGhBranchProtectionConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateSlicePtrHelper(&c.ConfigTemplates, newSliceToCopy, updatePtr)
 	updateStringPtrHelper(&c.EnforceAdmins, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.AllowsDeletion, stringToCopy, updatePtr)
@@ -790,27 +857,31 @@ func updateBaseGhBranchProtectionConfigHelper(c *BaseGhBranchProtectionConfig, s
 	updateStringPtrHelper(&c.RequireSignedCommits, stringToCopy, updatePtr)
 
 	if c.Pushes == nil {
-		c.Pushes = &GhBranchProtectPushesConfig{}
+		c.Pushes = &core.GhBranchProtectPushesConfig{}
 	}
+
 	updateGhBranchProtectPushesConfigHelper(c.Pushes, stringToCopy, newSliceToCopy, updatePtr)
 
 	if c.StatusChecks == nil {
-		c.StatusChecks = &GhBranchProtectStatusChecksConfig{}
+		c.StatusChecks = &core.GhBranchProtectStatusChecksConfig{}
 	}
+
 	updateGhBranchProtectStatusChecksConfigHelper(c.StatusChecks, stringToCopy, newSliceToCopy, updatePtr)
 
 	if c.PullRequestReviews == nil {
-		c.PullRequestReviews = &GhBranchProtectPRReviewConfig{}
+		c.PullRequestReviews = &core.GhBranchProtectPRReviewConfig{}
 	}
+
 	updateGhBranchProtectPRReviewConfigHelper(c.PullRequestReviews, stringToCopy, newSliceToCopy, updatePtr)
 }
 
 func TestBaseGhBranchProtectionConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		BaseGhBranchProtectionConfig{},
-		func(to, from *BaseGhBranchProtectionConfig) {
+		core.BaseGhBranchProtectionConfig{},
+		func(to, from *core.BaseGhBranchProtectionConfig) {
 			to.Merge(from)
 		},
 		updateBaseGhBranchProtectionConfigHelper,
@@ -818,6 +889,8 @@ func TestBaseGhBranchProtectionConfig_Merge(t *testing.T) {
 }
 
 func TestBaseGhBranchProtectionConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0].BaseGhBranchProtectionConfig
 	toWithNilSlicesAndStruct.ConfigTemplates = nil
 	toWithNilSlicesAndStruct.Pushes = nil
@@ -825,9 +898,9 @@ func TestBaseGhBranchProtectionConfig_Merge_2(t *testing.T) {
 	toWithNilSlicesAndStruct.PullRequestReviews = nil
 
 	cases := map[string]struct {
-		value    *BaseGhBranchProtectionConfig
-		from     *BaseGhBranchProtectionConfig
-		expected *BaseGhBranchProtectionConfig
+		value    *core.BaseGhBranchProtectionConfig
+		from     *core.BaseGhBranchProtectionConfig
+		expected *core.BaseGhBranchProtectionConfig
 	}{
 		"to has nil slices and struct": {
 			&toWithNilSlicesAndStruct,
@@ -842,9 +915,13 @@ func TestBaseGhBranchProtectionConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -857,17 +934,18 @@ func TestBaseGhBranchProtectionConfig_Merge_2(t *testing.T) {
 // ==> Repo->Branches[...]{BaseGhBranchConfig->Protection->Pushes}
 // and Repo->BranchProtection[...]{BaseGhBranchProtectionConfig->Pushes}
 
-func updateGhBranchProtectPushesConfigHelper(c *GhBranchProtectPushesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhBranchProtectPushesConfigHelper(c *core.GhBranchProtectPushesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.AllowsForcePushes, stringToCopy, updatePtr)
 	updateSlicePtrHelper(&c.PushRestrictions, newSliceToCopy, updatePtr)
 }
 
 func TestGhBranchProtectPushesConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhBranchProtectPushesConfig{},
-		func(to, from *GhBranchProtectPushesConfig) {
+		core.GhBranchProtectPushesConfig{},
+		func(to, from *core.GhBranchProtectPushesConfig) {
 			to.Merge(from)
 		},
 		updateGhBranchProtectPushesConfigHelper,
@@ -875,13 +953,15 @@ func TestGhBranchProtectPushesConfig_Merge(t *testing.T) {
 }
 
 func TestGhBranchProtectPushesConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0].Pushes
 	toWithNilSlicesAndStruct.PushRestrictions = nil
 
 	cases := map[string]struct {
-		value    *GhBranchProtectPushesConfig
-		from     *GhBranchProtectPushesConfig
-		expected *GhBranchProtectPushesConfig
+		value    *core.GhBranchProtectPushesConfig
+		from     *core.GhBranchProtectPushesConfig
+		expected *core.GhBranchProtectPushesConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -896,9 +976,13 @@ func TestGhBranchProtectPushesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -911,17 +995,18 @@ func TestGhBranchProtectPushesConfig_Merge_2(t *testing.T) {
 // ==> Repo->Branches[...]{BaseGhBranchConfig->Protection->StatusChecks}
 // and Repo->BranchProtection[...]{BaseGhBranchProtectionConfig->StatusChecks}
 
-func updateGhBranchProtectStatusChecksConfigHelper(c *GhBranchProtectStatusChecksConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhBranchProtectStatusChecksConfigHelper(c *core.GhBranchProtectStatusChecksConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Strict, stringToCopy, updatePtr)
 	updateSlicePtrHelper(&c.Required, newSliceToCopy, updatePtr)
 }
 
 func TestGhBranchProtectStatusChecksConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhBranchProtectStatusChecksConfig{},
-		func(to, from *GhBranchProtectStatusChecksConfig) {
+		core.GhBranchProtectStatusChecksConfig{},
+		func(to, from *core.GhBranchProtectStatusChecksConfig) {
 			to.Merge(from)
 		},
 		updateGhBranchProtectStatusChecksConfigHelper,
@@ -929,13 +1014,15 @@ func TestGhBranchProtectStatusChecksConfig_Merge(t *testing.T) {
 }
 
 func TestGhBranchProtectStatusChecksConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0].StatusChecks
 	toWithNilSlicesAndStruct.Required = nil
 
 	cases := map[string]struct {
-		value    *GhBranchProtectStatusChecksConfig
-		from     *GhBranchProtectStatusChecksConfig
-		expected *GhBranchProtectStatusChecksConfig
+		value    *core.GhBranchProtectStatusChecksConfig
+		from     *core.GhBranchProtectStatusChecksConfig
+		expected *core.GhBranchProtectStatusChecksConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -950,9 +1037,13 @@ func TestGhBranchProtectStatusChecksConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -965,24 +1056,26 @@ func TestGhBranchProtectStatusChecksConfig_Merge_2(t *testing.T) {
 // ==> Repo->Branches[...]{BaseGhBranchConfig->Protection->PullRequestReviews}
 // and Repo->BranchProtection[...]{BaseGhBranchProtectionConfig->PullRequestReviews}
 
-func updateGhBranchProtectPRReviewConfigHelper(c *GhBranchProtectPRReviewConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhBranchProtectPRReviewConfigHelper(c *core.GhBranchProtectPRReviewConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateSlicePtrHelper(&c.BypasserList, newSliceToCopy, updatePtr)
 	updateStringPtrHelper(&c.CodeownerApprovals, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.ResolvedConversations, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.ApprovalCount, stringToCopy, updatePtr)
 
 	if c.Dismissals == nil {
-		c.Dismissals = &GhBranchProtectPRReviewDismissalsConfig{}
+		c.Dismissals = &core.GhBranchProtectPRReviewDismissalsConfig{}
 	}
+
 	updateGhBranchProtectPRReviewDismissalsConfigHelper(c.Dismissals, stringToCopy, newSliceToCopy, updatePtr)
 }
 
 func TestGhBranchProtectPRReviewConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhBranchProtectPRReviewConfig{},
-		func(to, from *GhBranchProtectPRReviewConfig) {
+		core.GhBranchProtectPRReviewConfig{},
+		func(to, from *core.GhBranchProtectPRReviewConfig) {
 			to.Merge(from)
 		},
 		updateGhBranchProtectPRReviewConfigHelper,
@@ -990,14 +1083,16 @@ func TestGhBranchProtectPRReviewConfig_Merge(t *testing.T) {
 }
 
 func TestGhBranchProtectPRReviewConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0].PullRequestReviews
 	toWithNilSlicesAndStruct.BypasserList = nil
 	toWithNilSlicesAndStruct.Dismissals = nil
 
 	cases := map[string]struct {
-		value    *GhBranchProtectPRReviewConfig
-		from     *GhBranchProtectPRReviewConfig
-		expected *GhBranchProtectPRReviewConfig
+		value    *core.GhBranchProtectPRReviewConfig
+		from     *core.GhBranchProtectPRReviewConfig
+		expected *core.GhBranchProtectPRReviewConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -1012,9 +1107,13 @@ func TestGhBranchProtectPRReviewConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1027,18 +1126,19 @@ func TestGhBranchProtectPRReviewConfig_Merge_2(t *testing.T) {
 // ==> Repo->Branches[...]{BaseGhBranchConfig->Protection->{BaseGhBranchProtectionConfig->PullRequestReviews->Dismissals}}
 // and Repo->BranchProtection[...]{BaseGhBranchProtectionConfig->PullRequestReviews->Dismissals}
 
-func updateGhBranchProtectPRReviewDismissalsConfigHelper(c *GhBranchProtectPRReviewDismissalsConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhBranchProtectPRReviewDismissalsConfigHelper(c *core.GhBranchProtectPRReviewDismissalsConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Staled, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.Restrict, stringToCopy, updatePtr)
 	updateSlicePtrHelper(&c.RestrictTo, newSliceToCopy, updatePtr)
 }
 
 func TestGhBranchProtectPRReviewDismissalsConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhBranchProtectPRReviewDismissalsConfig{},
-		func(to, from *GhBranchProtectPRReviewDismissalsConfig) {
+		core.GhBranchProtectPRReviewDismissalsConfig{},
+		func(to, from *core.GhBranchProtectPRReviewDismissalsConfig) {
 			to.Merge(from)
 		},
 		updateGhBranchProtectPRReviewDismissalsConfigHelper,
@@ -1046,13 +1146,15 @@ func TestGhBranchProtectPRReviewDismissalsConfig_Merge(t *testing.T) {
 }
 
 func TestGhBranchProtectPRReviewDismissalsConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0].PullRequestReviews.Dismissals
 	toWithNilSlicesAndStruct.RestrictTo = nil
 
 	cases := map[string]struct {
-		value    *GhBranchProtectPRReviewDismissalsConfig
-		from     *GhBranchProtectPRReviewDismissalsConfig
-		expected *GhBranchProtectPRReviewDismissalsConfig
+		value    *core.GhBranchProtectPRReviewDismissalsConfig
+		from     *core.GhBranchProtectPRReviewDismissalsConfig
+		expected *core.GhBranchProtectPRReviewDismissalsConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -1067,9 +1169,13 @@ func TestGhBranchProtectPRReviewDismissalsConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1081,31 +1187,39 @@ func TestGhBranchProtectPRReviewDismissalsConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->PullRequests
 
-func updateGhRepoPullRequestConfigHelper(c *GhRepoPullRequestConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoPullRequestConfigHelper(c *core.GhRepoPullRequestConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	if c.MergeStrategy == nil {
-		c.MergeStrategy = &GhRepoPRMergeStrategyConfig{}
+		c.MergeStrategy = &core.GhRepoPRMergeStrategyConfig{}
 	}
+
 	updateGhRepoPRMergeStrategyConfigHelper(c.MergeStrategy, stringToCopy, newSliceToCopy, updatePtr)
+
 	if c.MergeCommit == nil {
-		c.MergeCommit = &GhRepoPRCommitConfig{}
+		c.MergeCommit = &core.GhRepoPRCommitConfig{}
 	}
+
 	updateGhRepoPRCommitConfigHelper(c.MergeCommit, stringToCopy, newSliceToCopy, updatePtr)
+
 	if c.SquashCommit == nil {
-		c.SquashCommit = &GhRepoPRCommitConfig{}
+		c.SquashCommit = &core.GhRepoPRCommitConfig{}
 	}
+
 	updateGhRepoPRCommitConfigHelper(c.SquashCommit, stringToCopy, newSliceToCopy, updatePtr)
+
 	if c.Branch == nil {
-		c.Branch = &GhRepoPRBranchConfig{}
+		c.Branch = &core.GhRepoPRBranchConfig{}
 	}
+
 	updateGhRepoPRBranchConfigHelper(c.Branch, stringToCopy, newSliceToCopy, updatePtr)
 }
 
 func TestGhRepoPullRequestConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoPullRequestConfig{},
-		func(to, from *GhRepoPullRequestConfig) {
+		core.GhRepoPullRequestConfig{},
+		func(to, from *core.GhRepoPullRequestConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoPullRequestConfigHelper,
@@ -1113,6 +1227,8 @@ func TestGhRepoPullRequestConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoPullRequestConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := GetFullConfig(0).PullRequests
 	toWithNilSlicesAndStruct.MergeStrategy = nil
 	toWithNilSlicesAndStruct.MergeCommit = nil
@@ -1120,9 +1236,9 @@ func TestGhRepoPullRequestConfig_Merge_2(t *testing.T) {
 	toWithNilSlicesAndStruct.Branch = nil
 
 	cases := map[string]struct {
-		value    *GhRepoPullRequestConfig
-		from     *GhRepoPullRequestConfig
-		expected *GhRepoPullRequestConfig
+		value    *core.GhRepoPullRequestConfig
+		from     *core.GhRepoPullRequestConfig
+		expected *core.GhRepoPullRequestConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -1137,9 +1253,13 @@ func TestGhRepoPullRequestConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1151,7 +1271,7 @@ func TestGhRepoPullRequestConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->PullRequests->MergeStrategy
 
-func updateGhRepoPRMergeStrategyConfigHelper(c *GhRepoPRMergeStrategyConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoPRMergeStrategyConfigHelper(c *core.GhRepoPRMergeStrategyConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.AllowMerge, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.AllowRebase, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.AllowSquash, stringToCopy, updatePtr)
@@ -1159,11 +1279,12 @@ func updateGhRepoPRMergeStrategyConfigHelper(c *GhRepoPRMergeStrategyConfig, str
 }
 
 func TestGhRepoPRMergeStrategyConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoPRMergeStrategyConfig{},
-		func(to, from *GhRepoPRMergeStrategyConfig) {
+		core.GhRepoPRMergeStrategyConfig{},
+		func(to, from *core.GhRepoPRMergeStrategyConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoPRMergeStrategyConfigHelper,
@@ -1171,10 +1292,12 @@ func TestGhRepoPRMergeStrategyConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoPRMergeStrategyConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoPRMergeStrategyConfig
-		from     *GhRepoPRMergeStrategyConfig
-		expected *GhRepoPRMergeStrategyConfig
+		value    *core.GhRepoPRMergeStrategyConfig
+		from     *core.GhRepoPRMergeStrategyConfig
+		expected *core.GhRepoPRMergeStrategyConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).PullRequests.MergeStrategy,
@@ -1184,9 +1307,13 @@ func TestGhRepoPRMergeStrategyConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1198,17 +1325,18 @@ func TestGhRepoPRMergeStrategyConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->PullRequests->MergeCommit and Repo->PullRequests->SquashCommit
 
-func updateGhRepoPRCommitConfigHelper(c *GhRepoPRCommitConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoPRCommitConfigHelper(c *core.GhRepoPRCommitConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Title, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.Message, stringToCopy, updatePtr)
 }
 
 func TestGhRepoPRCommitConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoPRCommitConfig{},
-		func(to, from *GhRepoPRCommitConfig) {
+		core.GhRepoPRCommitConfig{},
+		func(to, from *core.GhRepoPRCommitConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoPRCommitConfigHelper,
@@ -1216,10 +1344,12 @@ func TestGhRepoPRCommitConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoPRCommitConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoPRCommitConfig
-		from     *GhRepoPRCommitConfig
-		expected *GhRepoPRCommitConfig
+		value    *core.GhRepoPRCommitConfig
+		from     *core.GhRepoPRCommitConfig
+		expected *core.GhRepoPRCommitConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).PullRequests.MergeCommit,
@@ -1229,9 +1359,13 @@ func TestGhRepoPRCommitConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1243,17 +1377,18 @@ func TestGhRepoPRCommitConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->PullRequests->Branch
 
-func updateGhRepoPRBranchConfigHelper(c *GhRepoPRBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoPRBranchConfigHelper(c *core.GhRepoPRBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.SuggestUpdate, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.DeleteBranchOnMerge, stringToCopy, updatePtr)
 }
 
 func TestGhRepoPRBranchConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoPRBranchConfig{},
-		func(to, from *GhRepoPRBranchConfig) {
+		core.GhRepoPRBranchConfig{},
+		func(to, from *core.GhRepoPRBranchConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoPRBranchConfigHelper,
@@ -1261,10 +1396,12 @@ func TestGhRepoPRBranchConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoPRBranchConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoPRBranchConfig
-		from     *GhRepoPRBranchConfig
-		expected *GhRepoPRBranchConfig
+		value    *core.GhRepoPRBranchConfig
+		from     *core.GhRepoPRBranchConfig
+		expected *core.GhRepoPRBranchConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).PullRequests.Branch,
@@ -1274,9 +1411,13 @@ func TestGhRepoPRBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1288,16 +1429,17 @@ func TestGhRepoPRBranchConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Security
 
-func updateGhRepoSecurityConfigHelper(c *GhRepoSecurityConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoSecurityConfigHelper(c *core.GhRepoSecurityConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.VulnerabilityAlerts, stringToCopy, updatePtr)
 }
 
 func TestGhRepoSecurityConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoSecurityConfig{},
-		func(to, from *GhRepoSecurityConfig) {
+		core.GhRepoSecurityConfig{},
+		func(to, from *core.GhRepoSecurityConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoSecurityConfigHelper,
@@ -1305,10 +1447,12 @@ func TestGhRepoSecurityConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoSecurityConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoSecurityConfig
-		from     *GhRepoSecurityConfig
-		expected *GhRepoSecurityConfig
+		value    *core.GhRepoSecurityConfig
+		from     *core.GhRepoSecurityConfig
+		expected *core.GhRepoSecurityConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).Security,
@@ -1318,9 +1462,13 @@ func TestGhRepoSecurityConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1332,7 +1480,7 @@ func TestGhRepoSecurityConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Miscellaneous
 
-func updateGhRepoMiscellaneousConfigHelper(c *GhRepoMiscellaneousConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoMiscellaneousConfigHelper(c *core.GhRepoMiscellaneousConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateSlicePtrHelper(&c.Topics, newSliceToCopy, updatePtr)
 	updateStringPtrHelper(&c.AutoInit, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.Archived, stringToCopy, updatePtr)
@@ -1344,28 +1492,31 @@ func updateGhRepoMiscellaneousConfigHelper(c *GhRepoMiscellaneousConfig, stringT
 	updateStringPtrHelper(&c.HasDownloads, stringToCopy, updatePtr)
 
 	if c.Template == nil {
-		c.Template = &GhRepoTemplateConfig{}
+		c.Template = &core.GhRepoTemplateConfig{}
 	}
+
 	updateGhRepoTemplateConfigHelper(c.Template, stringToCopy, newSliceToCopy, updatePtr)
 
 	if c.Pages == nil {
-		c.Pages = &GhRepoPagesConfig{}
+		c.Pages = &core.GhRepoPagesConfig{}
 	}
 
 	updateGhRepoPagesConfigHelper(c.Pages, stringToCopy, newSliceToCopy, updatePtr)
 
 	if c.FileTemplates == nil {
-		c.FileTemplates = &GhRepoFileTemplatesConfig{}
+		c.FileTemplates = &core.GhRepoFileTemplatesConfig{}
 	}
+
 	updateGhRepoFileTemplatesConfigHelper(c.FileTemplates, stringToCopy, newSliceToCopy, updatePtr)
 }
 
 func TestGhRepoMiscellaneousConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoMiscellaneousConfig{},
-		func(to, from *GhRepoMiscellaneousConfig) {
+		core.GhRepoMiscellaneousConfig{},
+		func(to, from *core.GhRepoMiscellaneousConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoMiscellaneousConfigHelper,
@@ -1373,6 +1524,8 @@ func TestGhRepoMiscellaneousConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoMiscellaneousConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	toWithNilSlicesAndStruct := GetFullConfig(0).Miscellaneous
 	toWithNilSlicesAndStruct.Topics = nil
 	toWithNilSlicesAndStruct.Template = nil
@@ -1380,9 +1533,9 @@ func TestGhRepoMiscellaneousConfig_Merge_2(t *testing.T) {
 	toWithNilSlicesAndStruct.FileTemplates = nil
 
 	cases := map[string]struct {
-		value    *GhRepoMiscellaneousConfig
-		from     *GhRepoMiscellaneousConfig
-		expected *GhRepoMiscellaneousConfig
+		value    *core.GhRepoMiscellaneousConfig
+		from     *core.GhRepoMiscellaneousConfig
+		expected *core.GhRepoMiscellaneousConfig
 	}{
 		"to has nil slices and struct": {
 			toWithNilSlicesAndStruct,
@@ -1397,9 +1550,13 @@ func TestGhRepoMiscellaneousConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1411,17 +1568,18 @@ func TestGhRepoMiscellaneousConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Miscellaneous->Template
 
-func updateGhRepoTemplateConfigHelper(c *GhRepoTemplateConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoTemplateConfigHelper(c *core.GhRepoTemplateConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Source, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.FullClone, stringToCopy, updatePtr)
 }
 
 func TestGhRepoTemplateConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoTemplateConfig{},
-		func(to, from *GhRepoTemplateConfig) {
+		core.GhRepoTemplateConfig{},
+		func(to, from *core.GhRepoTemplateConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoTemplateConfigHelper,
@@ -1429,10 +1587,12 @@ func TestGhRepoTemplateConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoTemplateConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoTemplateConfig
-		from     *GhRepoTemplateConfig
-		expected *GhRepoTemplateConfig
+		value    *core.GhRepoTemplateConfig
+		from     *core.GhRepoTemplateConfig
+		expected *core.GhRepoTemplateConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).Miscellaneous.Template,
@@ -1442,9 +1602,13 @@ func TestGhRepoTemplateConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1456,17 +1620,18 @@ func TestGhRepoTemplateConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Miscellaneous->FileTemplates
 
-func updateGhRepoFileTemplatesConfigHelper(c *GhRepoFileTemplatesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoFileTemplatesConfigHelper(c *core.GhRepoFileTemplatesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Gitignore, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.License, stringToCopy, updatePtr)
 }
 
 func TestGhRepoFileTemplatesConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoFileTemplatesConfig{},
-		func(to, from *GhRepoFileTemplatesConfig) {
+		core.GhRepoFileTemplatesConfig{},
+		func(to, from *core.GhRepoFileTemplatesConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoFileTemplatesConfigHelper,
@@ -1474,10 +1639,12 @@ func TestGhRepoFileTemplatesConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoFileTemplatesConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoFileTemplatesConfig
-		from     *GhRepoFileTemplatesConfig
-		expected *GhRepoFileTemplatesConfig
+		value    *core.GhRepoFileTemplatesConfig
+		from     *core.GhRepoFileTemplatesConfig
+		expected *core.GhRepoFileTemplatesConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).Miscellaneous.FileTemplates,
@@ -1487,9 +1654,13 @@ func TestGhRepoFileTemplatesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1501,18 +1672,19 @@ func TestGhRepoFileTemplatesConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Miscellaneous->Pages
 
-func updateGhRepoPagesConfigHelper(c *GhRepoPagesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoPagesConfigHelper(c *core.GhRepoPagesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.Domain, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.SourcePath, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.SourceBranch, stringToCopy, updatePtr)
 }
 
 func TestGhRepoPagesConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoPagesConfig{},
-		func(to, from *GhRepoPagesConfig) {
+		core.GhRepoPagesConfig{},
+		func(to, from *core.GhRepoPagesConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoPagesConfigHelper,
@@ -1520,10 +1692,12 @@ func TestGhRepoPagesConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoPagesConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoPagesConfig
-		from     *GhRepoPagesConfig
-		expected *GhRepoPagesConfig
+		value    *core.GhRepoPagesConfig
+		from     *core.GhRepoPagesConfig
+		expected *core.GhRepoPagesConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).Miscellaneous.Pages,
@@ -1533,9 +1707,13 @@ func TestGhRepoPagesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1547,17 +1725,18 @@ func TestGhRepoPagesConfig_Merge_2(t *testing.T) {
 
 // ==> Repo->Terraform
 
-func updateGhRepoTerraformConfigHelper(c *GhRepoTerraformConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
+func updateGhRepoTerraformConfigHelper(c *core.GhRepoTerraformConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.ArchiveOnDestroy, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.IgnoreVulnerabilityAlertsDuringRead, stringToCopy, updatePtr)
 }
 
 func TestGhRepoTerraformConfig_Merge(t *testing.T) {
+	t.Parallel()
 	// Ensure updating from afterward doesn't affect result of merge and vice versa
 	ensureMergeWithoutOverflowBetweenToAndFrom(
 		t,
-		GhRepoTerraformConfig{},
-		func(to, from *GhRepoTerraformConfig) {
+		core.GhRepoTerraformConfig{},
+		func(to, from *core.GhRepoTerraformConfig) {
 			to.Merge(from)
 		},
 		updateGhRepoTerraformConfigHelper,
@@ -1565,10 +1744,12 @@ func TestGhRepoTerraformConfig_Merge(t *testing.T) {
 }
 
 func TestGhRepoTerraformConfig_Merge_2(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value    *GhRepoTerraformConfig
-		from     *GhRepoTerraformConfig
-		expected *GhRepoTerraformConfig
+		value    *core.GhRepoTerraformConfig
+		from     *core.GhRepoTerraformConfig
+		expected *core.GhRepoTerraformConfig
 	}{
 		"from nil": {
 			GetFullConfig(0).Terraform,
@@ -1578,9 +1759,13 @@ func TestGhRepoTerraformConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				tc.value.Merge(tc.from)
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -1598,6 +1783,8 @@ type (
 )
 
 func ensureMergeWithoutOverflowBetweenToAndFrom[T any](t *testing.T, empty T, mergeFn func(to, from *T), updateFn updateStructForTest[T]) {
+	t.Helper()
+
 	initialToStringValue := "initial_to_value"
 	initialToSliceValue := []string{"initial_to_slice_value1", "initial_to_slice_value2"}
 	initialFromStringValue := "initial_from_value"
@@ -1616,17 +1803,19 @@ func ensureMergeWithoutOverflowBetweenToAndFrom[T any](t *testing.T, empty T, me
 	to := createCopyWithFn(&initialToStringValue, &initialToSliceValue)
 	// Check that merging from nil has no impact
 	expectedInitialTo := createCopyWithFn(&initialToStringValue, &initialToSliceValue)
+
 	mergeFn(to, nil)
+
 	if diff := cmp.Diff(expectedInitialTo, to); diff != "" {
 		t.Fatalf("'to' merged with nil must not impact 'to': Config mismatch (-want +got):\n%s", diff)
 	}
 
 	// Check that merging from non nil do have an impact
 	from := createCopyWithFn(&initialFromStringValue, &initialFromSliceValue)
+
 	mergeFn(to, from)
 	// All values must be equals to 'from' values and slice must be a combination of both - Use copy in case original values are updated !
-	expectedToSliceAfterMerge := append(initialToSliceValue, initialFromSliceValue...)
-	fmt.Printf("expectedToSliceAfterMerge: %#v\n", expectedToSliceAfterMerge)
+	expectedToSliceAfterMerge := append(initialToSliceValue, initialFromSliceValue...) //nolint:gocritic //expected to be merged into another slice
 	expectedToAfterMerge := createCopyWithFn(&initialFromStringValueCopy, &expectedToSliceAfterMerge)
 	// Initial check - ensure merge worked as expected
 	if diff := cmp.Diff(expectedToAfterMerge, to); diff != "" {
@@ -1645,6 +1834,8 @@ func ensureMergeWithoutOverflowBetweenToAndFrom[T any](t *testing.T, empty T, me
 }
 
 func ensureNoOverflowBetweenToAndFrom[T any](t *testing.T, to *T, from *T, createCopyWithFn createCopyWithFnType[T], updateFn updateStructForTest[T], expectedInitialTo *T) {
+	t.Helper()
+
 	updatedToStringValue := "updated_to_value"
 	updatedToSliceValue := []string{"updated_to_slice_value1", "updated_to_slice_value2"}
 	updatedToStringPtrValue := "updated_to_ptr_value"
@@ -1686,33 +1877,40 @@ func ensureNoOverflowBetweenToAndFrom[T any](t *testing.T, to *T, from *T, creat
 	if diff := cmp.Diff(expectedFromAfterFromValuesUpdate, from); diff != "" {
 		t.Fatalf("updating 'from' *values must impact 'from': Config mismatch (-want +got):\n%s", diff)
 	}
+
 	if diff := cmp.Diff(expectedInitialTo, to); diff != "" {
 		t.Fatalf("updating 'from' *values must not impact 'to': Config mismatch (-want +got):\n%s", diff)
 	}
 
 	// Case 2: Updating 'from' pointers must not impact 'to' pointers
 	updateFn(from, &updatedFromStringPtrValue, &updatedFromSlicePtrValue, true)
+
 	if diff := cmp.Diff(expectedFromAfterFromPointersUpdate, from); diff != "" {
 		t.Fatalf("updating 'from' pointers must impact 'from': Config mismatch (-want +got):\n%s", diff)
 	}
+
 	if diff := cmp.Diff(expectedInitialTo, to); diff != "" {
 		t.Fatalf("updating 'from' pointers must not impact 'to': Config mismatch (-want +got):\n%s", diff)
 	}
 
 	// Case 3: Updating 'to' *values must not impact 'from' *values
 	updateFn(to, &updatedToStringValue, &updatedToSliceValue, false)
+
 	if diff := cmp.Diff(expectedToAfterToUpdate, to); diff != "" {
 		t.Fatalf("updating 'to' *values must impact 'to': Config mismatch (-want +got):\n%s", diff)
 	}
+
 	if diff := cmp.Diff(expectedFromAfterFromPointersUpdate, from); diff != "" {
 		t.Fatalf("updating 'to' *values must not impact 'from': Config mismatch (-want +got):\n%s", diff)
 	}
 
 	// Case 4: Updating 'to' pointers must not impact 'from' pointers
 	updateFn(to, &updatedToStringPtrValue, &updatedToSlicePtrValue, true)
+
 	if diff := cmp.Diff(expectedToAfterToPointersUpdate, to); diff != "" {
 		t.Fatalf("updating 'to' pointers must impact 'to': Config mismatch (-want +got):\n%s", diff)
 	}
+
 	if diff := cmp.Diff(expectedFromAfterFromPointersUpdate, from); diff != "" {
 		t.Fatalf("updating 'to' pointers must not impact 'from': Config mismatch (-want +got):\n%s", diff)
 	}
@@ -1720,6 +1918,7 @@ func ensureNoOverflowBetweenToAndFrom[T any](t *testing.T, to *T, from *T, creat
 
 func updateStringPtrHelper(to **string, stringToCopy *string, updatePtr bool) {
 	newString := fmt.Sprintf("%s", *stringToCopy)
+
 	if updatePtr {
 		*to = &newString
 	} else {
@@ -1729,6 +1928,7 @@ func updateStringPtrHelper(to **string, stringToCopy *string, updatePtr bool) {
 
 func updateSlicePtrHelper(to **[]string, newSliceToCopy *[]string, updatePtr bool) {
 	newSlice := append([]string{}, *newSliceToCopy...)
+
 	if updatePtr {
 		*to = &newSlice
 	} else {

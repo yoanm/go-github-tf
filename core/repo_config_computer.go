@@ -8,14 +8,20 @@ import (
 
 /** Public **/
 
-func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (c *GhRepoConfig, err error) {
+func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (*GhRepoConfig, error) {
+	var err error
+
+	//nolint:exhaustruct // No need here, it's just the base structure
+	config := &GhRepoConfig{}
+
 	if base == nil {
-		return nil, nil
+		return config, nil
 	}
+
 	if base.Name == nil {
 		return nil, fmt.Errorf("repository name is mandatory")
 	}
-	config := &GhRepoConfig{}
+
 	config.Merge(base)
 
 	configTrace(fmt.Sprintf("Config after merge: %s", *base.Name), config)
@@ -41,7 +47,7 @@ func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (c *GhRep
 	return config, nil
 }
 
-func ApplyRepositoryTemplate(c *GhRepoConfig, templates *TemplatesConfig) (newConfig *GhRepoConfig, err error) {
+func ApplyRepositoryTemplate(c *GhRepoConfig, templates *TemplatesConfig) (*GhRepoConfig, error) {
 	if c == nil {
 		return c, nil
 	}
@@ -54,27 +60,48 @@ func ApplyRepositoryTemplate(c *GhRepoConfig, templates *TemplatesConfig) (newCo
 	return applyRepositoryTemplate(c, tplList), nil
 }
 
-func ApplyBranchesTemplate(c *GhRepoConfig, templates *TemplatesConfig) (err error) {
+func ApplyBranchesTemplate(c *GhRepoConfig, templates *TemplatesConfig) error {
 	if c == nil {
 		return nil
 	}
+
+	var err error
+
 	if c.Branches != nil {
 		for k, b := range *c.Branches {
 			if b, err = ApplyBranchTemplate(b, templates); err != nil {
-				return fmt.Errorf("branch %s: %s", k, err)
+				return fmt.Errorf("branch %s: %w", k, err)
 			}
+
 			(*c.Branches)[k] = b
 		}
 	}
 
 	if c.DefaultBranch != nil {
 		b := &GhBranchConfig{
-			BaseGhBranchConfig: BaseGhBranchConfig{ConfigTemplates: c.DefaultBranch.ConfigTemplates},
+			SourceBranch: nil,
+			SourceSha:    nil,
+			BaseGhBranchConfig: BaseGhBranchConfig{
+				ConfigTemplates: c.DefaultBranch.ConfigTemplates,
+				Protection:      nil,
+			},
 		}
+
 		if b, err = ApplyBranchTemplate(b, templates); err != nil {
-			return fmt.Errorf("default branch: %s", err)
+			return fmt.Errorf("default branch: %w", err)
 		}
-		b.Merge(&GhBranchConfig{BaseGhBranchConfig: BaseGhBranchConfig{Protection: c.DefaultBranch.Protection}})
+
+		b.Merge(
+			&GhBranchConfig{
+				SourceBranch: nil,
+				SourceSha:    nil,
+				BaseGhBranchConfig: BaseGhBranchConfig{
+					ConfigTemplates: nil,
+					Protection:      c.DefaultBranch.Protection,
+				},
+			},
+		)
+
 		c.DefaultBranch.ConfigTemplates = nil
 		c.DefaultBranch.Protection = b.Protection
 	}
@@ -82,16 +109,19 @@ func ApplyBranchesTemplate(c *GhRepoConfig, templates *TemplatesConfig) (err err
 	return nil
 }
 
-func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig) (err error) {
+func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig) error {
 	if c == nil {
 		return nil
 	}
-	emptyVal := ""
+
+	var err error
+
 	if c.BranchProtections != nil {
 		for k, b := range *c.BranchProtections {
 			if b, err = ApplyBranchProtectionTemplate(b, templates); err != nil {
-				return fmt.Errorf("branch protection #%d: %s", k, err)
+				return fmt.Errorf("branch protection #%d: %w", k, err)
 			}
+
 			(*c.BranchProtections)[k] = b
 		}
 	}
@@ -99,13 +129,17 @@ func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig)
 	mapDuplicatedBranchProtection(c)
 
 	if c.DefaultBranch != nil && c.DefaultBranch.Protection != nil {
+		emptyVal := ""
+
 		wrapper := &GhBranchProtectionConfig{
 			Pattern:                      &emptyVal,
+			Forbid:                       &falseString,
 			BaseGhBranchProtectionConfig: *c.DefaultBranch.Protection,
 		}
 		if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
-			return fmt.Errorf("default branch: %s", err)
+			return fmt.Errorf("default branch: %w", err)
 		}
+
 		c.DefaultBranch.Protection = &wrapper.BaseGhBranchProtectionConfig
 	}
 
@@ -114,13 +148,16 @@ func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig)
 			if b.Protection == nil {
 				continue
 			}
+
 			wrapper := &GhBranchProtectionConfig{
 				Pattern:                      &k,
+				Forbid:                       &falseString,
 				BaseGhBranchProtectionConfig: *b.Protection,
 			}
 			if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
-				return fmt.Errorf("branch %s: %s", k, err)
+				return fmt.Errorf("branch %s: %w", k, err)
 			}
+
 			b.Protection = &wrapper.BaseGhBranchProtectionConfig
 		}
 	}
@@ -128,10 +165,14 @@ func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig)
 	return nil
 }
 
-func ApplyBranchProtectionTemplate(c *GhBranchProtectionConfig, templates *TemplatesConfig) (*GhBranchProtectionConfig, error) {
+func ApplyBranchProtectionTemplate(
+	c *GhBranchProtectionConfig,
+	templates *TemplatesConfig,
+) (*GhBranchProtectionConfig, error) {
 	if c == nil {
 		return c, nil
 	}
+
 	tplList, err := loadBranchProtectionTemplatesFor(c.ConfigTemplates, templates)
 	if err != nil {
 		return nil, err
@@ -144,6 +185,7 @@ func ApplyBranchTemplate(c *GhBranchConfig, templates *TemplatesConfig) (*GhBran
 	if c == nil {
 		return c, nil
 	}
+
 	tplList, err := loadBranchTemplatesFor(c.ConfigTemplates, templates)
 	if err != nil {
 		return nil, err
@@ -158,12 +200,24 @@ func ApplyBranchTemplate(c *GhBranchConfig, templates *TemplatesConfig) (*GhBran
 func mapDuplicatedBranchProtection(conf *GhRepoConfig) {
 	if conf.BranchProtections != nil {
 		knowPattern := map[string]int{}
+
 		configs := conf.BranchProtections
 		for k, v := range *configs {
 			if v.Pattern != nil {
 				if knownKey, ok := knowPattern[*v.Pattern]; ok {
-					log.Warn().Msgf("Repository %s: A branch protection with '%s' pattern already exists (#%d) => applying #%d as template for #%d !", *conf.Name, *v.Pattern, knownKey, knownKey, k)
-					(*configs)[knownKey] = applyBranchProtectionTemplate(v, []*GhBranchProtectionConfig{(*configs)[knownKey]})
+					log.Warn().Msgf(
+						"Repository %s: A branch protection with '%s' pattern already exists (#%d) => applying #%d as template for #%d !", //nolint:lll
+						*conf.Name,
+						*v.Pattern,
+						knownKey,
+						knownKey,
+						k,
+					)
+
+					(*configs)[knownKey] = applyBranchProtectionTemplate(
+						v,
+						[]*GhBranchProtectionConfig{(*configs)[knownKey]},
+					)
 					*configs = append((*configs)[:k], (*configs)[k+1:]...) // Remove the existing config from the list
 				} else {
 					knowPattern[*v.Pattern] = k
@@ -177,7 +231,10 @@ func applyRepositoryTemplate(to *GhRepoConfig, tplList []*GhRepoConfig) *GhRepoC
 	if len(tplList) == 0 {
 		return to
 	}
+
+	//nolint:exhaustruct // No need here, it's base structure
 	newConfig := &GhRepoConfig{}
+
 	for _, tpl := range tplList {
 		newConfig.Merge(tpl)
 	}
@@ -193,7 +250,10 @@ func applyBranchTemplate(to *GhBranchConfig, tplList []*GhBranchConfig) *GhBranc
 	if len(tplList) == 0 {
 		return to
 	}
+
+	//nolint:exhaustruct // No need here, it's base structure
 	newConfig := &GhBranchConfig{}
+
 	for _, tpl := range tplList {
 		newConfig.Merge(tpl)
 	}
@@ -205,11 +265,17 @@ func applyBranchTemplate(to *GhBranchConfig, tplList []*GhBranchConfig) *GhBranc
 	return newConfig
 }
 
-func applyBranchProtectionTemplate(to *GhBranchProtectionConfig, tplList []*GhBranchProtectionConfig) *GhBranchProtectionConfig {
+func applyBranchProtectionTemplate(
+	to *GhBranchProtectionConfig,
+	tplList []*GhBranchProtectionConfig,
+) *GhBranchProtectionConfig {
 	if len(tplList) == 0 {
 		return to
 	}
+
+	//nolint:exhaustruct // No need here, it's base structure
 	newConfig := &GhBranchProtectionConfig{}
+
 	for _, tpl := range tplList {
 		newConfig.Merge(tpl)
 	}
@@ -225,7 +291,9 @@ func loadRepoTemplatesFor(to *GhRepoConfig, templates *TemplatesConfig) ([]*GhRe
 	if to.ConfigTemplates == nil {
 		return nil, nil
 	}
+
 	const tplType = "repository"
+
 	if templates == nil {
 		return nil, fmt.Errorf("unable to load %s template, no template available", tplType)
 	}
@@ -247,11 +315,16 @@ func loadRepoTemplatesFor(to *GhRepoConfig, templates *TemplatesConfig) ([]*GhRe
 	return tplList, nil
 }
 
-func loadBranchProtectionTemplatesFor(tplNameToLoad *[]string, templates *TemplatesConfig) ([]*GhBranchProtectionConfig, error) {
+func loadBranchProtectionTemplatesFor(
+	tplNameToLoad *[]string,
+	templates *TemplatesConfig,
+) ([]*GhBranchProtectionConfig, error) {
 	if tplNameToLoad == nil {
 		return nil, nil
 	}
+
 	const tplType = "branch protection"
+
 	if templates == nil {
 		return nil, fmt.Errorf("unable to load %s template, no template available", tplType)
 	}
@@ -277,7 +350,9 @@ func loadBranchTemplatesFor(tplNameToLoad *[]string, templates *TemplatesConfig)
 	if tplNameToLoad == nil {
 		return nil, nil
 	}
+
 	const tplType = "branch"
+
 	if templates == nil {
 		return nil, fmt.Errorf("unable to load %s template, no template available", tplType)
 	}

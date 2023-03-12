@@ -10,13 +10,12 @@ import (
 )
 
 // Build time variables.
+//
+//nolint:gochecknoglobals // Expected to be global
 var (
 	version = "dev"
 	commit  = "none"
 	date    = "unknown"
-)
-
-var (
 	// Base flags.
 	workspacePathFlag        string
 	defaultWorkspacePathFlag = "."
@@ -41,6 +40,7 @@ var (
 	versionFlag bool
 )
 
+//nolint:gochecknoinits // Normal CLI flag declaration
 func init() {
 	// init command line flags
 	flag.StringVarP(&workspacePathFlag, "workspace", "w", defaultWorkspacePathFlag, `Workspace directory`)
@@ -48,8 +48,18 @@ func init() {
 	flag.StringVarP(&templateDirFlag, "templates", "t", defaultTemplateDirFlag, `Template directory`)
 	flag.StringVar(&yamlAnchorDirFlag, "yaml-anchors", defaultYamlAnchorDirFlag, `YAML anchors directory`)
 
-	// flag.BoolVar(&printImportsFlag, "print-imports", false, "Read terraform files and print related terraform import commands")
-	// flag.StringSliceVar(&skipImportListFlag, "skip", defaultSkipImportListFlag, "Skip provided import from the list")
+	// flag.BoolVar(
+	// 	&printImportsFlag,
+	// 	"print-imports",
+	// 	false,
+	// 	"Read terraform files and print related terraform import commands"
+	// )
+	// flag.StringSliceVar(
+	// 	&skipImportListFlag,
+	// 	"skip",
+	// 	defaultSkipImportListFlag,
+	// 	"Skip provided import from the list"
+	// )
 
 	flag.BoolVarP(&quietFlag, "quiet", "q", false, "Disable output")
 	flag.CountVarP(&verboseFlag, "verbose", "v", "Enable verbose output. -v for Info, -vv for Debug and -vvv for Trace")
@@ -65,38 +75,53 @@ func main() {
 
 func run() int {
 	parseFlags()
-	logLevel := zerolog.WarnLevel
-	if quietFlag {
-		logLevel = zerolog.Disabled
-	} else if verboseFlag == 1 {
-		logLevel = zerolog.InfoLevel
-	} else if verboseFlag == 2 {
-		logLevel = zerolog.DebugLevel
-	} else if verboseFlag > 2 {
-		logLevel = zerolog.TraceLevel
-	}
-
-	setupLogOutput(logLevel, disableAnsiFlag)
+	setupLogOutput(computeLogLevel(), disableAnsiFlag)
 
 	terraformDir := "terraform"
+
 	log.Debug().Msgf("Workspace: %s", workspacePathFlag)
 	log.Debug().Msgf("Config directory: %s", configDirFlag)
 	log.Debug().Msgf("Template directory: %s", templateDirFlag)
 	log.Debug().Msgf("YAML anchor directory: %s", yamlAnchorDirFlag)
+
 	exitCode := 0
-	if helpFlag {
+
+	switch {
+	case helpFlag:
 		flag.PrintDefaults()
-	} else if versionFlag {
+	case versionFlag:
+		//nolint:forbidigo // Expected output
 		fmt.Printf("github-tf version: %s (commit %s from %s)\n", version, commit, date)
 
 		/*}  else if printImportsFlag {
 		exitCode = printTerraformImports(filepath.Join(workspacePathFlag, terraformDir), &skipImportListFlag)
 		*/
-	} else {
-		exitCode = loadYamlAndWriteTerraform(workspacePathFlag, configDirFlag, templateDirFlag, terraformDir, yamlAnchorDirFlag)
+	default:
+		exitCode = loadYamlAndWriteTerraform(
+			workspacePathFlag,
+			configDirFlag,
+			templateDirFlag,
+			terraformDir,
+			yamlAnchorDirFlag,
+		)
 	}
 
 	return exitCode
+}
+
+func computeLogLevel() zerolog.Level {
+	switch {
+	case quietFlag:
+		return zerolog.Disabled
+	case verboseFlag == 1:
+		return zerolog.InfoLevel
+	case verboseFlag == 2: //nolint:gomnd // Doesn't make sense here to wrap 2
+		return zerolog.DebugLevel
+	case verboseFlag > 2: //nolint:gomnd // Doesn't make sense here to wrap 2
+		return zerolog.TraceLevel
+	}
+
+	return zerolog.WarnLevel
 }
 
 func parseFlags() {

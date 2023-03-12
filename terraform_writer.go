@@ -10,13 +10,23 @@ import (
 	"github.com/yoanm/github-tf/core"
 )
 
+const (
+	NoErrorExitCode                     = 0
+	ReadWorkspaceErrorExitCode          = 1
+	ComputeConfigErrorExitCode          = 2
+	GenerateTerraformFilesErrorExitCode = 3
+	WriteTerraformFilesErrorExitCode    = 4
+)
+
 func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformDir, yamlAnchorDir string) int {
 	var err error
 
 	var rawConfig *core.Config
+
 	if rawConfig, err = readWorkspace(workspacePath, configDir, templateDir, yamlAnchorDir); err != nil {
 		log.Error().Msgf("%s", err)
-		return 1
+
+		return ReadWorkspaceErrorExitCode
 	}
 
 	if zerolog.GlobalLevel() == zerolog.TraceLevel {
@@ -37,9 +47,11 @@ func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformD
 	)
 
 	var config *core.Config
+
 	if config, err = core.ComputeConfig(rawConfig); err != nil {
 		log.Error().Msgf("%s", err)
-		return 2
+
+		return ComputeConfigErrorExitCode
 	}
 
 	if zerolog.GlobalLevel() == zerolog.TraceLevel {
@@ -54,13 +66,15 @@ func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformD
 	files, err := core.GenerateHclRepoFiles(config.Repos)
 	if err != nil {
 		log.Error().Msgf("%s", err)
-		return 3
+
+		return GenerateTerraformFilesErrorExitCode
 	}
 
 	if err = core.WriteTerraformFiles(path.Join(workspacePath, terraformDir), files); err != nil {
 		log.Error().Msgf("%s", err)
-		return 4
+
+		return WriteTerraformFilesErrorExitCode
 	}
 
-	return 0
+	return NoErrorExitCode
 }

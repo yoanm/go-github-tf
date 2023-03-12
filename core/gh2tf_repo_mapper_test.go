@@ -1,4 +1,4 @@
-package core
+package core_test
 
 import (
 	"fmt"
@@ -6,21 +6,23 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/yoanm/go-tfsig"
-	"github.com/yoanm/go-tfsig/testutils"
-
+	"github.com/yoanm/github-tf/core"
 	"github.com/yoanm/go-gh2tf"
 	"github.com/yoanm/go-gh2tf/ghbranch"
 	"github.com/yoanm/go-gh2tf/ghbranchdefault"
 	"github.com/yoanm/go-gh2tf/ghbranchprotect"
 	"github.com/yoanm/go-gh2tf/ghrepository"
+	"github.com/yoanm/go-tfsig"
+	"github.com/yoanm/go-tfsig/testutils"
 )
 
 func TestMapToRepositoryRes(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	tfRepoId := "an_id"
 	cases := map[string]struct {
-		value    *GhRepoConfig
+		value    *core.GhRepoConfig
 		expected *ghrepository.Config
 	}{
 		"nil": {
@@ -28,7 +30,7 @@ func TestMapToRepositoryRes(t *testing.T) {
 			nil,
 		},
 		"empty": {
-			&GhRepoConfig{},
+			&core.GhRepoConfig{},
 			&ghrepository.Config{
 				ValueGenerator:           valGen,
 				Identifier:               tfRepoId,
@@ -60,11 +62,16 @@ func TestMapToRepositoryRes(t *testing.T) {
 	}
 
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
+
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual := MapToRepositoryRes(tc.value, valGen, tfRepoId)
+				t.Parallel()
+				actual := core.MapToRepositoryRes(tc.value, valGen, tfRepoId)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -74,6 +81,8 @@ func TestMapToRepositoryRes(t *testing.T) {
 }
 
 func TestMapToBranchRes(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	branchName := "a_branch_name"
 	defaultBranchName := "default_branch_name"
@@ -83,20 +92,20 @@ func TestMapToBranchRes(t *testing.T) {
 	repoLink := fmt.Sprintf("github_repository.%s.name", tfId)
 	defaultBranchLink := fmt.Sprintf("github_branch_default.%s.branch", tfId)
 	branch1Link := fmt.Sprintf("github_branch.%s-%s.branch", tfId, branch1Name)
-	repoConfig := GhRepoConfig{
+	repoConfig := core.GhRepoConfig{
 		Name: &repoName,
-		DefaultBranch: &GhDefaultBranchConfig{
+		DefaultBranch: &core.GhDefaultBranchConfig{
 			Name: &defaultBranchName,
 		},
-		Branches: &GhBranchesConfig{
-			branch1Name: &GhBranchConfig{},
+		Branches: &core.GhBranchesConfig{
+			branch1Name: &core.GhBranchConfig{},
 		},
 	}
 	cases := map[string]struct {
 		name     string
-		value    *GhBranchConfig
-		repo     *GhRepoConfig
-		links    []MapperLink
+		value    *core.GhBranchConfig
+		repo     *core.GhRepoConfig
+		links    []core.MapperLink
 		expected *ghbranch.Config
 	}{
 		"nil": {
@@ -108,7 +117,7 @@ func TestMapToBranchRes(t *testing.T) {
 		},
 		"empty": {
 			branchName,
-			&GhBranchConfig{},
+			&core.GhBranchConfig{},
 			&repoConfig,
 			nil,
 			&ghbranch.Config{
@@ -120,7 +129,7 @@ func TestMapToBranchRes(t *testing.T) {
 		},
 		"sourceBranch same as current branch": {
 			branchName,
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				SourceBranch: &branchName,
 			},
 			&repoConfig,
@@ -134,11 +143,11 @@ func TestMapToBranchRes(t *testing.T) {
 		},
 		"with all links - default branch link": {
 			branchName,
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				SourceBranch: &defaultBranchName,
 			},
 			&repoConfig,
-			[]MapperLink{LinkToRepository, LinkToBranch},
+			[]core.MapperLink{core.LinkToRepository, core.LinkToBranch},
 			&ghbranch.Config{
 				ValueGenerator: valGen,
 				Identifier:     tfId + "-" + branchName,
@@ -149,11 +158,11 @@ func TestMapToBranchRes(t *testing.T) {
 		},
 		"with all links - branch link": {
 			branchName,
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				SourceBranch: &branch1Name,
 			},
 			&repoConfig,
-			[]MapperLink{LinkToRepository, LinkToBranch},
+			[]core.MapperLink{core.LinkToRepository, core.LinkToBranch},
 			&ghbranch.Config{
 				ValueGenerator: valGen,
 				Identifier:     tfId + "-" + branchName,
@@ -165,11 +174,16 @@ func TestMapToBranchRes(t *testing.T) {
 	}
 
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
+
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual := MapToBranchRes(tc.name, tc.value, valGen, tc.repo, tfId, tc.links...)
+				t.Parallel()
+				actual := core.MapToBranchRes(tc.name, tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -179,6 +193,8 @@ func TestMapToBranchRes(t *testing.T) {
 }
 
 func TestMapToBranchRes_panic(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	tfId := "an_id"
 
@@ -186,13 +202,15 @@ func TestMapToBranchRes_panic(t *testing.T) {
 		t,
 		"Basic",
 		func() {
-			MapToBranchRes("a-name", &GhBranchConfig{}, valGen, nil, tfId)
+			core.MapToBranchRes("a-name", &core.GhBranchConfig{}, valGen, nil, tfId)
 		},
 		"repository name is mandatory for branch config",
 	)
 }
 
 func TestMapToDefaultBranchRes(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	defaultBranchName := "default_branch_name"
 	branch1Name := "branch1_name"
@@ -200,19 +218,19 @@ func TestMapToDefaultBranchRes(t *testing.T) {
 	tfId := "an_id"
 	repoLink := fmt.Sprintf("github_repository.%s.name", tfId)
 	branch1Link := fmt.Sprintf("github_branch.%s-%s.branch", tfId, branch1Name)
-	repoConfig := GhRepoConfig{
+	repoConfig := core.GhRepoConfig{
 		Name: &repoName,
-		DefaultBranch: &GhDefaultBranchConfig{
+		DefaultBranch: &core.GhDefaultBranchConfig{
 			Name: &defaultBranchName,
 		},
-		Branches: &GhBranchesConfig{
-			branch1Name: &GhBranchConfig{},
+		Branches: &core.GhBranchesConfig{
+			branch1Name: &core.GhBranchConfig{},
 		},
 	}
 	cases := map[string]struct {
-		value    *GhDefaultBranchConfig
-		repo     *GhRepoConfig
-		links    []MapperLink
+		value    *core.GhDefaultBranchConfig
+		repo     *core.GhRepoConfig
+		links    []core.MapperLink
 		expected *ghbranchdefault.Config
 	}{
 		"nil": {
@@ -222,7 +240,7 @@ func TestMapToDefaultBranchRes(t *testing.T) {
 			nil,
 		},
 		"empty": {
-			&GhDefaultBranchConfig{
+			&core.GhDefaultBranchConfig{
 				Name: &defaultBranchName,
 			},
 			&repoConfig,
@@ -235,11 +253,11 @@ func TestMapToDefaultBranchRes(t *testing.T) {
 			},
 		},
 		"with all links": {
-			&GhDefaultBranchConfig{
+			&core.GhDefaultBranchConfig{
 				Name: &branch1Name,
 			},
 			&repoConfig,
-			[]MapperLink{LinkToRepository, LinkToBranch},
+			[]core.MapperLink{core.LinkToRepository, core.LinkToBranch},
 			&ghbranchdefault.Config{
 				ValueGenerator: valGen,
 				Identifier:     tfId,
@@ -250,11 +268,16 @@ func TestMapToDefaultBranchRes(t *testing.T) {
 	}
 
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
+
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual := MapToDefaultBranchRes(tc.value, valGen, tc.repo, tfId, tc.links...)
+				t.Parallel()
+				actual := core.MapToDefaultBranchRes(tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -264,6 +287,8 @@ func TestMapToDefaultBranchRes(t *testing.T) {
 }
 
 func TestMapToDefaultBranchRes_panic(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	tfId := "an_id"
 
@@ -271,26 +296,28 @@ func TestMapToDefaultBranchRes_panic(t *testing.T) {
 		t,
 		"Basic",
 		func() {
-			MapToDefaultBranchRes(&GhDefaultBranchConfig{}, valGen, nil, tfId)
+			core.MapToDefaultBranchRes(&core.GhDefaultBranchConfig{}, valGen, nil, tfId)
 		},
 		"repository is mandatory for default branch config",
 	)
 }
 
 func TestMapDefaultBranchToBranchProtectionRes(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	repoName := "a_repo"
 	pattern := "a-pattern"
 	tfId := "an_id"
 	repoLink := fmt.Sprintf("github_repository.%s.node_id", tfId)
 	defaultBranchLink := fmt.Sprintf("github_branch_default.%s.branch", tfId)
-	repoConfig := GhRepoConfig{
+	repoConfig := core.GhRepoConfig{
 		Name: &repoName,
 	}
 	cases := map[string]struct {
-		value    *GhDefaultBranchConfig
-		repo     *GhRepoConfig
-		links    []MapperLink
+		value    *core.GhDefaultBranchConfig
+		repo     *core.GhRepoConfig
+		links    []core.MapperLink
 		expected *ghbranchprotect.Config
 	}{
 		"nil": {
@@ -300,26 +327,26 @@ func TestMapDefaultBranchToBranchProtectionRes(t *testing.T) {
 			nil,
 		},
 		"empty": {
-			&GhDefaultBranchConfig{},
+			&core.GhDefaultBranchConfig{},
 			&repoConfig,
 			nil,
 			nil,
 		},
 		"without protection": {
-			&GhDefaultBranchConfig{
+			&core.GhDefaultBranchConfig{
 				&pattern,
-				BaseGhBranchConfig{nil, nil},
+				core.BaseGhBranchConfig{nil, nil},
 			},
 			&repoConfig,
 			nil,
 			nil,
 		},
 		"with links": {
-			&GhDefaultBranchConfig{
+			&core.GhDefaultBranchConfig{
 				&pattern,
-				BaseGhBranchConfig{
+				core.BaseGhBranchConfig{
 					nil,
-					&BaseGhBranchProtectionConfig{
+					&core.BaseGhBranchProtectionConfig{
 						nil,
 						nil,
 						nil,
@@ -332,7 +359,7 @@ func TestMapDefaultBranchToBranchProtectionRes(t *testing.T) {
 				},
 			},
 			&repoConfig,
-			[]MapperLink{LinkToRepository, LinkToBranch},
+			[]core.MapperLink{core.LinkToRepository, core.LinkToBranch},
 			&ghbranchprotect.Config{
 				valGen,
 				tfId + "-default",
@@ -351,11 +378,16 @@ func TestMapDefaultBranchToBranchProtectionRes(t *testing.T) {
 	}
 
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
+
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual := MapDefaultBranchToBranchProtectionRes(tc.value, valGen, tc.repo, tfId, tc.links...)
+				t.Parallel()
+				actual := core.MapDefaultBranchToBranchProtectionRes(tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -365,6 +397,8 @@ func TestMapDefaultBranchToBranchProtectionRes(t *testing.T) {
 }
 
 func TestMapBranchToBranchProtectionRes(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	branchName := "a_branch_name"
 	defaultBranchName := "default_branch_name"
@@ -373,20 +407,20 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 	tfId := "an_id"
 	repoLink := fmt.Sprintf("github_repository.%s.node_id", tfId)
 	branch1Link := fmt.Sprintf("github_branch.%s-%s.branch", tfId, branch1Name)
-	repoConfig := GhRepoConfig{
+	repoConfig := core.GhRepoConfig{
 		Name: &repoName,
-		DefaultBranch: &GhDefaultBranchConfig{
+		DefaultBranch: &core.GhDefaultBranchConfig{
 			Name: &defaultBranchName,
 		},
-		Branches: &GhBranchesConfig{
-			branch1Name: &GhBranchConfig{},
+		Branches: &core.GhBranchesConfig{
+			branch1Name: &core.GhBranchConfig{},
 		},
 	}
 	cases := map[string]struct {
 		name     string
-		value    *GhBranchConfig
-		repo     *GhRepoConfig
-		links    []MapperLink
+		value    *core.GhBranchConfig
+		repo     *core.GhRepoConfig
+		links    []core.MapperLink
 		expected *ghbranchprotect.Config
 	}{
 		"nil": {
@@ -398,14 +432,14 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 		},
 		"empty": {
 			branchName,
-			&GhBranchConfig{},
+			&core.GhBranchConfig{},
 			&repoConfig,
 			nil,
 			nil,
 		},
 		"without protection": {
 			branchName,
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				SourceBranch: &branchName,
 			},
 			&repoConfig,
@@ -414,14 +448,14 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 		},
 		"with all links": {
 			branch1Name,
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				SourceBranch: &branch1Name,
-				BaseGhBranchConfig: BaseGhBranchConfig{
-					Protection: &BaseGhBranchProtectionConfig{},
+				BaseGhBranchConfig: core.BaseGhBranchConfig{
+					Protection: &core.BaseGhBranchProtectionConfig{},
 				},
 			},
 			&repoConfig,
-			[]MapperLink{LinkToRepository, LinkToBranch},
+			[]core.MapperLink{core.LinkToRepository, core.LinkToBranch},
 			&ghbranchprotect.Config{
 				valGen,
 				tfId + "-" + branch1Name,
@@ -440,11 +474,16 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 	}
 
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
+
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual := MapBranchToBranchProtectionRes(tc.name, tc.value, valGen, tc.repo, tfId, tc.links...)
+				t.Parallel()
+				actual := core.MapBranchToBranchProtectionRes(tc.name, tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -454,22 +493,24 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 }
 
 func TestMapToBranchProtectionRes(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	repoName := "a_repo"
 	pattern := "a-pattern"
 	tfId := "an_id"
 	repoLink := fmt.Sprintf("github_repository.%s.node_id", tfId)
 	branchLink := fmt.Sprintf("github_branch.%s-%s.branch", tfId, pattern)
-	repoConfig := GhRepoConfig{
+	repoConfig := core.GhRepoConfig{
 		Name: &repoName,
-		Branches: &GhBranchesConfig{
-			pattern: &GhBranchConfig{},
+		Branches: &core.GhBranchesConfig{
+			pattern: &core.GhBranchConfig{},
 		},
 	}
 	cases := map[string]struct {
-		value    *GhBranchProtectionConfig
-		repo     *GhRepoConfig
-		links    []MapperLink
+		value    *core.GhBranchProtectionConfig
+		repo     *core.GhRepoConfig
+		links    []core.MapperLink
 		expected *ghbranchprotect.Config
 	}{
 		"nil": {
@@ -479,7 +520,7 @@ func TestMapToBranchProtectionRes(t *testing.T) {
 			nil,
 		},
 		"empty": {
-			&GhBranchProtectionConfig{},
+			&core.GhBranchProtectionConfig{},
 			&repoConfig,
 			nil,
 			&ghbranchprotect.Config{
@@ -498,10 +539,10 @@ func TestMapToBranchProtectionRes(t *testing.T) {
 			},
 		},
 		"with links": {
-			&GhBranchProtectionConfig{
+			&core.GhBranchProtectionConfig{
 				&pattern,
 				nil,
-				BaseGhBranchProtectionConfig{
+				core.BaseGhBranchProtectionConfig{
 					nil,
 					nil,
 					nil,
@@ -513,7 +554,7 @@ func TestMapToBranchProtectionRes(t *testing.T) {
 				},
 			},
 			&repoConfig,
-			[]MapperLink{LinkToRepository, LinkToBranch},
+			[]core.MapperLink{core.LinkToRepository, core.LinkToBranch},
 			&ghbranchprotect.Config{
 				valGen,
 				tfId + "-" + pattern,
@@ -532,11 +573,16 @@ func TestMapToBranchProtectionRes(t *testing.T) {
 	}
 
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
+
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual := MapToBranchProtectionRes(tc.value, valGen, tc.repo, tfId, tc.links...)
+				t.Parallel()
+				actual := core.MapToBranchProtectionRes(tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -546,6 +592,8 @@ func TestMapToBranchProtectionRes(t *testing.T) {
 }
 
 func TestMapToBranchProtectionRes_panic(t *testing.T) {
+	t.Parallel()
+
 	valGen := gh2tf.NewValueGenerator()
 	tfId := "an_id"
 
@@ -553,7 +601,7 @@ func TestMapToBranchProtectionRes_panic(t *testing.T) {
 		t,
 		"Basic",
 		func() {
-			MapToBranchProtectionRes(&GhBranchProtectionConfig{}, valGen, nil, tfId)
+			core.MapToBranchProtectionRes(&core.GhBranchProtectionConfig{}, valGen, nil, tfId)
 		},
 		"repository name is mandatory for branch protection config",
 	)

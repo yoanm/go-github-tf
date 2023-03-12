@@ -1,4 +1,4 @@
-package core
+package core_test
 
 import (
 	"fmt"
@@ -6,13 +6,17 @@ import (
 
 	differ "github.com/andreyvit/diff"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/yoanm/github-tf/core"
 )
 
 func TestComputeConfig(t *testing.T) {
+	t.Parallel()
+
 	aName := "a_name"
 	cases := map[string]struct {
-		value    *Config
-		expected *Config
+		value    *core.Config
+		expected *core.Config
 		error    error
 	}{
 		"nil": {
@@ -21,27 +25,27 @@ func TestComputeConfig(t *testing.T) {
 			nil,
 		},
 		"empty": {
-			&Config{Templates: nil, Repos: nil},
-			NewConfig(),
+			&core.Config{Templates: nil, Repos: nil},
+			core.NewConfig(),
 			nil,
 		},
 		"base": {
-			&Config{
+			&core.Config{
 				Templates: nil,
-				Repos: []*GhRepoConfig{
+				Repos: []*core.GhRepoConfig{
 					{
 						&aName, nil, nil, nil, nil, nil,
 						nil, nil, nil, nil, nil,
 					},
 				},
 			},
-			&Config{
-				Templates: &TemplatesConfig{
-					Repos:             map[string]*GhRepoConfig{},
-					Branches:          map[string]*GhBranchConfig{},
-					BranchProtections: map[string]*GhBranchProtectionConfig{},
+			&core.Config{
+				Templates: &core.TemplatesConfig{
+					Repos:             map[string]*core.GhRepoConfig{},
+					Branches:          map[string]*core.GhBranchConfig{},
+					BranchProtections: map[string]*core.GhBranchProtectionConfig{},
 				},
-				Repos: []*GhRepoConfig{
+				Repos: []*core.GhRepoConfig{
 					{
 						&aName, nil, nil, nil, nil, nil,
 						nil, nil, nil, nil, nil,
@@ -51,9 +55,9 @@ func TestComputeConfig(t *testing.T) {
 			nil,
 		},
 		"Repo without name": {
-			&Config{
+			&core.Config{
 				Templates: nil,
-				Repos: []*GhRepoConfig{
+				Repos: []*core.GhRepoConfig{
 					{
 						nil, nil, nil, nil, nil, nil,
 						nil, nil, nil, nil, nil,
@@ -68,9 +72,9 @@ func TestComputeConfig(t *testing.T) {
 			fmt.Errorf("error during computation:\n\t - repository name is missing for repo #0\n\t - repository name is missing for repo #1"),
 		},
 		"Underlying computation error": {
-			&Config{
+			&core.Config{
 				Templates: nil,
-				Repos: []*GhRepoConfig{
+				Repos: []*core.GhRepoConfig{
 					{
 						&aName, &[]string{aName}, nil, nil, nil, nil,
 						nil, nil, nil, nil, nil,
@@ -83,10 +87,14 @@ func TestComputeConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel tests
+		tc := tc         // Reinit var for parallel tests
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ComputeConfig(tc.value)
+				t.Parallel()
+				actual, err := core.ComputeConfig(tc.value)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)

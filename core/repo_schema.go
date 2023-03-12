@@ -14,7 +14,7 @@ type GhRepoConfig struct {
 	Terraform         *GhRepoTerraformConfig     `yaml:"terraform,omitempty"`
 }
 
-func (to *GhRepoConfig) Merge(from *GhRepoConfig) {
+func (to *GhRepoConfig) Merge(from *GhRepoConfig) { //nolint:gocognit,cyclop // Hard to factorize, more understandable as is
 	if from == nil {
 		return
 	}
@@ -26,44 +26,62 @@ func (to *GhRepoConfig) Merge(from *GhRepoConfig) {
 
 	if from.Miscellaneous != nil {
 		if to.Miscellaneous == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Miscellaneous = &GhRepoMiscellaneousConfig{}
 		}
+
 		to.Miscellaneous.Merge(from.Miscellaneous)
 	}
+
 	if from.PullRequests != nil {
 		if to.PullRequests == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.PullRequests = &GhRepoPullRequestConfig{}
 		}
+
 		to.PullRequests.Merge(from.PullRequests)
 	}
+
 	if from.DefaultBranch != nil {
 		if to.DefaultBranch == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.DefaultBranch = &GhDefaultBranchConfig{}
 		}
+
 		to.DefaultBranch.Merge(from.DefaultBranch)
 	}
+
 	if from.Branches != nil {
 		if to.Branches == nil {
 			to.Branches = &GhBranchesConfig{}
 		}
+
 		to.Branches.Merge(from.Branches)
 	}
+
 	if from.Security != nil {
 		if to.Security == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Security = &GhRepoSecurityConfig{}
 		}
+
 		to.Security.Merge(from.Security)
 	}
+
 	if from.Terraform != nil {
 		if to.Terraform == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Terraform = &GhRepoTerraformConfig{}
 		}
+
 		to.Terraform.Merge(from.Terraform)
 	}
+
 	if from.BranchProtections != nil {
 		if to.BranchProtections == nil {
 			to.BranchProtections = &GhBranchProtectionsConfig{}
 		}
+
 		to.BranchProtections.Merge(from.BranchProtections)
 	}
 }
@@ -80,6 +98,7 @@ func (to *GhBranchesConfig) Merge(from *GhBranchesConfig) {
 		if exists {
 			existingVal.Merge(v)
 		} else {
+			//nolint:exhaustruct // No need here, it's base structure
 			newVal := &GhBranchConfig{}
 			newVal.Merge(v)
 			(*to)[k] = newVal
@@ -95,11 +114,14 @@ func (to *GhBranchProtectionsConfig) Merge(from *GhBranchProtectionsConfig) {
 	}
 	// Duplicate every 'from' items to avoid overflow later
 	newItems := make(GhBranchProtectionsConfig, len(*from))
+
 	for k, v := range *from {
+		//nolint:exhaustruct // No need here, it's base structure
 		newItem := &GhBranchProtectionConfig{}
 		newItem.Merge(v)
 		newItems[k] = newItem
 	}
+
 	*to = append(*to, newItems...)
 }
 
@@ -146,22 +168,31 @@ func (to *GhRepoMiscellaneousConfig) Merge(from *GhRepoMiscellaneousConfig) {
 	mergeStringIfNotNil(&to.HasWiki, from.HasWiki)
 	mergeStringIfNotNil(&to.HasProjects, from.HasProjects)
 	mergeStringIfNotNil(&to.HasDownloads, from.HasDownloads)
+
 	if from.Template != nil {
 		if to.Template == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Template = &GhRepoTemplateConfig{}
 		}
+
 		to.Template.Merge(from.Template)
 	}
+
 	if from.Pages != nil {
 		if to.Pages == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Pages = &GhRepoPagesConfig{}
 		}
+
 		to.Pages.Merge(from.Pages)
 	}
+
 	if from.FileTemplates != nil {
 		if to.FileTemplates == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.FileTemplates = &GhRepoFileTemplatesConfig{}
 		}
+
 		to.FileTemplates.Merge(from.FileTemplates)
 	}
 }
@@ -210,26 +241,37 @@ func (to *GhRepoPullRequestConfig) Merge(from *GhRepoPullRequestConfig) {
 
 	if from.MergeStrategy != nil {
 		if to.MergeStrategy == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.MergeStrategy = &GhRepoPRMergeStrategyConfig{}
 		}
+
 		to.MergeStrategy.Merge(from.MergeStrategy)
 	}
+
 	if from.MergeCommit != nil {
 		if to.MergeCommit == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.MergeCommit = &GhRepoPRCommitConfig{}
 		}
+
 		to.MergeCommit.Merge(from.MergeCommit)
 	}
+
 	if from.SquashCommit != nil {
 		if to.SquashCommit == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.SquashCommit = &GhRepoPRCommitConfig{}
 		}
+
 		to.SquashCommit.Merge(from.SquashCommit)
 	}
+
 	if from.Branch != nil {
 		if to.Branch == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Branch = &GhRepoPRBranchConfig{}
 		}
+
 		to.Branch.Merge(from.Branch)
 	}
 }
@@ -292,10 +334,13 @@ func (to *BaseGhBranchConfig) Merge(from *BaseGhBranchConfig) {
 	}
 
 	mergeSliceIfNotNil(&to.ConfigTemplates, from.ConfigTemplates)
+
 	if from.Protection != nil {
 		if to.Protection == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Protection = &BaseGhBranchProtectionConfig{}
 		}
+
 		to.Protection.Merge(from.Protection)
 	}
 }
@@ -358,20 +403,28 @@ func (to *BaseGhBranchProtectionConfig) Merge(from *BaseGhBranchProtectionConfig
 
 	if from.Pushes != nil {
 		if to.Pushes == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Pushes = &GhBranchProtectPushesConfig{}
 		}
+
 		to.Pushes.Merge(from.Pushes)
 	}
+
 	if from.StatusChecks != nil {
 		if to.StatusChecks == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.StatusChecks = &GhBranchProtectStatusChecksConfig{}
 		}
+
 		to.StatusChecks.Merge(from.StatusChecks)
 	}
+
 	if from.PullRequestReviews != nil {
 		if to.PullRequestReviews == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.PullRequestReviews = &GhBranchProtectPRReviewConfig{}
 		}
+
 		to.PullRequestReviews.Merge(from.PullRequestReviews)
 	}
 }
@@ -438,10 +491,13 @@ func (to *GhBranchProtectPRReviewConfig) Merge(from *GhBranchProtectPRReviewConf
 	mergeStringIfNotNil(&to.CodeownerApprovals, from.CodeownerApprovals)
 	mergeStringIfNotNil(&to.ResolvedConversations, from.ResolvedConversations)
 	mergeStringIfNotNil(&to.ApprovalCount, from.ApprovalCount)
+
 	if from.Dismissals != nil {
 		if to.Dismissals == nil {
+			//nolint:exhaustruct // No need here, simple init
 			to.Dismissals = &GhBranchProtectPRReviewDismissalsConfig{}
 		}
+
 		to.Dismissals.Merge(from.Dismissals)
 	}
 }
@@ -510,6 +566,7 @@ func mergeSliceIfNotNil(to **[]string, from *[]string) {
 		if *to == nil {
 			*to = &[]string{}
 		}
+
 		**to = append(**to, *from...)
 	}
 }

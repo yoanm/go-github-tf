@@ -10,6 +10,7 @@ import (
 )
 
 func setupLogOutput(level zerolog.Level, disableAnsi bool) {
+	//nolint:exhaustruct // Not useful here
 	outputLogger := zerolog.ConsoleWriter{
 		Out: os.Stderr,
 		// Remove time header: quite useless for console
@@ -27,31 +28,33 @@ func setupLogOutput(level zerolog.Level, disableAnsi bool) {
 }
 
 func formatLevel(disableAnsi bool) zerolog.Formatter {
-	return func(i interface{}) string {
-		var l string
-		if ll, ok := i.(string); ok {
-			switch ll {
+	return func(originalMsg interface{}) string {
+		var msg string
+
+		if level, ok := originalMsg.(string); ok {
+			switch level {
 			case "trace":
-				l = colorize("Trace", colorMagenta, disableAnsi)
+				msg = colorize("Trace", colorMagenta, disableAnsi)
 			case "debug":
-				l = colorize("Debug", colorGreen, disableAnsi)
+				msg = colorize("Debug", colorGreen, disableAnsi)
 			case "info":
-				l = colorize("Info", colorBlue, disableAnsi)
+				msg = colorize("Info", colorBlue, disableAnsi)
 			case "warn":
-				l = colorize("Warn", colorYellow, disableAnsi)
+				msg = colorize("Warn", colorYellow, disableAnsi)
 			case "error":
-				l = colorize("Error", colorRed, disableAnsi)
+				msg = colorize("Error", colorRed, disableAnsi)
 			case "fatal":
-				l = colorize(colorize("Fatal", colorRed, disableAnsi), colorBold, disableAnsi)
+				msg = colorize(colorize("Fatal", colorRed, disableAnsi), colorBold, disableAnsi)
 			case "panic":
-				l = colorize(colorize("Panic", colorRed, disableAnsi), colorBold, disableAnsi)
+				msg = colorize(colorize("Panic", colorRed, disableAnsi), colorBold, disableAnsi)
 			default:
-				l = colorize("???", colorBold, disableAnsi)
+				msg = colorize("???", colorBold, disableAnsi)
 			}
 		} else {
-			l = strings.ToUpper(fmt.Sprintf("%s", i))
+			msg = strings.ToUpper(fmt.Sprintf("%s", originalMsg))
 		}
-		return l
+
+		return msg
 	}
 }
 
@@ -60,6 +63,7 @@ func colorize(s interface{}, c int, disabled bool) string {
 	if disabled {
 		return fmt.Sprintf("%s", s)
 	}
+
 	return fmt.Sprintf("\x1b[%dm%v\x1b[0m", c, s)
 }
 

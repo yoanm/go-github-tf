@@ -1,20 +1,23 @@
-package core
+package core_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/yoanm/github-tf/core"
 )
 
 func TestLoadRepositoryFromFile(t *testing.T) {
+	t.Parallel()
 	anchorDir := "testdata/yaml-anchors"
-	YamlAnchorDirectory = &anchorDir
+	core.YamlAnchorDirectory = &anchorDir
 
 	name := "my-repo-name-anchor"
 	desc := "my-repo-description-anchor"
 
 	cases := map[string]struct {
 		filename string
-		expected *GhRepoConfig
+		expected *core.GhRepoConfig
 		error    error
 	}{
 		"Not found file": {
@@ -39,7 +42,7 @@ func TestLoadRepositoryFromFile(t *testing.T) {
 		},
 		"Working with anchors": {
 			"testdata/repo.with-anchor.yml",
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				&name, nil, nil, &desc, nil, nil, nil,
 				nil, nil, nil, nil,
 			},
@@ -48,10 +51,14 @@ func TestLoadRepositoryFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadRepositoryFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadRepositoryFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -59,12 +66,13 @@ func TestLoadRepositoryFromFile(t *testing.T) {
 }
 
 func TestLoadRepositoriesFromFile(t *testing.T) {
+	t.Parallel()
 	anchorDir := "testdata/yaml-anchors"
-	YamlAnchorDirectory = &anchorDir
+	core.YamlAnchorDirectory = &anchorDir
 
 	cases := map[string]struct {
 		filename string
-		expected []*GhRepoConfig
+		expected []*core.GhRepoConfig
 		error    error
 	}{
 		"Not found file": {
@@ -84,16 +92,20 @@ func TestLoadRepositoriesFromFile(t *testing.T) {
 		},
 		"Working": {
 			"testdata/repos.full.yml",
-			[]*GhRepoConfig{GetFullConfig(1), GetFullConfig(2)},
+			[]*core.GhRepoConfig{GetFullConfig(1), GetFullConfig(2)},
 			nil,
 		},
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadRepositoriesFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadRepositoriesFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -101,12 +113,13 @@ func TestLoadRepositoriesFromFile(t *testing.T) {
 }
 
 func TestLoadRepositoryTemplateFromFile(t *testing.T) {
+	t.Parallel()
 	full := GetFullConfig(1)
 	// Template can't have a Name
 	full.Name = nil
 	cases := map[string]struct {
 		filename string
-		expected *GhRepoConfig
+		expected *core.GhRepoConfig
 		error    error
 	}{
 		"Not found file": {
@@ -132,10 +145,14 @@ func TestLoadRepositoryTemplateFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadRepositoryTemplateFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadRepositoryTemplateFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -143,11 +160,12 @@ func TestLoadRepositoryTemplateFromFile(t *testing.T) {
 }
 
 func TestLoadBranchTemplateFromFile(t *testing.T) {
+	t.Parallel()
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.Branches)["feature/branch1"]
 	cases := map[string]struct {
 		filename string
-		expected *GhBranchConfig
+		expected *core.GhBranchConfig
 		error    error
 	}{
 		"Not found file": {
@@ -173,10 +191,14 @@ func TestLoadBranchTemplateFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadBranchTemplateFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadBranchTemplateFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -184,11 +206,12 @@ func TestLoadBranchTemplateFromFile(t *testing.T) {
 }
 
 func TestLoadBranchProtectionTemplateFromFile(t *testing.T) {
+	t.Parallel()
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.BranchProtections)[0]
 	cases := map[string]struct {
 		filename string
-		expected *GhBranchProtectionConfig
+		expected *core.GhBranchProtectionConfig
 		error    error
 	}{
 		"Not found file": {
@@ -214,10 +237,14 @@ func TestLoadBranchProtectionTemplateFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadBranchProtectionTemplateFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadBranchProtectionTemplateFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -225,11 +252,12 @@ func TestLoadBranchProtectionTemplateFromFile(t *testing.T) {
 }
 
 func TestLoadGhRepoConfigFromFile(t *testing.T) {
+	t.Parallel()
 	full := GetFullConfig(1)
 	repoName := "repo-name"
 	cases := map[string]struct {
 		filename string
-		expected *GhRepoConfig
+		expected *core.GhRepoConfig
 		error    error
 	}{
 		"Not found file": {
@@ -244,7 +272,7 @@ func TestLoadGhRepoConfigFromFile(t *testing.T) {
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/repos/repo.unexpected-property.yml",
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				&repoName, nil, nil, nil, nil, nil, nil,
 				nil, nil, nil, nil,
 			},
@@ -258,10 +286,14 @@ func TestLoadGhRepoConfigFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadGhRepoConfigFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadGhRepoConfigFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -269,11 +301,12 @@ func TestLoadGhRepoConfigFromFile(t *testing.T) {
 }
 
 func TestLoadGhRepoConfigListFromFile(t *testing.T) {
+	t.Parallel()
 	full1, full2 := GetFullConfig(1), GetFullConfig(2)
 	repoName := "repo-name"
 	cases := map[string]struct {
 		filename string
-		expected []*GhRepoConfig
+		expected []*core.GhRepoConfig
 		error    error
 	}{
 		"Not found file": {
@@ -288,7 +321,7 @@ func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/repos/repos.unexpected-property.yml",
-			[]*GhRepoConfig{
+			[]*core.GhRepoConfig{
 				{
 					&repoName, nil, nil, nil, nil, nil, nil,
 					nil, nil, nil, nil,
@@ -298,16 +331,20 @@ func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 		},
 		"Working": {
 			"testdata/repos.full.yml",
-			[]*GhRepoConfig{full1, full2},
+			[]*core.GhRepoConfig{full1, full2},
 			nil,
 		},
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadGhRepoConfigListFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadGhRepoConfigListFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -315,12 +352,13 @@ func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 }
 
 func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
+	t.Parallel()
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.Branches)["feature/branch1"]
 	sourceBranch := "branch1-source-branch1"
 	cases := map[string]struct {
 		filename string
-		expected *GhBranchConfig
+		expected *core.GhBranchConfig
 		error    error
 	}{
 		"Not found file": {
@@ -335,7 +373,7 @@ func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/templates/branch.unexpected-property.yml",
-			&GhBranchConfig{SourceBranch: &sourceBranch},
+			&core.GhBranchConfig{SourceBranch: &sourceBranch},
 			nil,
 		},
 		"Working": {
@@ -346,10 +384,14 @@ func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadGhRepoBranchConfigFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadGhRepoBranchConfigFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -357,12 +399,13 @@ func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
 }
 
 func TestLoadGhRepoBranchProtectionConfigFromFile(t *testing.T) {
+	t.Parallel()
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.BranchProtections)[0]
 	pattern := "master"
 	cases := map[string]struct {
 		filename string
-		expected *GhBranchProtectionConfig
+		expected *core.GhBranchProtectionConfig
 		error    error
 	}{
 		"Not found file": {
@@ -377,7 +420,7 @@ func TestLoadGhRepoBranchProtectionConfigFromFile(t *testing.T) {
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml",
-			&GhBranchProtectionConfig{Pattern: &pattern},
+			&core.GhBranchProtectionConfig{Pattern: &pattern},
 			nil,
 		},
 		"Working": {
@@ -388,10 +431,14 @@ func TestLoadGhRepoBranchProtectionConfigFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				conf, err := LoadGhRepoBranchProtectionConfigFromFile(tc.filename)
+				t.Parallel()
+				conf, err := core.LoadGhRepoBranchProtectionConfigFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)

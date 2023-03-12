@@ -1,8 +1,7 @@
-package core
+package core_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -11,15 +10,19 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 
 	"github.com/yoanm/go-tfsig/testutils"
+
+	"github.com/yoanm/github-tf/core"
 )
 
 func TestGenerateHclRepoFiles(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value         []*GhRepoConfig
+		value         []*core.GhRepoConfig
 		expectedFiles map[string]string
 	}{
 		"Full": {
-			[]*GhRepoConfig{GetFullConfig(1), GetFullConfig(2)},
+			[]*core.GhRepoConfig{GetFullConfig(1), GetFullConfig(2)},
 			map[string]string{
 				"repo.repo1.tf": "repo1.full",
 				"repo.repo2.tf": "repo2.full",
@@ -30,16 +33,20 @@ func TestGenerateHclRepoFiles(t *testing.T) {
 			nil,
 		},
 		"empty": {
-			[]*GhRepoConfig{},
+			[]*core.GhRepoConfig{},
 			nil,
 		},
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				files, err := GenerateHclRepoFiles(tc.value)
+				t.Parallel()
+				files, err := core.GenerateHclRepoFiles(tc.value)
 				if err != nil {
 					t.Errorf("Case %q: %s", tcname, err)
 				} else {
@@ -48,8 +55,8 @@ func TestGenerateHclRepoFiles(t *testing.T) {
 						if !exists {
 							t.Errorf("Case %q: expected file %s doesn't exist !", tcname, fname)
 						} else {
-							if err := testutils.EnsureFileEqualsGoldenFile(tffile, goldenfile); err != nil {
-								t.Errorf("Case %q file %s: %v", tcname, fname, err)
+							if err2 := testutils.EnsureFileEqualsGoldenFile(tffile, goldenfile); err2 != nil {
+								t.Errorf("Case %q file %s: %v", tcname, fname, err2)
 							}
 						}
 					}
@@ -63,10 +70,13 @@ func TestGenerateHclRepoFiles(t *testing.T) {
 }
 
 func TestWriteTerraformFiles(t *testing.T) {
+	t.Parallel()
+
 	file1 := hclwrite.NewEmptyFile()
 	file1.Body().AppendBlock(hclwrite.NewBlock("type1", []string{"label1"}))
 	file2 := hclwrite.NewEmptyFile()
 	file2.Body().AppendBlock(hclwrite.NewBlock("type2", []string{"label2"}))
+
 	cases := map[string]struct {
 		value         map[string]*hclwrite.File
 		expectedFiles map[string]string
@@ -92,11 +102,15 @@ func TestWriteTerraformFiles(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
+				t.Parallel()
 				root := os.TempDir()
-				err := WriteTerraformFiles(root, tc.value)
+				err := core.WriteTerraformFiles(root, tc.value)
 				if err != nil {
 					t.Errorf("Case %q: %s", tcname, err)
 				} else {
@@ -105,9 +119,9 @@ func TestWriteTerraformFiles(t *testing.T) {
 						if !exists {
 							t.Errorf("Case %q: expected file %s doesn't exist !", tcname, fname)
 						} else {
-							actual, err := ioutil.ReadFile(path.Join(root, fname))
-							if err != nil {
-								t.Errorf("Case %q: %s", tcname, err)
+							actual, err2 := os.ReadFile(path.Join(root, fname))
+							if err2 != nil {
+								t.Errorf("Case %q: %s", tcname, err2)
 							} else if string(actual) != expected {
 								t.Errorf("Case %q:\n- expected\n+ actual\n\n%v", tcname, diff.LineDiff(expected, string(actual)))
 							}
@@ -120,13 +134,18 @@ func TestWriteTerraformFiles(t *testing.T) {
 }
 
 func TestWriteTerraformFiles_onError(t *testing.T) {
+	t.Parallel()
+
 	file1 := hclwrite.NewEmptyFile()
 	file1.Body().AppendBlock(hclwrite.NewBlock("type1", []string{"label1"}))
+
 	notWritableDir := path.Join(os.TempDir(), "not_writable_dir")
+
 	err := os.MkdirAll(notWritableDir, os.FileMode(0))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
+
 	cases := map[string]struct {
 		root  string
 		value map[string]*hclwrite.File
@@ -149,14 +168,17 @@ func TestWriteTerraformFiles_onError(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				err := WriteTerraformFiles(tc.root, tc.value)
-				if err == nil {
+				t.Parallel()
+				if err2 := core.WriteTerraformFiles(tc.root, tc.value); err2 == nil {
 					t.Errorf("Case %q: expected an error but everything went well", tcname)
-				} else if err.Error() != tc.error.Error() {
-					t.Errorf("Case %q:\n- expected\n+ actual\n\n%v", tcname, diff.LineDiff(tc.error.Error(), err.Error()))
+				} else if err2.Error() != tc.error.Error() {
+					t.Errorf("Case %q:\n- expected\n+ actual\n\n%v", tcname, diff.LineDiff(tc.error.Error(), err2.Error()))
 				}
 			},
 		)

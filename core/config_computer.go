@@ -9,28 +9,12 @@ import (
 /** Public **/
 
 func ComputeConfig(config *Config) (*Config, error) {
-	if config == nil {
-		return nil, nil
-	}
 	computedConfig := NewConfig()
-
-	errList := map[string]error{}
-
-	// Compute repository config
-	if config.Repos != nil {
-		for k, base := range config.Repos {
-			if base.Name == nil {
-				errList[fmt.Sprintf("Key %d", k)] = fmt.Errorf("repository name is missing for repo #%d", k)
-			} else {
-				computedRepo, computeError := ComputeRepoConfig(base, config.Templates)
-				if computeError != nil {
-					errList[*base.Name] = fmt.Errorf("repository %s: %s", *base.Name, computeError)
-				} else {
-					computedConfig.AppendRepo(computedRepo)
-				}
-			}
-		}
+	if config == nil {
+		return computedConfig, nil
 	}
+
+	errList := loadConfig(config, computedConfig)
 
 	if len(errList) > 0 {
 		msgList := []string{"error during computation:"}
@@ -39,6 +23,7 @@ func ComputeConfig(config *Config) (*Config, error) {
 		for k := range errList {
 			keys = append(keys, k)
 		}
+
 		sort.Strings(keys)
 
 		for _, file := range keys {
@@ -50,4 +35,30 @@ func ComputeConfig(config *Config) (*Config, error) {
 	}
 
 	return computedConfig, nil
+}
+
+func loadConfig(config *Config, computedConfig *Config) map[string]error {
+	errList := map[string]error{}
+
+	// Compute repository config
+	if config.Repos != nil {
+		for k, base := range config.Repos {
+			loadConfigRepo(config, computedConfig, base, errList, k)
+		}
+	}
+
+	return errList
+}
+
+func loadConfigRepo(config *Config, computedConfig *Config, base *GhRepoConfig, errList map[string]error, index int) {
+	if base.Name == nil {
+		errList[fmt.Sprintf("Key %d", index)] = fmt.Errorf("repository name is missing for repo #%d", index)
+	} else {
+		computedRepo, computeError := ComputeRepoConfig(base, config.Templates)
+		if computeError != nil {
+			errList[*base.Name] = fmt.Errorf("repository %s: %w", *base.Name, computeError)
+		} else {
+			computedConfig.AppendRepo(computedRepo)
+		}
+	}
 }
