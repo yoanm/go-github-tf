@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "branch-branch-protection.json",
+  "type": "object",
+  "allOf": [{"$ref": "#/definitions/Root"}],
+  "unevaluatedProperties": false,
+  "definitions": {
+    "Root": {
+      "type": "object",
+      "allOf": [{ "$ref": "branch-branch-protection-template.json"}],
+      "title": "Root"
+    }
+  }
+}

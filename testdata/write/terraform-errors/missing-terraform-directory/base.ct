@@ -1,0 +1,4 @@
+$ cd testdata
+$ github-tf --no-ansi --> FAIL 4
+Error | error while writing files:
+	 - open terraform: no such file or directory

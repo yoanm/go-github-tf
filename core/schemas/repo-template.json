@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "repo-template.json",
+  "type": "object",
+  "allOf": [{"$ref": "#/definitions/Root"}],
+  "unevaluatedProperties": false,
+  "definitions": {
+    "Root": {
+      "type": "object",
+      "properties": {
+        "_templates": {"type": "array", "additionalItems": false, "items": {"type": "string"}},
+        "visibility": {"type": "string"},
+        "description": {"type": "string"},
+        "misc": {"$ref": "#/definitions/Miscellaneous"},
+        "security": {"$ref": "#/definitions/Security"},
+        "pull-requests": {"$ref": "#/definitions/PullRequest"},
+        "branch-protections": {"$ref": "#/definitions/BranchProtections"},
+        "default-branch": {"$ref": "default-branch.json"},
+        "branches": {"$ref": "#/definitions/Branches"},
+        "terraform": {"$ref": "#/definitions/Terraform"}
+      },
+      "title": "Root"
+    },
+    "BranchProtections": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "allOf": [{"$ref": "branch-protection.json#/definitions/Root"}],
+        "unevaluatedProperties": false
+      },
+      "title": "BranchProtections"
+    },
+    "Branches": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "allOf": [{"$ref": "branch.json"}],
+          "unevaluatedProperties": false
+        }
+      },
+      "title": "Branches"
+    },
+    "Miscellaneous": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "auto-init": {"type": "boolean"},
+        "archived": {"type": "boolean"},
+        "is-template": {"type": "boolean"},
+        "topics": {"type": "array", "items": {"type": "string"}},
+        "homepage-url": {"type": "string"},
+        "issues": {"type": "boolean"},
+        "wiki": {"type": "boolean"},
+        "projects": {"type": "boolean"},
+        "downloads": {"type": "boolean"},
+        "template": {"$ref": "#/definitions/MiscTemplate"},
+        "pages": {"$ref": "#/definitions/MiscPages"},
+        "file-templates": {"$ref": "#/definitions/MiscFileTemplates"}
+      },
+      "title": "Miscellaneous"
+    },
+    "MiscTemplate": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "source": {"type": "string"},
+        "full-clone": {"type": "boolean"}
+      },
+      "required": ["source"],
+      "title": "MiscTemplate"
+    },
+    "MiscPages": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "domain": {"type": "string"},
+        "source-branch": {"type": "string"},
+        "source-path": {"type": "string"}
+      },
+      "required": ["source-branch", "source-path"],
+      "title": "MiscSource"
+    },
+    "MiscFileTemplates": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "gitignore": {"type": "string"},
+        "license": {"type": "string"}
+      },
+      "title": "MiscSource"
+    },
+    "PullRequest": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "merge-strategy": {"$ref": "#/definitions/PRMergeStrategies"},
+        "merge-commit": {"$ref": "#/definitions/PRCommitConfig"},
+        "squash-commit": {"$ref": "#/definitions/PRCommitConfig"},
+        "branch": {"$ref": "#/definitions/PRBranchConfig"}
+      },
+      "title": "PullRequest"
+    },
+    "PRMergeStrategies": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "merge": {"type": "boolean"},
+        "rebase": {"type": "boolean"},
+        "squash": {"type": "boolean"},
+        "auto-merge": {"type": "boolean"}
+      },
+      "title": "PRMergeStrategies"
+    },
+    "PRCommitConfig": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "title": {"type": "string"},
+        "message": {"type": "string"}
+      },
+      "title": "PRCommitConfig"
+    },
+    "PRBranchConfig": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "suggest-update": {"type": "boolean"},
+        "delete-on-merge": {"type": "boolean"}
+      },
+      "title": "PRBranchConfig"
+    },
+    "Terraform": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "archive-on-destroy": {"type": "boolean"},
+        "ignore-vulnerability-alerts-during-read": {"type": "boolean"}
+      },
+      "title": "Terraform"
+    },
+    "Security": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "vulnerability-alerts": {
+          "type": "boolean"
+        }
+      },
+      "title": "Security"
+    }
+  }
+}

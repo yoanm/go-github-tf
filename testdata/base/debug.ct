@@ -1,0 +1,6 @@
+$ github-tf --no-ansi -vv
+Debug | Workspace: .
+Debug | Config directory: config
+Debug | Template directory: templates
+Debug | YAML anchor directory: yaml-anchors
+Info | Found: 0 repos / 0 repo templates / 0 branch templates / 0 branch protection templates

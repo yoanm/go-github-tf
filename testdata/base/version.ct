@@ -1,0 +1,5 @@
+$ github-tf --version
+github-tf version: dev (commit none from unknown)
+
+$ github-tf -V
+github-tf version: dev (commit none from unknown)

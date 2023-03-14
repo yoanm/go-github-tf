@@ -1,0 +1,22 @@
+_templates: [ "branch1-branch-template1" ]
+protection:
+  _templates: [ "branch1-branch-protection-template1" ]
+  enforce-admins: true
+  deletion: true
+  linear-history: true
+  signed-commits: true
+  pushes:
+    force-push: true
+    restrict-to: [ branch1-pushRestriction1 ]
+  status-checks:
+    strict: true
+    required: [ branch1-context1 ]
+  pull-request-reviews:
+    bypassers: [ branch1-bypasser1 ]
+    resolved-conversations: true
+    codeowner-approvals: true
+    approval-count: 5
+    dismissals:
+      staled: true
+      restrict: true
+      restrict-to: [ branch1-dismissalRestriction1 ]

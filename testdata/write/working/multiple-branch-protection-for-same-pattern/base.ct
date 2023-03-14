@@ -1,0 +1,16 @@
+$ cd testdata
+$ github-tf -v --no-ansi
+Info | Found: 1 repos / 0 repo templates / 0 branch templates / 0 branch protection templates
+Warn | Repository repo1: A branch protection with 'd' pattern already exists (#0) => applying #0 as template for #1 !
+
+$ cd terraform
+$ cat repo.repo1.tf
+resource "github_repository" "repo1" {
+  name = "repo1"
+}
+
+resource "github_branch_protection" "repo1-d" {
+  repository_id  = github_repository.repo1.node_id
+  pattern        = "d"
+  enforce_admins = false
+}

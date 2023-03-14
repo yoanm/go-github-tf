@@ -1,0 +1,16 @@
+$ cd testdata
+$ github-tf --no-ansi --> FAIL 1
+Error | Error during workspace loading:
+Error during configs loading:
+	 - file config/repos/test.yml: /unwantedProperty not allowed
+
+$ github-tf --no-ansi -vvv --> FAIL 1
+Debug | Workspace: .
+Debug | Config directory: config
+Debug | Template directory: templates
+Debug | YAML anchor directory: yaml-anchors
+Debug | Reading repository directory: config/repos
+Trace | File config/repos/test.yml: original validation error => jsonschema: '/unwantedProperty' does not validate with map:///repo.json#/UnevaluatedProperties: not allowed
+Error | Error during workspace loading:
+Error during configs loading:
+	 - file config/repos/test.yml: /unwantedProperty not allowed

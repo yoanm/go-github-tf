@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "branch-template.json",
+  "type": "object",
+  "allOf": [{"$ref": "#/definitions/Root"}],
+  "unevaluatedProperties": false,
+  "definitions": {
+    "Root": {
+      "type": "object",
+      "properties": {
+        "_templates": {"type": "array", "additionalItems": false, "items": {"type": "string"}},
+        "source-branch": {"type": "string"},
+        "source-sha": {"type": "string"},
+        "protection": { "$ref": "branch-branch-protection.json"}
+      },
+      "required": [],
+      "title": "Root"
+    }
+  }
+}
