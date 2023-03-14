@@ -126,14 +126,14 @@ func TestCLIWrite_working(t *testing.T) {
 func configure(t *testing.T, testdataPath string) *cmdtest.TestSuite {
 	t.Helper()
 
-	ts, err := cmdtest.Read(testdataPath)
+	suite, err := cmdtest.Read(testdataPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ts.Commands["github-tf"] = cmdtest.InProcessProgram("github-tf", run)
-	ts.Commands["chmod"] = chmodCmd
-	ts.Setup = func(rootDir string) error {
+	suite.Commands["github-tf"] = cmdtest.InProcessProgram("github-tf", run)
+	suite.Commands["chmod"] = chmodCmd
+	suite.Setup = func(rootDir string) error {
 		_, testFileName, _, ok := runtime.Caller(0)
 		if !ok {
 			return fmt.Errorf("failed get real working directory from caller")
@@ -160,7 +160,7 @@ func configure(t *testing.T, testdataPath string) *cmdtest.TestSuite {
 		return nil
 	}
 
-	return ts
+	return suite
 }
 
 func chmodCmd(args []string, inputFile string) ([]byte, error) {

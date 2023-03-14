@@ -113,7 +113,7 @@ func TestComputeRepoConfig(t *testing.T) {
 					core.BaseGhBranchConfig{
 						Protection: &core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
@@ -125,7 +125,7 @@ func TestComputeRepoConfig(t *testing.T) {
 					&branchName,
 					core.BaseGhBranchConfig{
 						Protection: &core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+							AllowDeletion: &allowDeletions,
 							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
@@ -165,7 +165,7 @@ func TestComputeRepoConfig(t *testing.T) {
 						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							Protection: &core.BaseGhBranchProtectionConfig{
 								ConfigTemplates: &[]string{aTemplate},
-								AllowsDeletion:  &allowDeletions,
+								AllowDeletion:   &allowDeletions,
 							},
 						},
 					},
@@ -178,7 +178,7 @@ func TestComputeRepoConfig(t *testing.T) {
 					branchName: {
 						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							Protection: &core.BaseGhBranchProtectionConfig{
-								AllowsDeletion: &allowDeletions,
+								AllowDeletion: &allowDeletions,
 								Pushes: &core.GhBranchProtectPushesConfig{
 									AllowsForcePushes: &allowForcePushes,
 								},
@@ -196,7 +196,7 @@ func TestComputeRepoConfig(t *testing.T) {
 					{
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
@@ -208,7 +208,7 @@ func TestComputeRepoConfig(t *testing.T) {
 					&core.GhBranchProtectionConfig{
 						Pattern: &pattern,
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+							AllowDeletion: &allowDeletions,
 							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
@@ -228,7 +228,7 @@ func TestComputeRepoConfig(t *testing.T) {
 						ConfigTemplates: &[]string{aTemplate2},
 						Protection: &core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
@@ -238,7 +238,7 @@ func TestComputeRepoConfig(t *testing.T) {
 							ConfigTemplates: &[]string{aTemplate},
 							Protection: &core.BaseGhBranchProtectionConfig{
 								ConfigTemplates: &[]string{aTemplate},
-								AllowsDeletion:  &allowDeletions,
+								AllowDeletion:   &allowDeletions,
 								Pushes: &core.GhBranchProtectPushesConfig{
 									AllowsForcePushes: &allowForcePushes,
 								},
@@ -250,7 +250,7 @@ func TestComputeRepoConfig(t *testing.T) {
 					{
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
@@ -266,8 +266,8 @@ func TestComputeRepoConfig(t *testing.T) {
 					&branchName,
 					core.BaseGhBranchConfig{
 						Protection: &core.BaseGhBranchProtectionConfig{
-							EnforceAdmins:  &enforceAdmins,
-							AllowsDeletion: &allowDeletions,
+							EnforceAdmins: &enforceAdmins,
+							AllowDeletion: &allowDeletions,
 							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
@@ -279,7 +279,7 @@ func TestComputeRepoConfig(t *testing.T) {
 						SourceBranch: &sourceBranch,
 						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							Protection: &core.BaseGhBranchProtectionConfig{
-								AllowsDeletion: &allowDeletions,
+								AllowDeletion: &allowDeletions,
 								Pushes: &core.GhBranchProtectPushesConfig{
 									AllowsForcePushes: &allowForcePushes,
 								},
@@ -291,7 +291,7 @@ func TestComputeRepoConfig(t *testing.T) {
 					&core.GhBranchProtectionConfig{
 						Pattern: &pattern,
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+							AllowDeletion: &allowDeletions,
 							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
@@ -402,7 +402,7 @@ func TestComputeRepoConfig_edgeCases(t *testing.T) {
 					{
 						Pattern: &pattern,
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},
@@ -421,8 +421,8 @@ func TestComputeRepoConfig_edgeCases(t *testing.T) {
 						Pattern: &pattern,
 						Forbid:  &forbid,
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
-							EnforceAdmins:  &enforceAdmins,
+							AllowDeletion: &allowDeletions,
+							EnforceAdmins: &enforceAdmins,
 						},
 					},
 				},
@@ -873,13 +873,13 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 		"no template provided": {
 			&core.GhBranchProtectionConfig{
 				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-					AllowsDeletion: &allowDeletions,
+					AllowDeletion: &allowDeletions,
 				},
 			},
 			emptyTplConfig,
 			&core.GhBranchProtectionConfig{
 				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-					AllowsDeletion: &allowDeletions,
+					AllowDeletion: &allowDeletions,
 				},
 			},
 			nil,
@@ -888,14 +888,14 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 			&core.GhBranchProtectionConfig{
 				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 					ConfigTemplates: &[]string{aTemplate},
-					AllowsDeletion:  &allowDeletions,
+					AllowDeletion:   &allowDeletions,
 				},
 			},
 			tplConfig,
 			&core.GhBranchProtectionConfig{
 				Pattern: &pattern,
 				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-					AllowsDeletion: &allowDeletions,
+					AllowDeletion: &allowDeletions,
 				},
 			},
 			nil,
@@ -984,7 +984,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 				BranchProtections: &core.GhBranchProtectionsConfig{
 					&core.GhBranchProtectionConfig{
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},
@@ -994,7 +994,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 				BranchProtections: &core.GhBranchProtectionsConfig{
 					&core.GhBranchProtectionConfig{
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},
@@ -1007,7 +1007,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 					&core.GhBranchProtectionConfig{
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
@@ -1018,7 +1018,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 					&core.GhBranchProtectionConfig{
 						Pattern: &pattern,
 						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},

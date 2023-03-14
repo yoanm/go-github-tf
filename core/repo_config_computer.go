@@ -47,63 +47,63 @@ func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (*GhRepoC
 	return config, nil
 }
 
-func ApplyRepositoryTemplate(c *GhRepoConfig, templates *TemplatesConfig) (*GhRepoConfig, error) {
-	if c == nil {
-		return c, nil
+func ApplyRepositoryTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig) (*GhRepoConfig, error) {
+	if repoConfig == nil {
+		return repoConfig, nil
 	}
 
-	tplList, err := loadRepoTemplatesFor(c, templates)
+	tplList, err := loadRepoTemplatesFor(repoConfig, templates)
 	if err != nil {
 		return nil, err
 	}
 
-	return applyRepositoryTemplate(c, tplList), nil
+	return applyRepositoryTemplate(repoConfig, tplList), nil
 }
 
-func ApplyBranchesTemplate(c *GhRepoConfig, templates *TemplatesConfig) error {
-	if c == nil {
+func ApplyBranchesTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig) error {
+	if repoConfig == nil {
 		return nil
 	}
 
 	var err error
 
-	if c.Branches != nil {
-		for k, b := range *c.Branches {
+	if repoConfig.Branches != nil {
+		for k, b := range *repoConfig.Branches {
 			if b, err = ApplyBranchTemplate(b, templates); err != nil {
 				return fmt.Errorf("branch %s: %w", k, err)
 			}
 
-			(*c.Branches)[k] = b
+			(*repoConfig.Branches)[k] = b
 		}
 	}
 
-	if c.DefaultBranch != nil {
-		b := &GhBranchConfig{
+	if repoConfig.DefaultBranch != nil {
+		branchConfig := &GhBranchConfig{
 			SourceBranch: nil,
 			SourceSha:    nil,
 			BaseGhBranchConfig: BaseGhBranchConfig{
-				ConfigTemplates: c.DefaultBranch.ConfigTemplates,
+				ConfigTemplates: repoConfig.DefaultBranch.ConfigTemplates,
 				Protection:      nil,
 			},
 		}
 
-		if b, err = ApplyBranchTemplate(b, templates); err != nil {
+		if branchConfig, err = ApplyBranchTemplate(branchConfig, templates); err != nil {
 			return fmt.Errorf("default branch: %w", err)
 		}
 
-		b.Merge(
+		branchConfig.Merge(
 			&GhBranchConfig{
 				SourceBranch: nil,
 				SourceSha:    nil,
 				BaseGhBranchConfig: BaseGhBranchConfig{
 					ConfigTemplates: nil,
-					Protection:      c.DefaultBranch.Protection,
+					Protection:      repoConfig.DefaultBranch.Protection,
 				},
 			},
 		)
 
-		c.DefaultBranch.ConfigTemplates = nil
-		c.DefaultBranch.Protection = b.Protection
+		repoConfig.DefaultBranch.ConfigTemplates = nil
+		repoConfig.DefaultBranch.Protection = branchConfig.Protection
 	}
 
 	return nil
@@ -144,21 +144,21 @@ func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig)
 	}
 
 	if c.Branches != nil {
-		for k, b := range *c.Branches {
-			if b.Protection == nil {
+		for branchName, branchConfig := range *c.Branches {
+			if branchConfig.Protection == nil {
 				continue
 			}
 
 			wrapper := &GhBranchProtectionConfig{
-				Pattern:                      &k,
+				Pattern:                      &branchName,
 				Forbid:                       &falseString,
-				BaseGhBranchProtectionConfig: *b.Protection,
+				BaseGhBranchProtectionConfig: *branchConfig.Protection,
 			}
 			if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
-				return fmt.Errorf("branch %s: %w", k, err)
+				return fmt.Errorf("branch %s: %w", branchName, err)
 			}
 
-			b.Protection = &wrapper.BaseGhBranchProtectionConfig
+			branchConfig.Protection = &wrapper.BaseGhBranchProtectionConfig
 		}
 	}
 
@@ -166,32 +166,32 @@ func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig)
 }
 
 func ApplyBranchProtectionTemplate(
-	c *GhBranchProtectionConfig,
+	branchProtectionConfig *GhBranchProtectionConfig,
 	templates *TemplatesConfig,
 ) (*GhBranchProtectionConfig, error) {
-	if c == nil {
-		return c, nil
+	if branchProtectionConfig == nil {
+		return branchProtectionConfig, nil
 	}
 
-	tplList, err := loadBranchProtectionTemplatesFor(c.ConfigTemplates, templates)
+	tplList, err := loadBranchProtectionTemplatesFor(branchProtectionConfig.ConfigTemplates, templates)
 	if err != nil {
 		return nil, err
 	}
 
-	return applyBranchProtectionTemplate(c, tplList), nil
+	return applyBranchProtectionTemplate(branchProtectionConfig, tplList), nil
 }
 
-func ApplyBranchTemplate(c *GhBranchConfig, templates *TemplatesConfig) (*GhBranchConfig, error) {
-	if c == nil {
-		return c, nil
+func ApplyBranchTemplate(branchConfig *GhBranchConfig, templates *TemplatesConfig) (*GhBranchConfig, error) {
+	if branchConfig == nil {
+		return branchConfig, nil
 	}
 
-	tplList, err := loadBranchTemplatesFor(c.ConfigTemplates, templates)
+	tplList, err := loadBranchTemplatesFor(branchConfig.ConfigTemplates, templates)
 	if err != nil {
 		return nil, err
 	}
 
-	return applyBranchTemplate(c, tplList), nil
+	return applyBranchTemplate(branchConfig, tplList), nil
 }
 
 /** Private **/
@@ -202,34 +202,34 @@ func mapDuplicatedBranchProtection(conf *GhRepoConfig) {
 		knowPattern := map[string]int{}
 
 		configs := conf.BranchProtections
-		for k, v := range *configs {
-			if v.Pattern != nil {
-				if knownKey, ok := knowPattern[*v.Pattern]; ok {
+		for pattern, branchProtectionConfig := range *configs {
+			if branchProtectionConfig.Pattern != nil {
+				if knownKey, ok := knowPattern[*branchProtectionConfig.Pattern]; ok {
 					log.Warn().Msgf(
 						"Repository %s: A branch protection with '%s' pattern already exists (#%d) => applying #%d as template for #%d !", //nolint:lll
 						*conf.Name,
-						*v.Pattern,
+						*branchProtectionConfig.Pattern,
 						knownKey,
 						knownKey,
-						k,
+						pattern,
 					)
 
 					(*configs)[knownKey] = applyBranchProtectionTemplate(
-						v,
+						branchProtectionConfig,
 						[]*GhBranchProtectionConfig{(*configs)[knownKey]},
 					)
-					*configs = append((*configs)[:k], (*configs)[k+1:]...) // Remove the existing config from the list
+					*configs = append((*configs)[:pattern], (*configs)[pattern+1:]...) // Remove the existing config from the list
 				} else {
-					knowPattern[*v.Pattern] = k
+					knowPattern[*branchProtectionConfig.Pattern] = pattern
 				}
 			}
 		}
 	}
 }
 
-func applyRepositoryTemplate(to *GhRepoConfig, tplList []*GhRepoConfig) *GhRepoConfig {
+func applyRepositoryTemplate(toConfig *GhRepoConfig, tplList []*GhRepoConfig) *GhRepoConfig {
 	if len(tplList) == 0 {
-		return to
+		return toConfig
 	}
 
 	//nolint:exhaustruct // No need here, it's base structure
@@ -239,16 +239,16 @@ func applyRepositoryTemplate(to *GhRepoConfig, tplList []*GhRepoConfig) *GhRepoC
 		newConfig.Merge(tpl)
 	}
 
-	newConfig.Merge(to)
+	newConfig.Merge(toConfig)
 	// Remove the template as it has been applied
 	newConfig.ConfigTemplates = nil
 
 	return newConfig
 }
 
-func applyBranchTemplate(to *GhBranchConfig, tplList []*GhBranchConfig) *GhBranchConfig {
+func applyBranchTemplate(toConfig *GhBranchConfig, tplList []*GhBranchConfig) *GhBranchConfig {
 	if len(tplList) == 0 {
-		return to
+		return toConfig
 	}
 
 	//nolint:exhaustruct // No need here, it's base structure
@@ -258,7 +258,7 @@ func applyBranchTemplate(to *GhBranchConfig, tplList []*GhBranchConfig) *GhBranc
 		newConfig.Merge(tpl)
 	}
 
-	newConfig.Merge(to)
+	newConfig.Merge(toConfig)
 	// Remove templates as they are applied
 	newConfig.ConfigTemplates = nil
 
@@ -266,11 +266,11 @@ func applyBranchTemplate(to *GhBranchConfig, tplList []*GhBranchConfig) *GhBranc
 }
 
 func applyBranchProtectionTemplate(
-	to *GhBranchProtectionConfig,
+	configReceiver *GhBranchProtectionConfig,
 	tplList []*GhBranchProtectionConfig,
 ) *GhBranchProtectionConfig {
 	if len(tplList) == 0 {
-		return to
+		return configReceiver
 	}
 
 	//nolint:exhaustruct // No need here, it's base structure
@@ -280,15 +280,15 @@ func applyBranchProtectionTemplate(
 		newConfig.Merge(tpl)
 	}
 
-	newConfig.Merge(to)
+	newConfig.Merge(configReceiver)
 	// Remove templates as they are applied
 	newConfig.ConfigTemplates = nil
 
 	return newConfig
 }
 
-func loadRepoTemplatesFor(to *GhRepoConfig, templates *TemplatesConfig) ([]*GhRepoConfig, error) {
-	if to.ConfigTemplates == nil {
+func loadRepoTemplatesFor(toConfig *GhRepoConfig, templates *TemplatesConfig) ([]*GhRepoConfig, error) {
+	if toConfig.ConfigTemplates == nil {
 		return nil, nil
 	}
 
@@ -299,7 +299,7 @@ func loadRepoTemplatesFor(to *GhRepoConfig, templates *TemplatesConfig) ([]*GhRe
 	}
 
 	tplList, err := loadTemplateList(
-		to.ConfigTemplates,
+		toConfig.ConfigTemplates,
 		func(s string) *GhRepoConfig {
 			return templates.GetRepo(s)
 		},

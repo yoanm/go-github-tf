@@ -9,6 +9,7 @@ import (
 
 func TestLoadRepositoryFromFile(t *testing.T) {
 	t.Parallel()
+
 	anchorDir := "testdata/yaml-anchors"
 	core.YamlAnchorDirectory = &anchorDir
 
@@ -67,6 +68,7 @@ func TestLoadRepositoryFromFile(t *testing.T) {
 
 func TestLoadRepositoriesFromFile(t *testing.T) {
 	t.Parallel()
+
 	anchorDir := "testdata/yaml-anchors"
 	core.YamlAnchorDirectory = &anchorDir
 
@@ -114,6 +116,7 @@ func TestLoadRepositoriesFromFile(t *testing.T) {
 
 func TestLoadRepositoryTemplateFromFile(t *testing.T) {
 	t.Parallel()
+
 	full := GetFullConfig(1)
 	// Template can't have a Name
 	full.Name = nil
@@ -161,6 +164,7 @@ func TestLoadRepositoryTemplateFromFile(t *testing.T) {
 
 func TestLoadBranchTemplateFromFile(t *testing.T) {
 	t.Parallel()
+
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.Branches)["feature/branch1"]
 	cases := map[string]struct {
@@ -207,6 +211,7 @@ func TestLoadBranchTemplateFromFile(t *testing.T) {
 
 func TestLoadBranchProtectionTemplateFromFile(t *testing.T) {
 	t.Parallel()
+
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.BranchProtections)[0]
 	cases := map[string]struct {
@@ -253,6 +258,7 @@ func TestLoadBranchProtectionTemplateFromFile(t *testing.T) {
 
 func TestLoadGhRepoConfigFromFile(t *testing.T) {
 	t.Parallel()
+
 	full := GetFullConfig(1)
 	repoName := "repo-name"
 	cases := map[string]struct {
@@ -302,6 +308,7 @@ func TestLoadGhRepoConfigFromFile(t *testing.T) {
 
 func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 	t.Parallel()
+
 	full1, full2 := GetFullConfig(1), GetFullConfig(2)
 	repoName := "repo-name"
 	cases := map[string]struct {
@@ -353,6 +360,7 @@ func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 
 func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
 	t.Parallel()
+
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.Branches)["feature/branch1"]
 	sourceBranch := "branch1-source-branch1"
@@ -400,6 +408,7 @@ func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
 
 func TestLoadGhRepoBranchProtectionConfigFromFile(t *testing.T) {
 	t.Parallel()
+
 	fullRepo := GetFullConfig(1)
 	full := (*fullRepo.BranchProtections)[0]
 	pattern := "master"

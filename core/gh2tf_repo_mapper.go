@@ -25,8 +25,8 @@ const (
 //nolint:gochecknoglobals // Easier than duplicate it everywhere needed
 var falseString = "false"
 
-func MapToRepositoryRes(c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string) *ghrepository.Config {
-	if c == nil {
+func MapToRepositoryRes(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string) *ghrepository.Config {
+	if repoConfig == nil {
 		return nil
 	}
 
@@ -39,7 +39,7 @@ func MapToRepositoryRes(c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId s
 		hasWiki,
 		hasDownloads,
 		page,
-		template := mapMiscellaneous(c, valGen)
+		template := mapMiscellaneous(repoConfig, valGen)
 
 	allowMergeCommit,
 		allowRebaseMerge,
@@ -49,27 +49,27 @@ func MapToRepositoryRes(c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId s
 		mergeCommitMessage,
 		squashMergeCommitTitle,
 		squashMergeCommitMessage,
-		deleteBranchOnMerge := mapPullRequest(c)
+		deleteBranchOnMerge := mapPullRequest(repoConfig)
 	// Security
 	var vulnerabilityAlerts *string
-	if c.Security != nil {
-		vulnerabilityAlerts = c.Security.VulnerabilityAlerts
+	if repoConfig.Security != nil {
+		vulnerabilityAlerts = repoConfig.Security.VulnerabilityAlerts
 	}
 
 	// Terraform
 	var archiveOnDestroy *string
-	if c.Terraform != nil {
-		archiveOnDestroy = c.Terraform.ArchiveOnDestroy
+	if repoConfig.Terraform != nil {
+		archiveOnDestroy = repoConfig.Terraform.ArchiveOnDestroy
 	}
 
 	return &ghrepository.Config{
 		ValueGenerator: valGen,
 		Identifier:     repoTfId,
 
-		Name:                     c.Name,
-		Visibility:               c.Visibility,
+		Name:                     repoConfig.Name,
+		Visibility:               repoConfig.Visibility,
 		Archived:                 archived,
-		Description:              c.Description,
+		Description:              repoConfig.Description,
 		AutoInit:                 autoInit,
 		HasIssues:                hasIssues,
 		HasProjects:              hasProjects,
@@ -98,7 +98,9 @@ func MapToRepositoryRes(c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId s
 	}
 }
 
-func mapPullRequest(c *GhRepoConfig) (*string, *string, *string, *string, *string, *string, *string, *string, *string) {
+func mapPullRequest(
+	repoConfig *GhRepoConfig,
+) (*string, *string, *string, *string, *string, *string, *string, *string, *string) {
 	// PullRequest
 	var (
 		allowMergeCommit         *string
@@ -113,27 +115,27 @@ func mapPullRequest(c *GhRepoConfig) (*string, *string, *string, *string, *strin
 	)
 	// var suggestUpdate *string
 
-	if c.PullRequests != nil {
-		if c.PullRequests.MergeStrategy != nil {
-			allowMergeCommit = c.PullRequests.MergeStrategy.AllowMerge
-			allowRebaseMerge = c.PullRequests.MergeStrategy.AllowRebase
-			allowSquashMerge = c.PullRequests.MergeStrategy.AllowSquash
-			allowAutoMerge = c.PullRequests.MergeStrategy.AllowAutoMerge
+	if repoConfig.PullRequests != nil {
+		if repoConfig.PullRequests.MergeStrategy != nil {
+			allowMergeCommit = repoConfig.PullRequests.MergeStrategy.AllowMerge
+			allowRebaseMerge = repoConfig.PullRequests.MergeStrategy.AllowRebase
+			allowSquashMerge = repoConfig.PullRequests.MergeStrategy.AllowSquash
+			allowAutoMerge = repoConfig.PullRequests.MergeStrategy.AllowAutoMerge
 		}
 
-		if c.PullRequests.MergeCommit != nil {
-			mergeCommitTitle = c.PullRequests.MergeCommit.Title
-			mergeCommitMessage = c.PullRequests.MergeCommit.Message
+		if repoConfig.PullRequests.MergeCommit != nil {
+			mergeCommitTitle = repoConfig.PullRequests.MergeCommit.Title
+			mergeCommitMessage = repoConfig.PullRequests.MergeCommit.Message
 		}
 
-		if c.PullRequests.SquashCommit != nil {
-			squashMergeCommitTitle = c.PullRequests.SquashCommit.Title
-			squashMergeCommitMessage = c.PullRequests.SquashCommit.Message
+		if repoConfig.PullRequests.SquashCommit != nil {
+			squashMergeCommitTitle = repoConfig.PullRequests.SquashCommit.Title
+			squashMergeCommitMessage = repoConfig.PullRequests.SquashCommit.Message
 		}
 
-		if c.PullRequests.Branch != nil {
+		if repoConfig.PullRequests.Branch != nil {
 			// suggestUpdate = c.PullRequests.Branch.SuggestUpdate
-			deleteBranchOnMerge = c.PullRequests.Branch.DeleteBranchOnMerge
+			deleteBranchOnMerge = repoConfig.PullRequests.Branch.DeleteOnMerge
 		}
 	}
 
@@ -142,7 +144,7 @@ func mapPullRequest(c *GhRepoConfig) (*string, *string, *string, *string, *strin
 }
 
 //nolint:nonamedreturns // Easier to understand as is
-func mapMiscellaneous(c *GhRepoConfig, valGen tfsig.ValueGenerator) (
+func mapMiscellaneous(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) (
 	topics *[]string,
 	autoInit *string,
 	archived *string,
@@ -157,37 +159,37 @@ func mapMiscellaneous(c *GhRepoConfig, valGen tfsig.ValueGenerator) (
 	page *ghrepository.PagesConfig,
 	template *ghrepository.TemplateConfig,
 ) {
-	if c.Miscellaneous != nil {
-		topics = c.Miscellaneous.Topics
-		autoInit = c.Miscellaneous.AutoInit
-		archived = c.Miscellaneous.Archived
-		homepageUrl = c.Miscellaneous.HomepageUrl
+	if repoConfig.Miscellaneous != nil {
+		topics = repoConfig.Miscellaneous.Topics
+		autoInit = repoConfig.Miscellaneous.AutoInit
+		archived = repoConfig.Miscellaneous.Archived
+		homepageUrl = repoConfig.Miscellaneous.HomepageUrl
 		// isTemplate = c.Miscellaneous.IsTemplate
-		hasIssues = c.Miscellaneous.HasIssues
-		hasProjects = c.Miscellaneous.HasProjects
-		hasWiki = c.Miscellaneous.HasWiki
-		hasDownloads = c.Miscellaneous.HasDownloads
+		hasIssues = repoConfig.Miscellaneous.HasIssues
+		hasProjects = repoConfig.Miscellaneous.HasProjects
+		hasWiki = repoConfig.Miscellaneous.HasWiki
+		hasDownloads = repoConfig.Miscellaneous.HasDownloads
 
 		// if c.Miscellaneous.FileTemplates != nil {
 		// gitignoreTemplate = c.Miscellaneous.FileTemplates.Gitignore
 		// licenseTemplate = c.Miscellaneous.FileTemplates.License
 		// }
 
-		template = mapTemplate(c, valGen)
-		page = mapPage(c, valGen)
+		template = mapTemplate(repoConfig, valGen)
+		page = mapPage(repoConfig, valGen)
 	}
 
 	return topics, autoInit, archived, homepageUrl, hasIssues, hasProjects, hasWiki, hasDownloads, page, template
 }
 
-func mapPage(c *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.PagesConfig {
-	if c.Miscellaneous.Pages != nil {
+func mapPage(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.PagesConfig {
+	if repoConfig.Miscellaneous.Pages != nil {
 		var source *ghrepository.PagesSourceConfig
-		if c.Miscellaneous.Pages.SourcePath != nil || c.Miscellaneous.Pages.SourceBranch != nil {
+		if repoConfig.Miscellaneous.Pages.SourcePath != nil || repoConfig.Miscellaneous.Pages.SourceBranch != nil {
 			source = &ghrepository.PagesSourceConfig{
 				ValueGenerator: valGen,
-				Branch:         c.Miscellaneous.Pages.SourceBranch,
-				Path:           c.Miscellaneous.Pages.SourcePath,
+				Branch:         repoConfig.Miscellaneous.Pages.SourceBranch,
+				Path:           repoConfig.Miscellaneous.Pages.SourcePath,
 			}
 		}
 
@@ -197,8 +199,8 @@ func mapPage(c *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.PagesCo
 	return nil
 }
 
-func mapTemplate(c *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.TemplateConfig {
-	if c.Miscellaneous.Template != nil {
+func mapTemplate(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.TemplateConfig {
+	if repoConfig.Miscellaneous.Template != nil {
 		template := &ghrepository.TemplateConfig{
 			ValueGenerator: valGen,
 			// IncludeAllBranches: c.Miscellaneous.Template.FullClone,
@@ -206,8 +208,8 @@ func mapTemplate(c *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.Tem
 			Repository: nil,
 		}
 
-		if c.Miscellaneous.Template.Source != nil {
-			sources := strings.Split(*c.Miscellaneous.Template.Source, "/")
+		if repoConfig.Miscellaneous.Template.Source != nil {
+			sources := strings.Split(*repoConfig.Miscellaneous.Template.Source, "/")
 			if len(sources) == 2 { //nolint:gomnd // Doesn't make sense here to wrap 2
 				template.Owner = &sources[0]
 				template.Repository = &sources[1]
@@ -222,13 +224,13 @@ func mapTemplate(c *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.Tem
 
 func MapToBranchRes(
 	name string,
-	c *GhBranchConfig,
+	branchConfig *GhBranchConfig,
 	valGen tfsig.ValueGenerator,
 	repo *GhRepoConfig,
 	repoTfId string,
 	links ...MapperLink,
 ) *ghbranch.Config {
-	if c == nil {
+	if branchConfig == nil {
 		return nil
 	}
 
@@ -239,8 +241,8 @@ func MapToBranchRes(
 
 	identifier := fmt.Sprintf("%s-%s", repoTfId, tfsig.ToTerraformIdentifier(name))
 
-	if c.SourceBranch != nil && *c.SourceBranch != name {
-		sourceBranch = c.SourceBranch
+	if branchConfig.SourceBranch != nil && *branchConfig.SourceBranch != name {
+		sourceBranch = branchConfig.SourceBranch
 	}
 
 	if repo != nil {
@@ -261,7 +263,7 @@ func MapToBranchRes(
 		Repository:     repoName,
 		Branch:         &name,
 		SourceBranch:   sourceBranch,
-		SourceSha:      c.SourceSha,
+		SourceSha:      branchConfig.SourceSha,
 	}
 }
 
@@ -298,31 +300,31 @@ func applyBranchResLink(
 }
 
 func MapToDefaultBranchRes(
-	c *GhDefaultBranchConfig,
+	branchConfig *GhDefaultBranchConfig,
 	valGen tfsig.ValueGenerator,
 	repo *GhRepoConfig,
 	repoTfId string,
 	links ...MapperLink,
 ) *ghbranchdefault.Config {
-	if c == nil {
+	if branchConfig == nil {
 		return nil
 	}
 
 	var repository *string
 
-	branch := c.Name
+	branch := branchConfig.Name
 
 	if repo != nil {
 		repository = repo.Name
 	}
 
-	for _, v := range links {
-		if v == LinkToRepository {
+	for _, link := range links {
+		if link == LinkToRepository {
 			// /!\ a branch can't be configured if repository doesn't exist
 			// => Add an explicit dependency by using "github_repository.${repoTfId}.name"
 			tmp := fmt.Sprintf("github_repository.%s.name", repoTfId)
 			repository = &tmp
-		} else if v == LinkToBranch {
+		} else if link == LinkToBranch {
 			if branch != nil && repo.Branches != nil {
 				if _, branchConfigExists := (*repo.Branches)[*branch]; branchConfigExists {
 					// /!\ default branch can't be configured if related branch doesn't exist
@@ -347,28 +349,28 @@ func MapToDefaultBranchRes(
 }
 
 func MapDefaultBranchToBranchProtectionRes(
-	c *GhDefaultBranchConfig,
+	branchConfig *GhDefaultBranchConfig,
 	valGen tfsig.ValueGenerator,
 	repo *GhRepoConfig,
 	repoTfId string,
 	links ...MapperLink,
 ) *ghbranchprotect.Config {
-	if c == nil || c.Protection == nil {
+	if branchConfig == nil || branchConfig.Protection == nil {
 		return nil
 	}
 
 	wrapper := &GhBranchProtectionConfig{
-		Pattern: c.Name,
+		Pattern: branchConfig.Name,
 		Forbid:  &falseString,
 		BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-			ConfigTemplates:      c.Protection.ConfigTemplates,
-			EnforceAdmins:        c.Protection.EnforceAdmins,
-			AllowsDeletion:       c.Protection.AllowsDeletion,
-			RequireLinearHistory: c.Protection.RequireLinearHistory,
-			RequireSignedCommits: c.Protection.RequireSignedCommits,
-			Pushes:               c.Protection.Pushes,
-			StatusChecks:         c.Protection.StatusChecks,
-			PullRequestReviews:   c.Protection.PullRequestReviews,
+			ConfigTemplates:      branchConfig.Protection.ConfigTemplates,
+			EnforceAdmins:        branchConfig.Protection.EnforceAdmins,
+			AllowDeletion:        branchConfig.Protection.AllowDeletion,
+			RequireLinearHistory: branchConfig.Protection.RequireLinearHistory,
+			RequireSignedCommits: branchConfig.Protection.RequireSignedCommits,
+			Pushes:               branchConfig.Protection.Pushes,
+			StatusChecks:         branchConfig.Protection.StatusChecks,
+			PullRequestReviews:   branchConfig.Protection.PullRequestReviews,
 		},
 	}
 
@@ -391,13 +393,13 @@ func MapDefaultBranchToBranchProtectionRes(
 
 func MapBranchToBranchProtectionRes(
 	name string,
-	c *GhBranchConfig,
+	branchConfig *GhBranchConfig,
 	valGen tfsig.ValueGenerator,
 	repo *GhRepoConfig,
 	repoTfId string,
 	links ...MapperLink,
 ) *ghbranchprotect.Config {
-	if c == nil || c.Protection == nil {
+	if branchConfig == nil || branchConfig.Protection == nil {
 		return nil
 	}
 
@@ -405,14 +407,14 @@ func MapBranchToBranchProtectionRes(
 		Pattern: &name,
 		Forbid:  &falseString,
 		BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-			ConfigTemplates:      c.Protection.ConfigTemplates,
-			EnforceAdmins:        c.Protection.EnforceAdmins,
-			AllowsDeletion:       c.Protection.AllowsDeletion,
-			RequireLinearHistory: c.Protection.RequireLinearHistory,
-			RequireSignedCommits: c.Protection.RequireSignedCommits,
-			Pushes:               c.Protection.Pushes,
-			StatusChecks:         c.Protection.StatusChecks,
-			PullRequestReviews:   c.Protection.PullRequestReviews,
+			ConfigTemplates:      branchConfig.Protection.ConfigTemplates,
+			EnforceAdmins:        branchConfig.Protection.EnforceAdmins,
+			AllowDeletion:        branchConfig.Protection.AllowDeletion,
+			RequireLinearHistory: branchConfig.Protection.RequireLinearHistory,
+			RequireSignedCommits: branchConfig.Protection.RequireSignedCommits,
+			Pushes:               branchConfig.Protection.Pushes,
+			StatusChecks:         branchConfig.Protection.StatusChecks,
+			PullRequestReviews:   branchConfig.Protection.PullRequestReviews,
 		},
 	}
 
@@ -420,13 +422,13 @@ func MapBranchToBranchProtectionRes(
 }
 
 func MapToBranchProtectionRes(
-	c *GhBranchProtectionConfig,
+	branchProtectionConfig *GhBranchProtectionConfig,
 	valGen tfsig.ValueGenerator,
 	repo *GhRepoConfig,
 	repoTfId string,
 	links ...MapperLink,
 ) *ghbranchprotect.Config {
-	if c == nil {
+	if branchProtectionConfig == nil {
 		return nil
 	}
 
@@ -439,7 +441,7 @@ func MapToBranchProtectionRes(
 	)
 
 	idEnd := "INVALID"
-	pattern := c.Pattern
+	pattern := branchProtectionConfig.Pattern
 
 	if repo != nil {
 		repoName = repo.Name
@@ -453,38 +455,38 @@ func MapToBranchProtectionRes(
 		panic("repository name is mandatory for branch protection config")
 	}
 
-	if c.Pattern != nil {
-		idEnd = tfsig.ToTerraformIdentifier(*c.Pattern)
+	if branchProtectionConfig.Pattern != nil {
+		idEnd = tfsig.ToTerraformIdentifier(*branchProtectionConfig.Pattern)
 	}
 
-	if c.StatusChecks != nil {
+	if branchProtectionConfig.StatusChecks != nil {
 		requiredStatusChecks = &ghbranchprotect.RequiredStatusChecksConfig{
 			ValueGenerator: valGen,
-			Strict:         c.StatusChecks.Strict,
-			Contexts:       c.StatusChecks.Required,
+			Strict:         branchProtectionConfig.StatusChecks.Strict,
+			Contexts:       branchProtectionConfig.StatusChecks.Required,
 		}
 	}
 
-	if c.PullRequestReviews != nil {
+	if branchProtectionConfig.PullRequestReviews != nil {
 		requiredPRReview = &ghbranchprotect.RequiredPRReviewConfig{
 			ValueGenerator:               valGen,
 			DismissStaleReviews:          nil,
 			RestrictDismissals:           nil,
 			DismissalRestrictions:        nil,
-			RequireCodeOwnerReviews:      c.PullRequestReviews.CodeownerApprovals,
-			RequiredApprovingReviewCount: c.PullRequestReviews.ApprovalCount,
+			RequireCodeOwnerReviews:      branchProtectionConfig.PullRequestReviews.CodeownerApprovals,
+			RequiredApprovingReviewCount: branchProtectionConfig.PullRequestReviews.ApprovalCount,
 		}
 
-		if c.PullRequestReviews.Dismissals != nil {
-			requiredPRReview.DismissStaleReviews = c.PullRequestReviews.Dismissals.Staled
-			requiredPRReview.RestrictDismissals = c.PullRequestReviews.Dismissals.Restrict
-			requiredPRReview.DismissalRestrictions = c.PullRequestReviews.Dismissals.RestrictTo
+		if branchProtectionConfig.PullRequestReviews.Dismissals != nil {
+			requiredPRReview.DismissStaleReviews = branchProtectionConfig.PullRequestReviews.Dismissals.Staled
+			requiredPRReview.RestrictDismissals = branchProtectionConfig.PullRequestReviews.Dismissals.Restrict
+			requiredPRReview.DismissalRestrictions = branchProtectionConfig.PullRequestReviews.Dismissals.RestrictTo
 		}
 	}
 
-	if c.Pushes != nil {
-		allowsForcePushes = c.Pushes.AllowsForcePushes
-		pushRestrictions = c.Pushes.PushRestrictions
+	if branchProtectionConfig.Pushes != nil {
+		allowsForcePushes = branchProtectionConfig.Pushes.AllowsForcePushes
+		pushRestrictions = branchProtectionConfig.Pushes.RestrictTo
 	}
 
 	return &ghbranchprotect.Config{
@@ -492,30 +494,30 @@ func MapToBranchProtectionRes(
 		Identifier:            repoTfId + "-" + idEnd,
 		RepositoryId:          repoName,
 		Pattern:               pattern,
-		EnforceAdmins:         c.EnforceAdmins,
-		AllowsDeletions:       c.AllowsDeletion,
+		EnforceAdmins:         branchProtectionConfig.EnforceAdmins,
+		AllowsDeletions:       branchProtectionConfig.AllowDeletion,
 		AllowsForcePushes:     allowsForcePushes,
 		PushRestrictions:      pushRestrictions,
-		RequiredLinearHistory: c.RequireLinearHistory,
-		RequireSignedCommits:  c.RequireSignedCommits,
+		RequiredLinearHistory: branchProtectionConfig.RequireLinearHistory,
+		RequireSignedCommits:  branchProtectionConfig.RequireSignedCommits,
 		RequiredStatusChecks:  requiredStatusChecks,
 		RequiredPRReview:      requiredPRReview,
 	}
 }
 
 func mapBranchProtectionResLink(
-	v MapperLink,
+	link MapperLink,
 	repoTfId string,
 	repoName *string,
 	pattern *string,
 	repo *GhRepoConfig,
 ) (*string, *string) {
-	if v == LinkToRepository {
+	if link == LinkToRepository {
 		// /!\ a branch protection can't be configured if repository doesn't exist
 		// => Add an explicit dependency by using "github_repository.${repoTfId}.node_id"
 		tmp := fmt.Sprintf("github_repository.%s.node_id", repoTfId)
 		repoName = &tmp
-	} else if v == LinkToBranch {
+	} else if link == LinkToBranch {
 		if pattern != nil && repo != nil && repo.Branches != nil {
 			if _, branchConfigExists := (*repo.Branches)[*pattern]; branchConfigExists {
 				tmp := fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*pattern))

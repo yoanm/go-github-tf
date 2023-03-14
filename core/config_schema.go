@@ -36,7 +36,7 @@ func (c *Config) GetRepo(name string) *GhRepoConfig {
 type TemplatesConfig struct {
 	Repos             map[string]*GhRepoConfig             `yaml:"repos,omitempty"`
 	Branches          map[string]*GhBranchConfig           `yaml:"branches,omitempty"`
-	BranchProtections map[string]*GhBranchProtectionConfig `yaml:"branchProtection,omitempty"`
+	BranchProtections map[string]*GhBranchProtectionConfig `yaml:"branch-protections,omitempty"`
 }
 
 func (c *TemplatesConfig) GetRepo(name string) *GhRepoConfig {

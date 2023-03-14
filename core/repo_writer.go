@@ -14,13 +14,13 @@ import (
 
 /** Public **/
 
-func NewHclRepository(repoTfId string, c *GhRepoConfig, valGen tfsig.ValueGenerator) *hclwrite.File {
+func NewHclRepository(repoTfId string, repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) *hclwrite.File {
 	hclFile := hclwrite.NewEmptyFile()
 
-	appendRepositoryResource(hclFile.Body(), c, valGen, repoTfId)
-	appendBranchDefaultResources(hclFile.Body(), c, valGen, repoTfId)
-	appendBranchResources(hclFile.Body(), c, valGen, repoTfId)
-	appendBranchProtectionResourceContent(hclFile.Body(), c, valGen, repoTfId)
+	appendRepositoryResource(hclFile.Body(), repoConfig, valGen, repoTfId)
+	appendBranchDefaultResources(hclFile.Body(), repoConfig, valGen, repoTfId)
+	appendBranchResources(hclFile.Body(), repoConfig, valGen, repoTfId)
+	appendBranchProtectionResourceContent(hclFile.Body(), repoConfig, valGen, repoTfId)
 
 	return hclFile
 }
@@ -46,29 +46,38 @@ func appendBranchDefaultResources(body *hclwrite.Body, c *GhRepoConfig, valGen t
 	)
 }
 
-func appendBranchResources(body *hclwrite.Body, c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string) {
-	if c.Branches != nil {
-		hasDefaultBranch := c.DefaultBranch != nil && c.DefaultBranch.Name != nil
+func appendBranchResources(
+	body *hclwrite.Body,
+	repoConfig *GhRepoConfig,
+	valGen tfsig.ValueGenerator,
+	repoTfId string,
+) {
+	if repoConfig.Branches != nil {
+		hasDefaultBranch := repoConfig.DefaultBranch != nil && repoConfig.DefaultBranch.Name != nil
 		// sort branches to always get a predictable output (for tests mostly)
-		keys := make([]string, 0, len(*c.Branches))
-		for k := range *c.Branches {
+		keys := make([]string, 0, len(*repoConfig.Branches))
+		for k := range *repoConfig.Branches {
 			keys = append(keys, k)
 		}
 
 		sort.Strings(keys)
 
-		for _, k := range keys {
-			v := (*c.Branches)[k]
+		for _, key := range keys {
+			branchConfig := (*repoConfig.Branches)[key]
 
 			appendBranchResourceSignature(
 				body,
-				c,
-				// /!\ use LinkToRepository, so underlying repository will have to be created before creating the branch
-				// /!\ use LinkToBranch, so if a source branch is configured, it will have to be created before creating current one
-				ghbranch.NewSignature(MapToBranchRes(k, v, valGen, c, repoTfId, LinkToRepository, LinkToBranch)),
+				repoConfig,
+				// /!\ use LinkToRepository, so underlying repository will have to be created before
+				// 		creating the branch
+				// /!\ use LinkToBranch, so if a source branch is configured, it will have to be created
+				// 		before creating current one
+				ghbranch.NewSignature(
+					MapToBranchRes(key, branchConfig, valGen, repoConfig, repoTfId, LinkToRepository, LinkToBranch),
+				),
 				hasDefaultBranch,
-				k,
-				v,
+				key,
+				branchConfig,
 			)
 		}
 	}
@@ -76,21 +85,21 @@ func appendBranchResources(body *hclwrite.Body, c *GhRepoConfig, valGen tfsig.Va
 
 func appendBranchResourceSignature(
 	body *hclwrite.Body,
-	c *GhRepoConfig,
+	repoConfig *GhRepoConfig,
 	sig *tfsig.BlockSignature,
 	hasDefaultBranch bool,
-	k string,
-	v *GhBranchConfig,
+	branchName string,
+	branchConfig *GhBranchConfig,
 ) {
 	if sig != nil {
 		// In case
 		//  - it's the default branch config
-		ignoreSourceBranch := hasDefaultBranch && *c.DefaultBranch.Name == k
+		ignoreSourceBranch := hasDefaultBranch && *repoConfig.DefaultBranch.Name == branchName
 		//  - or source_branch is the default branch
-		ignoreSourceBranch = ignoreSourceBranch || (hasDefaultBranch && v.SourceBranch != nil &&
-			*c.DefaultBranch.Name == *v.SourceBranch)
+		ignoreSourceBranch = ignoreSourceBranch || (hasDefaultBranch && branchConfig.SourceBranch != nil &&
+			*repoConfig.DefaultBranch.Name == *branchConfig.SourceBranch)
 		//  - or no source branch configured (which means the same as current default branch)
-		ignoreSourceBranch = ignoreSourceBranch || v.SourceBranch == nil
+		ignoreSourceBranch = ignoreSourceBranch || branchConfig.SourceBranch == nil
 		// => append ignore_changes directive on source_branch
 		// It's useful mostly when switching default branch to another one from outside of terraform,
 		// or from terraform when following those steps:
@@ -132,7 +141,7 @@ func appendBranchResourceSignature(
 
 func appendBranchProtectionResourceContent(
 	body *hclwrite.Body,
-	c *GhRepoConfig,
+	repoConfig *GhRepoConfig,
 	valGen tfsig.ValueGenerator,
 	repoTfId string,
 ) {
@@ -144,22 +153,29 @@ func appendBranchProtectionResourceContent(
 			// /!\ use LinkToBranch, to explicitly bind the protection to the branch, so if something
 			// change on default_branch resource,
 			// the protection will be impacted only if the change on default_branch resource succeeded
-			MapDefaultBranchToBranchProtectionRes(c.DefaultBranch, valGen, c, repoTfId, LinkToRepository, LinkToBranch),
+			MapDefaultBranchToBranchProtectionRes(
+				repoConfig.DefaultBranch,
+				valGen,
+				repoConfig,
+				repoTfId,
+				LinkToRepository,
+				LinkToBranch,
+			),
 		),
 	)
 
-	if c.Branches != nil {
+	if repoConfig.Branches != nil {
 		// sort branches to always get a predictable output (for tests mostly)
-		keys := make([]string, 0, len(*c.Branches))
+		keys := make([]string, 0, len(*repoConfig.Branches))
 
-		for k := range *c.Branches {
+		for k := range *repoConfig.Branches {
 			keys = append(keys, k)
 		}
 
 		sort.Strings(keys)
 
-		for _, k := range keys {
-			v := (*c.Branches)[k]
+		for _, key := range keys {
+			branchConfig := (*repoConfig.Branches)[key]
 
 			tfsig.AppendNewLineAndBlockIfNotNil(
 				body,
@@ -168,14 +184,14 @@ func appendBranchProtectionResourceContent(
 					// creating the branch protection
 					// /!\ do not use LinkToBranch, else branch protection will be created only after branch is created
 					// (which is useless and can be done in parallel)
-					MapBranchToBranchProtectionRes(k, v, valGen, c, repoTfId, LinkToRepository),
+					MapBranchToBranchProtectionRes(key, branchConfig, valGen, repoConfig, repoTfId, LinkToRepository),
 				),
 			)
 		}
 	}
 
-	if c.BranchProtections != nil {
-		for _, branchProtectionConfig := range *c.BranchProtections {
+	if repoConfig.BranchProtections != nil {
+		for _, branchProtectionConfig := range *repoConfig.BranchProtections {
 			tfsig.AppendNewLineAndBlockIfNotNil(
 				body,
 				ghbranchprotect.New(
@@ -185,7 +201,7 @@ func appendBranchProtectionResourceContent(
 					// branch is created (which is useless and can be done in parallel) and in many cases related
 					// branch config doesn't exist anyway (else it's simpler to move the protection config under
 					// 'protection' attribute of the related branch)
-					MapToBranchProtectionRes(branchProtectionConfig, valGen, c, repoTfId, LinkToRepository),
+					MapToBranchProtectionRes(branchProtectionConfig, valGen, repoConfig, repoTfId, LinkToRepository),
 				),
 			)
 		}

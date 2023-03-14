@@ -1,7 +1,8 @@
 package core
 
 type GhRepoConfig struct {
-	Name              *string                    `yaml:"name,omitempty"`
+	Name *string `yaml:"name,omitempty"`
+	//nolint:tagliatelle // yaml templates, not config templates => better to use underscore here
 	ConfigTemplates   *[]string                  `yaml:"_templates,omitempty,flow"`
 	Visibility        *string                    `yaml:"visibility,omitempty"`
 	Description       *string                    `yaml:"description,omitempty"`
@@ -10,11 +11,13 @@ type GhRepoConfig struct {
 	BranchProtections *GhBranchProtectionsConfig `yaml:"branch-protections,omitempty"`
 	PullRequests      *GhRepoPullRequestConfig   `yaml:"pull-requests,omitempty"`
 	Security          *GhRepoSecurityConfig      `yaml:"security,omitempty"`
-	Miscellaneous     *GhRepoMiscellaneousConfig `yaml:"misc,omitempty"`
-	Terraform         *GhRepoTerraformConfig     `yaml:"terraform,omitempty"`
+	//nolint:tagliatelle // Long name, easier if it's just misc
+	Miscellaneous *GhRepoMiscellaneousConfig `yaml:"misc,omitempty"`
+	Terraform     *GhRepoTerraformConfig     `yaml:"terraform,omitempty"`
 }
 
-func (to *GhRepoConfig) Merge(from *GhRepoConfig) { //nolint:gocognit,cyclop // Hard to factorize, more understandable as is
+//nolint:gocognit,cyclop // Hard to factorize, more understandable as is
+func (to *GhRepoConfig) Merge(from *GhRepoConfig) {
 	if from == nil {
 		return
 	}
@@ -93,15 +96,15 @@ func (to *GhBranchesConfig) Merge(from *GhBranchesConfig) {
 		return
 	}
 
-	for k, v := range *from {
-		existingVal, exists := (*to)[k]
+	for branchName, branchConfig := range *from {
+		existingVal, exists := (*to)[branchName]
 		if exists {
-			existingVal.Merge(v)
+			existingVal.Merge(branchConfig)
 		} else {
 			//nolint:exhaustruct // No need here, it's base structure
 			newVal := &GhBranchConfig{}
-			newVal.Merge(v)
-			(*to)[k] = newVal
+			newVal.Merge(branchConfig)
+			(*to)[branchName] = newVal
 		}
 	}
 }
@@ -140,14 +143,18 @@ func (to *GhRepoTemplateConfig) Merge(from *GhRepoTemplateConfig) {
 }
 
 type GhRepoMiscellaneousConfig struct {
-	Topics        *[]string                  `yaml:"topics,omitempty,flow"`
-	AutoInit      *string                    `yaml:"auto-init,omitempty"`
-	Archived      *string                    `yaml:"archived,omitempty"`
-	IsTemplate    *string                    `yaml:"is-template,omitempty"`
-	HomepageUrl   *string                    `yaml:"homepage-url,omitempty"`
-	HasIssues     *string                    `yaml:"issues,omitempty"`
-	HasWiki       *string                    `yaml:"wiki,omitempty"`
-	HasProjects   *string                    `yaml:"projects,omitempty"`
+	Topics      *[]string `yaml:"topics,omitempty,flow"`
+	AutoInit    *string   `yaml:"auto-init,omitempty"`
+	Archived    *string   `yaml:"archived,omitempty"`
+	IsTemplate  *string   `yaml:"is-template,omitempty"`
+	HomepageUrl *string   `yaml:"homepage-url,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'has' prefix (as it's a boolean)
+	HasIssues *string `yaml:"issues,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'has' prefix (as it's a boolean)
+	HasWiki *string `yaml:"wiki,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'has' prefix (as it's a boolean)
+	HasProjects *string `yaml:"projects,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'has' prefix (as it's a boolean)
 	HasDownloads  *string                    `yaml:"downloads,omitempty"`
 	Template      *GhRepoTemplateConfig      `yaml:"template,omitempty"`
 	Pages         *GhRepoPagesConfig         `yaml:"pages,omitempty"`
@@ -277,9 +284,13 @@ func (to *GhRepoPullRequestConfig) Merge(from *GhRepoPullRequestConfig) {
 }
 
 type GhRepoPRMergeStrategyConfig struct {
-	AllowMerge     *string `yaml:"merge,omitempty"`
-	AllowRebase    *string `yaml:"rebase,omitempty"`
-	AllowSquash    *string `yaml:"squash,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'allow' prefix (as it's a boolean)
+	AllowMerge *string `yaml:"merge,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'allow' prefix (as it's a boolean)
+	AllowRebase *string `yaml:"rebase,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'allow' prefix (as it's a boolean)
+	AllowSquash *string `yaml:"squash,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'allow' prefix (as it's a boolean)
 	AllowAutoMerge *string `yaml:"auto-merge,omitempty"`
 }
 
@@ -309,8 +320,8 @@ func (to *GhRepoPRCommitConfig) Merge(from *GhRepoPRCommitConfig) {
 }
 
 type GhRepoPRBranchConfig struct {
-	SuggestUpdate       *string `yaml:"suggest-update,omitempty"`
-	DeleteBranchOnMerge *string `yaml:"delete-on-merge,omitempty"`
+	SuggestUpdate *string `yaml:"suggest-update,omitempty"`
+	DeleteOnMerge *string `yaml:"delete-on-merge,omitempty"`
 }
 
 func (to *GhRepoPRBranchConfig) Merge(from *GhRepoPRBranchConfig) {
@@ -319,10 +330,11 @@ func (to *GhRepoPRBranchConfig) Merge(from *GhRepoPRBranchConfig) {
 	}
 
 	mergeStringIfNotNil(&to.SuggestUpdate, from.SuggestUpdate)
-	mergeStringIfNotNil(&to.DeleteBranchOnMerge, from.DeleteBranchOnMerge)
+	mergeStringIfNotNil(&to.DeleteOnMerge, from.DeleteOnMerge)
 }
 
 type BaseGhBranchConfig struct {
+	//nolint:tagliatelle // yaml templates, not config templates => better to use underscore here
 	ConfigTemplates *[]string `yaml:"_templates,omitempty,flow"`
 
 	Protection *BaseGhBranchProtectionConfig `yaml:"protection,omitempty"`
@@ -378,11 +390,15 @@ func (to *GhBranchConfig) Merge(from *GhBranchConfig) {
 }
 
 type BaseGhBranchProtectionConfig struct {
+	//nolint:tagliatelle // yaml templates, not config templates => better to use underscore here
 	ConfigTemplates *[]string `yaml:"_templates,omitempty,flow"`
 
-	EnforceAdmins        *string `yaml:"enforce-admins,omitempty"`
-	AllowsDeletion       *string `yaml:"deletion,omitempty"`
+	EnforceAdmins *string `yaml:"enforce-admins,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'allow' prefix (as it's a boolean)
+	AllowDeletion *string `yaml:"deletion,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'require' prefix (as it's a boolean)
 	RequireLinearHistory *string `yaml:"linear-history,omitempty"`
+	//nolint:tagliatelle // Already make sense for yaml config without the 'require' prefix (as it's a boolean)
 	RequireSignedCommits *string `yaml:"signed-commits,omitempty"`
 
 	Pushes             *GhBranchProtectPushesConfig       `yaml:"pushes,omitempty"`
@@ -397,7 +413,7 @@ func (to *BaseGhBranchProtectionConfig) Merge(from *BaseGhBranchProtectionConfig
 
 	mergeSliceIfNotNil(&to.ConfigTemplates, from.ConfigTemplates)
 	mergeStringIfNotNil(&to.EnforceAdmins, from.EnforceAdmins)
-	mergeStringIfNotNil(&to.AllowsDeletion, from.AllowsDeletion)
+	mergeStringIfNotNil(&to.AllowDeletion, from.AllowDeletion)
 	mergeStringIfNotNil(&to.RequireLinearHistory, from.RequireLinearHistory)
 	mergeStringIfNotNil(&to.RequireSignedCommits, from.RequireSignedCommits)
 
@@ -430,8 +446,9 @@ func (to *BaseGhBranchProtectionConfig) Merge(from *BaseGhBranchProtectionConfig
 }
 
 type GhBranchProtectPushesConfig struct {
+	//nolint:tagliatelle // Already make sense for yaml config without the 'allow' prefix (as it's a boolean)
 	AllowsForcePushes *string   `yaml:"force-push,omitempty"`
-	PushRestrictions  *[]string `yaml:"restrict-to,omitempty,flow"`
+	RestrictTo        *[]string `yaml:"restrict-to,omitempty,flow"`
 }
 
 func (to *GhBranchProtectPushesConfig) Merge(from *GhBranchProtectPushesConfig) {
@@ -440,7 +457,7 @@ func (to *GhBranchProtectPushesConfig) Merge(from *GhBranchProtectPushesConfig) 
 	}
 
 	mergeStringIfNotNil(&to.AllowsForcePushes, from.AllowsForcePushes)
-	mergeSliceIfNotNil(&to.PushRestrictions, from.PushRestrictions)
+	mergeSliceIfNotNil(&to.RestrictTo, from.RestrictTo)
 }
 
 type GhBranchProtectionConfig struct {
@@ -474,7 +491,7 @@ func (to *GhBranchProtectStatusChecksConfig) Merge(from *GhBranchProtectStatusCh
 }
 
 type GhBranchProtectPRReviewConfig struct {
-	BypasserList          *[]string `yaml:"bypassers,omitempty,flow"`
+	Bypassers             *[]string `yaml:"bypassers,omitempty,flow"`
 	CodeownerApprovals    *string   `yaml:"codeowner-approvals,omitempty"`
 	ResolvedConversations *string   `yaml:"resolved-conversations,omitempty"`
 	ApprovalCount         *string   `yaml:"approval-count,omitempty"`
@@ -487,7 +504,7 @@ func (to *GhBranchProtectPRReviewConfig) Merge(from *GhBranchProtectPRReviewConf
 		return
 	}
 
-	mergeSliceIfNotNil(&to.BypasserList, from.BypasserList)
+	mergeSliceIfNotNil(&to.Bypassers, from.Bypassers)
 	mergeStringIfNotNil(&to.CodeownerApprovals, from.CodeownerApprovals)
 	mergeStringIfNotNil(&to.ResolvedConversations, from.ResolvedConversations)
 	mergeStringIfNotNil(&to.ApprovalCount, from.ApprovalCount)
@@ -546,27 +563,27 @@ func (to *GhRepoTerraformConfig) Merge(from *GhRepoTerraformConfig) {
 
 // mergeStringIfNotNil ensures that updating 'from' afterward doesn't affect 'to' and vice versa
 // It override the string behind 'to' pointer by the string behind 'from' pointer.
-func mergeStringIfNotNil(to **string, from *string) {
-	if from != nil {
+func mergeStringIfNotNil(toString **string, fromString *string) {
+	if fromString != nil {
 		// !! to != nil is assume here !!
-		if *to == nil {
+		if *toString == nil {
 			empty := ""
-			*to = &empty
+			*toString = &empty
 		}
 		// Set the underlying value instead of the pointer to avoid overflow later
-		**to = *from
+		**toString = *fromString
 	}
 }
 
 // mergeSliceIfNotNil ensures that updating 'from' afterward doesn't affect 'to' and vice versa
 // It use append function to create a new slice combining 'from' and 'to' items.
-func mergeSliceIfNotNil(to **[]string, from *[]string) {
-	if from != nil {
+func mergeSliceIfNotNil(toSlice **[]string, fromSlice *[]string) {
+	if fromSlice != nil {
 		// !! to != nil is assume here !!
-		if *to == nil {
-			*to = &[]string{}
+		if *toSlice == nil {
+			*toSlice = &[]string{}
 		}
 
-		**to = append(**to, *from...)
+		**toSlice = append(**toSlice, *fromSlice...)
 	}
 }

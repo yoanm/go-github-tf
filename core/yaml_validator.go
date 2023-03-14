@@ -121,17 +121,18 @@ func ValidateBranchProtectionTemplateConfig(filePath string) error {
 
 /** Private **/
 
-func loadAsInterface(filePath string, v *interface{}) error {
+func loadAsInterface(filePath string, receiver *interface{}) error {
 	var (
 		content []byte
 		err     error
 	)
 
 	if content, err = os.ReadFile(filePath); err != nil {
+		//nolint:wrapcheck // Expected to return raw error
 		return err
 	}
 
-	if err2 := newDecoder(content).Decode(v); err2 != nil {
+	if err2 := newDecoder(content).Decode(receiver); err2 != nil {
 		return fmt.Errorf("file %s: %w", filePath, err2)
 	}
 
@@ -141,19 +142,19 @@ func loadAsInterface(filePath string, v *interface{}) error {
 // USE ONLY ON THAT FILE - START
 // e is expected to be an 'error' from jsonschema lib, which is supposed to be a '*jsonschema.ValidationError'
 // (but error type can't be cast to jsonschema.ValidationError type as is).
-func _normalizeValidationError(filePath string, e interface{}) error {
-	if e == nil {
+func _normalizeValidationError(filePath string, err interface{}) error {
+	if err == nil {
 		return nil
 	}
 
 	//nolint:errcheck,forcetypeassert // Internal method, error is expected to be a validationError
-	vErr := e.(*jsonschema.ValidationError)
+	vErr := err.(*jsonschema.ValidationError)
 
-	log.Trace().Msgf("File %s: original validation error => %s", filePath, e)
+	log.Trace().Msgf("File %s: original validation error => %s", filePath, err)
 
-	err := _validationErrorLeaf(vErr)
+	validationError := _validationErrorLeaf(vErr)
 
-	return fmt.Errorf("file %s: %s %s", filePath, err.InstanceLocation, err.Message)
+	return fmt.Errorf("file %s: %s %s", filePath, validationError.InstanceLocation, validationError.Message)
 }
 
 func _validationErrorLeaf(ve *jsonschema.ValidationError) *jsonschema.ValidationError {

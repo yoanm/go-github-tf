@@ -32,24 +32,24 @@ func WriteTerraformFileError(errList []error) error {
 
 func GenerateHclRepoFiles(configList []*GhRepoConfig) (map[string]*hclwrite.File, error) {
 	valueGenerator := gh2tf.NewValueGenerator()
-	wg := &sync.WaitGroup{}
+	waitGroup := &sync.WaitGroup{}
 	collector := make(fileCollector, len(configList))
 	errCollector := make(errorCollector, len(configList))
 
 	var errList []error
 
-	for k, c := range configList {
-		wg.Add(1)
+	for k, repoConfig := range configList {
+		waitGroup.Add(1)
 
-		if c.Name == nil {
+		if repoConfig.Name == nil {
 			errList = append(errList, fmt.Errorf("config #%d: repository name is mandatory", k))
 		} else {
-			repoTfId := tfsig.ToTerraformIdentifier(*c.Name)
-			go generateHclRepoFileAsync(c, valueGenerator, repoTfId, collector, wg)
+			repoTfId := tfsig.ToTerraformIdentifier(*repoConfig.Name)
+			go generateHclRepoFileAsync(repoConfig, valueGenerator, repoTfId, collector, waitGroup)
 		}
 	}
 
-	wg.Wait()
+	waitGroup.Wait()
 	close(collector)
 	close(errCollector)
 
@@ -107,7 +107,7 @@ func WriteTerraformFiles(rootPath string, files map[string]*hclwrite.File) (err 
 		return nil
 	}
 
-	wg := &sync.WaitGroup{}
+	waitGroup := &sync.WaitGroup{}
 	errCollector := make(errorCollector, len(files))
 
 	fs, statError := os.Stat(rootPath)
@@ -116,12 +116,12 @@ func WriteTerraformFiles(rootPath string, files map[string]*hclwrite.File) (err 
 
 	if exists && isDir {
 		for fName, hclFile := range files {
-			wg.Add(1)
+			waitGroup.Add(1)
 
-			go writeTerraformFileAsync(path.Join(rootPath, fName), hclFile, errCollector, wg)
+			go writeTerraformFileAsync(path.Join(rootPath, fName), hclFile, errCollector, waitGroup)
 		}
 
-		wg.Wait()
+		waitGroup.Wait()
 	}
 
 	close(errCollector)
@@ -187,7 +187,7 @@ type (
 )
 
 func generateHclRepoFileAsync(
-	c *GhRepoConfig,
+	repoConfig *GhRepoConfig,
 	valGen tfsig.ValueGenerator,
 	repoTfId string,
 	collector fileCollector,
@@ -197,7 +197,7 @@ func generateHclRepoFileAsync(
 
 	fname := fmt.Sprintf("repo.%s.tf", repoTfId)
 
-	collector <- fileCollectorItem{name: fname, file: NewHclRepository(repoTfId, c, valGen)}
+	collector <- fileCollectorItem{name: fname, file: NewHclRepository(repoTfId, repoConfig, valGen)}
 }
 
 func writeTerraformFileAsync(path string, hclFile *hclwrite.File, errCollector errorCollector, wg *sync.WaitGroup) {
@@ -206,18 +206,18 @@ func writeTerraformFileAsync(path string, hclFile *hclwrite.File, errCollector e
 	formatted := hclwrite.Format(hclFile.Bytes())
 
 	var (
-		f   *os.File
-		err error
+		file *os.File
+		err  error
 	)
 
 	fName := filepath.Base(path)
 
-	if f, err = os.Create(path); err != nil {
+	if file, err = os.Create(path); err != nil {
 		errCollector <- errorCollectorItem{fName, err}
 	} else {
-		log.Debug().Msgf("Writing terraform file '%s'", f.Name())
+		log.Debug().Msgf("Writing terraform file '%s'", file.Name())
 
-		if _, err = f.Write(formatted); err != nil {
+		if _, err = file.Write(formatted); err != nil {
 			errCollector <- errorCollectorItem{fName, err}
 		}
 	}

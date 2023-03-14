@@ -112,9 +112,9 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 		*(full2.DefaultBranch.Protection.ConfigTemplates)...,
 	)
 
-	*fullMergeResult.DefaultBranch.Protection.Pushes.PushRestrictions = append(
-		*(full1.DefaultBranch.Protection.Pushes.PushRestrictions),
-		*(full2.DefaultBranch.Protection.Pushes.PushRestrictions)...,
+	*fullMergeResult.DefaultBranch.Protection.Pushes.RestrictTo = append(
+		*(full1.DefaultBranch.Protection.Pushes.RestrictTo),
+		*(full2.DefaultBranch.Protection.Pushes.RestrictTo)...,
 	)
 
 	*fullMergeResult.DefaultBranch.Protection.StatusChecks.Required = append(
@@ -122,9 +122,9 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 		*(full2.DefaultBranch.Protection.StatusChecks.Required)...,
 	)
 
-	*fullMergeResult.DefaultBranch.Protection.PullRequestReviews.BypasserList = append(
-		*(full1.DefaultBranch.Protection.PullRequestReviews.BypasserList),
-		*(full2.DefaultBranch.Protection.PullRequestReviews.BypasserList)...,
+	*fullMergeResult.DefaultBranch.Protection.PullRequestReviews.Bypassers = append(
+		*(full1.DefaultBranch.Protection.PullRequestReviews.Bypassers),
+		*(full2.DefaultBranch.Protection.PullRequestReviews.Bypassers)...,
 	)
 
 	*fullMergeResult.DefaultBranch.Protection.PullRequestReviews.Dismissals.RestrictTo = append(
@@ -146,9 +146,9 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 		*((*full2.Branches)["feature/branch2"].Protection.ConfigTemplates)...,
 	)
 
-	*(*fullMergeResult.Branches)["feature/branch2"].Protection.Pushes.PushRestrictions = append(
-		*((*full1.Branches)["feature/branch2"].Protection.Pushes.PushRestrictions),
-		*((*full2.Branches)["feature/branch2"].Protection.Pushes.PushRestrictions)...,
+	*(*fullMergeResult.Branches)["feature/branch2"].Protection.Pushes.RestrictTo = append(
+		*((*full1.Branches)["feature/branch2"].Protection.Pushes.RestrictTo),
+		*((*full2.Branches)["feature/branch2"].Protection.Pushes.RestrictTo)...,
 	)
 
 	*(*fullMergeResult.Branches)["feature/branch2"].Protection.StatusChecks.Required = append(
@@ -156,9 +156,9 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 		*((*full2.Branches)["feature/branch2"].Protection.StatusChecks.Required)...,
 	)
 
-	*(*fullMergeResult.Branches)["feature/branch2"].Protection.PullRequestReviews.BypasserList = append(
-		*((*full1.Branches)["feature/branch2"].Protection.PullRequestReviews.BypasserList),
-		*((*full2.Branches)["feature/branch2"].Protection.PullRequestReviews.BypasserList)...,
+	*(*fullMergeResult.Branches)["feature/branch2"].Protection.PullRequestReviews.Bypassers = append(
+		*((*full1.Branches)["feature/branch2"].Protection.PullRequestReviews.Bypassers),
+		*((*full2.Branches)["feature/branch2"].Protection.PullRequestReviews.Bypassers)...,
 	)
 
 	*(*fullMergeResult.Branches)["feature/branch2"].Protection.PullRequestReviews.Dismissals.RestrictTo = append(
@@ -315,8 +315,8 @@ func TestGhBranchesConfig_Merge(t *testing.T) {
 				// ConfigTemplates: &toConfigTemplates,
 				Protection: &core.BaseGhBranchProtectionConfig{
 					// ConfigTemplates:       &toConfigTemplates,
-					EnforceAdmins:  &toEnforceAdmins,
-					AllowsDeletion: &toAllowsDeletions,
+					EnforceAdmins: &toEnforceAdmins,
+					AllowDeletion: &toAllowsDeletions,
 					Pushes: &core.GhBranchProtectPushesConfig{
 						AllowsForcePushes: &toAllowsForcePushes,
 						// PushRestrictions:      &toPushRestrictions,
@@ -370,8 +370,8 @@ func TestGhBranchesConfig_Merge(t *testing.T) {
 				// ConfigTemplates: &fromConfigTemplates,
 				Protection: &core.BaseGhBranchProtectionConfig{
 					// ConfigTemplates:       &fromConfigTemplates,
-					EnforceAdmins:  &fromEnforceAdmins,
-					AllowsDeletion: &fromAllowsDeletions,
+					EnforceAdmins: &fromEnforceAdmins,
+					AllowDeletion: &fromAllowsDeletions,
 					Pushes: &core.GhBranchProtectPushesConfig{
 						AllowsForcePushes: &fromAllowsForcePushes,
 						// PushRestrictions:      &fromPushRestrictions,
@@ -852,7 +852,7 @@ func TestGhBranchProtectionConfig_Merge_2(t *testing.T) {
 func updateBaseGhBranchProtectionConfigHelper(c *core.BaseGhBranchProtectionConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateSlicePtrHelper(&c.ConfigTemplates, newSliceToCopy, updatePtr)
 	updateStringPtrHelper(&c.EnforceAdmins, stringToCopy, updatePtr)
-	updateStringPtrHelper(&c.AllowsDeletion, stringToCopy, updatePtr)
+	updateStringPtrHelper(&c.AllowDeletion, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.RequireLinearHistory, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.RequireSignedCommits, stringToCopy, updatePtr)
 
@@ -936,7 +936,7 @@ func TestBaseGhBranchProtectionConfig_Merge_2(t *testing.T) {
 
 func updateGhBranchProtectPushesConfigHelper(c *core.GhBranchProtectPushesConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.AllowsForcePushes, stringToCopy, updatePtr)
-	updateSlicePtrHelper(&c.PushRestrictions, newSliceToCopy, updatePtr)
+	updateSlicePtrHelper(&c.RestrictTo, newSliceToCopy, updatePtr)
 }
 
 func TestGhBranchProtectPushesConfig_Merge(t *testing.T) {
@@ -956,7 +956,7 @@ func TestGhBranchProtectPushesConfig_Merge_2(t *testing.T) {
 	t.Parallel()
 
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0].Pushes
-	toWithNilSlicesAndStruct.PushRestrictions = nil
+	toWithNilSlicesAndStruct.RestrictTo = nil
 
 	cases := map[string]struct {
 		value    *core.GhBranchProtectPushesConfig
@@ -1057,7 +1057,7 @@ func TestGhBranchProtectStatusChecksConfig_Merge_2(t *testing.T) {
 // and Repo->BranchProtection[...]{BaseGhBranchProtectionConfig->PullRequestReviews}
 
 func updateGhBranchProtectPRReviewConfigHelper(c *core.GhBranchProtectPRReviewConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
-	updateSlicePtrHelper(&c.BypasserList, newSliceToCopy, updatePtr)
+	updateSlicePtrHelper(&c.Bypassers, newSliceToCopy, updatePtr)
 	updateStringPtrHelper(&c.CodeownerApprovals, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.ResolvedConversations, stringToCopy, updatePtr)
 	updateStringPtrHelper(&c.ApprovalCount, stringToCopy, updatePtr)
@@ -1086,7 +1086,7 @@ func TestGhBranchProtectPRReviewConfig_Merge_2(t *testing.T) {
 	t.Parallel()
 
 	toWithNilSlicesAndStruct := (*GetFullConfig(0).BranchProtections)[0].PullRequestReviews
-	toWithNilSlicesAndStruct.BypasserList = nil
+	toWithNilSlicesAndStruct.Bypassers = nil
 	toWithNilSlicesAndStruct.Dismissals = nil
 
 	cases := map[string]struct {
@@ -1379,7 +1379,7 @@ func TestGhRepoPRCommitConfig_Merge_2(t *testing.T) {
 
 func updateGhRepoPRBranchConfigHelper(c *core.GhRepoPRBranchConfig, stringToCopy *string, newSliceToCopy *[]string, updatePtr bool) {
 	updateStringPtrHelper(&c.SuggestUpdate, stringToCopy, updatePtr)
-	updateStringPtrHelper(&c.DeleteBranchOnMerge, stringToCopy, updatePtr)
+	updateStringPtrHelper(&c.DeleteOnMerge, stringToCopy, updatePtr)
 }
 
 func TestGhRepoPRBranchConfig_Merge(t *testing.T) {

@@ -9,9 +9,8 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 
-	"github.com/yoanm/go-tfsig/testutils"
-
 	"github.com/yoanm/github-tf/core"
+	"github.com/yoanm/go-tfsig/testutils"
 )
 
 func TestGenerateHclRepoFiles(t *testing.T) {
