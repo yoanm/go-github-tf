@@ -7,7 +7,7 @@ require (
 	github.com/goccy/go-yaml v1.9.5
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/go-cmp v0.5.9
-	github.com/hashicorp/hcl/v2 v2.15.0
+	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/rs/zerolog v1.26.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.0.2
 	github.com/spf13/pflag v1.0.5
