@@ -280,23 +280,29 @@ func applyBranchResLink(
 		tmp := fmt.Sprintf("github_repository.%s.name", repoTfId)
 		repoName = &tmp
 	} else if link == LinkToBranch && sourceBranch != nil && repo != nil {
-		// /!\ a branch can't be configured if source_branch branch doesn't exist
-		// => Add an explicit dependency by using "github_branch.${repoTfId}-${branchId}.branch"
-		// Or Add an explicit dependency by using "github_branch_default.${repoTfId}.branch"
-		tmp := *sourceBranch
-		if repo.Branches != nil {
-			if _, sourceBranchConfigExists := (*repo.Branches)[*sourceBranch]; sourceBranchConfigExists {
-				tmp = fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*sourceBranch))
-			}
-		}
-		// Look for default branch only if not already updated
-		if tmp == *sourceBranch && repo.DefaultBranch != nil && *repo.DefaultBranch.Name == *sourceBranch {
-			tmp = fmt.Sprintf("github_branch_default.%s.branch", repoTfId)
-		}
-		sourceBranch = &tmp
+		sourceBranch = linkBranch(sourceBranch, repo, repoTfId)
 	}
 
 	return repoName, sourceBranch
+}
+
+func linkBranch(sourceBranch *string, repo *GhRepoConfig, repoTfId string) *string {
+	// /!\ a branch can't be configured if source_branch branch doesn't exist
+	// => Add an explicit dependency by using "github_branch.${repoTfId}-${branchId}.branch"
+	// Or Add an explicit dependency by using "github_branch_default.${repoTfId}.branch"
+	tmp := *sourceBranch
+
+	if repo.Branches != nil {
+		if _, sourceBranchConfigExists := (*repo.Branches)[*sourceBranch]; sourceBranchConfigExists {
+			tmp = fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*sourceBranch))
+		}
+	}
+	// Look for default branch only if not already updated
+	if tmp == *sourceBranch && repo.DefaultBranch != nil && *repo.DefaultBranch.Name == *sourceBranch {
+		tmp = fmt.Sprintf("github_branch_default.%s.branch", repoTfId)
+	}
+
+	return &tmp
 }
 
 func MapToDefaultBranchRes(

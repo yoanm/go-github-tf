@@ -297,6 +297,7 @@ func generateTemplateLoadingErrorMessages(readErr error, errList map[string]erro
 	for k := range errList {
 		keys = append(keys, k)
 	}
+
 	sort.Strings(keys)
 
 	for _, file := range keys {

@@ -109,57 +109,31 @@ func ApplyBranchesTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig)
 	return nil
 }
 
-func ApplyBranchProtectionsTemplate(c *GhRepoConfig, templates *TemplatesConfig) error {
-	if c == nil {
+func ApplyBranchProtectionsTemplate(config *GhRepoConfig, templates *TemplatesConfig) error {
+	if config == nil {
 		return nil
 	}
 
 	var err error
 
-	if c.BranchProtections != nil {
-		for k, b := range *c.BranchProtections {
+	if config.BranchProtections != nil {
+		for k, b := range *config.BranchProtections {
 			if b, err = ApplyBranchProtectionTemplate(b, templates); err != nil {
 				return fmt.Errorf("branch protection #%d: %w", k, err)
 			}
 
-			(*c.BranchProtections)[k] = b
+			(*config.BranchProtections)[k] = b
 		}
 	}
 
-	mapDuplicatedBranchProtection(c)
+	mapDuplicatedBranchProtection(config)
 
-	if c.DefaultBranch != nil && c.DefaultBranch.Protection != nil {
-		emptyVal := ""
-
-		wrapper := &GhBranchProtectionConfig{
-			Pattern:                      &emptyVal,
-			Forbid:                       &falseString,
-			BaseGhBranchProtectionConfig: *c.DefaultBranch.Protection,
-		}
-		if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
-			return fmt.Errorf("default branch: %w", err)
-		}
-
-		c.DefaultBranch.Protection = &wrapper.BaseGhBranchProtectionConfig
+	if err2 := applyDefaultBranchProtectionTemplate(config, templates); err2 != nil {
+		return err2
 	}
 
-	if c.Branches != nil {
-		for branchName, branchConfig := range *c.Branches {
-			if branchConfig.Protection == nil {
-				continue
-			}
-
-			wrapper := &GhBranchProtectionConfig{
-				Pattern:                      &branchName,
-				Forbid:                       &falseString,
-				BaseGhBranchProtectionConfig: *branchConfig.Protection,
-			}
-			if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
-				return fmt.Errorf("branch %s: %w", branchName, err)
-			}
-
-			branchConfig.Protection = &wrapper.BaseGhBranchProtectionConfig
-		}
+	if err2 := applyBranchesBranchProtectionTemplate(config, templates); err2 != nil {
+		return err2
 	}
 
 	return nil
@@ -372,4 +346,50 @@ func loadBranchTemplatesFor(tplNameToLoad *[]string, templates *TemplatesConfig)
 	}
 
 	return tplList, nil
+}
+
+func applyBranchesBranchProtectionTemplate(config *GhRepoConfig, templates *TemplatesConfig) error {
+	if config.Branches != nil {
+		for branchName, branchConfig := range *config.Branches {
+			if branchConfig.Protection == nil {
+				continue
+			}
+
+			var err error
+
+			wrapper := &GhBranchProtectionConfig{
+				Pattern:                      &branchName,
+				Forbid:                       &falseString,
+				BaseGhBranchProtectionConfig: *branchConfig.Protection,
+			}
+			if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
+				return fmt.Errorf("branch %s: %w", branchName, err)
+			}
+
+			branchConfig.Protection = &wrapper.BaseGhBranchProtectionConfig
+		}
+	}
+
+	return nil
+}
+
+func applyDefaultBranchProtectionTemplate(config *GhRepoConfig, templates *TemplatesConfig) error {
+	if config.DefaultBranch != nil && config.DefaultBranch.Protection != nil {
+		emptyVal := ""
+
+		var err error
+
+		wrapper := &GhBranchProtectionConfig{
+			Pattern:                      &emptyVal,
+			Forbid:                       &falseString,
+			BaseGhBranchProtectionConfig: *config.DefaultBranch.Protection,
+		}
+		if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
+			return fmt.Errorf("default branch: %w", err)
+		}
+
+		config.DefaultBranch.Protection = &wrapper.BaseGhBranchProtectionConfig
+	}
+
+	return nil
 }

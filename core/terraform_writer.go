@@ -88,7 +88,7 @@ func internalSortFileErrors(errCollector errorCollector) (map[string]error, []st
 	return subErrList, keys
 }
 
-func WriteTerraformFiles(rootPath string, files map[string]*hclwrite.File) (err error) {
+func WriteTerraformFiles(rootPath string, files map[string]*hclwrite.File) error {
 	if len(files) == 0 {
 		return nil
 	}
@@ -112,10 +112,8 @@ func WriteTerraformFiles(rootPath string, files map[string]*hclwrite.File) (err 
 
 	close(errCollector)
 
-	if len(errCollector) > 0 || statError != nil || !exists || !isDir {
-		return WriteTerraformFileError(
-			generateWritingFileErrors(rootPath, exists, statError, isDir, errCollector),
-		)
+	if errList := generateWritingFileErrors(rootPath, exists, statError, isDir, errCollector); len(errList) > 0 {
+		return WriteTerraformFileError(errList)
 	}
 
 	return nil
@@ -135,7 +133,7 @@ func generateWritingFileErrors(
 		return []error{statError}
 	case !isDir:
 		return []error{PathIsNotADirectoryError(rootPath)}
-	default:
+	case len(errCollector) > 0:
 		// sort file to always get a predictable output (for tests mostly)
 		errList := map[string]error{}
 		keys := make([]string, 0, len(errList))
@@ -155,6 +153,8 @@ func generateWritingFileErrors(
 
 		return msgList
 	}
+
+	return nil
 }
 
 /** Private **/
