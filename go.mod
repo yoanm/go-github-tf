@@ -1,4 +1,4 @@
-module github.com/yoanm/github-tf
+module github.com/yoanm/go-github-tf
 
 go 1.20
 

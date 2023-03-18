@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/yoanm/github-tf/core"
+	"github.com/yoanm/go-github-tf/core"
 )
 
 // ==> Repo

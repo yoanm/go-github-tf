@@ -7,7 +7,7 @@ import (
 	differ "github.com/andreyvit/diff"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/yoanm/github-tf/core"
+	"github.com/yoanm/go-github-tf/core"
 )
 
 func TestComputeConfig(t *testing.T) {

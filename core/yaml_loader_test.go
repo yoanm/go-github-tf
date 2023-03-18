@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/yoanm/github-tf/core"
+	"github.com/yoanm/go-github-tf/core"
 )
 
 //nolint:paralleltest // Can't be done on parallel as core.YamlAnchorDirectory is used (else race condition)

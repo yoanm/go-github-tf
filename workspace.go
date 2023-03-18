@@ -9,7 +9,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog/log"
 
-	"github.com/yoanm/github-tf/core"
+	"github.com/yoanm/go-github-tf/core"
 )
 
 func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*core.Config, error) {
