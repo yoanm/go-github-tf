@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/goccy/go-yaml v1.9.5
+	github.com/goccy/go-yaml v1.10.0
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/hcl/v2 v2.15.0
