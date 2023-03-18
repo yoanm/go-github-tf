@@ -1,8 +1,6 @@
 package core
 
 import (
-	"sort"
-
 	"github.com/hashicorp/hcl/v2/hclwrite"
 
 	"github.com/yoanm/go-gh2tf/ghbranch"
@@ -54,16 +52,10 @@ func appendBranchResources(
 ) {
 	if repoConfig.Branches != nil {
 		hasDefaultBranch := repoConfig.DefaultBranch != nil && repoConfig.DefaultBranch.Name != nil
-		// sort branches to always get a predictable output (for tests mostly)
-		keys := make([]string, 0, len(*repoConfig.Branches))
-		for k := range *repoConfig.Branches {
-			keys = append(keys, k)
-		}
+		keys, branches := MapToSortedListWithKeys(*repoConfig.Branches)
 
-		sort.Strings(keys)
-
-		for _, key := range keys {
-			branchConfig := (*repoConfig.Branches)[key]
+		for idx, branchConfig := range branches {
+			key := keys[idx]
 
 			appendBranchResourceSignature(
 				body,
@@ -166,16 +158,10 @@ func appendBranchProtectionResourceContent(
 
 	if repoConfig.Branches != nil {
 		// sort branches to always get a predictable output (for tests mostly)
-		keys := make([]string, 0, len(*repoConfig.Branches))
+		keys, branches := MapToSortedListWithKeys(*repoConfig.Branches)
 
-		for k := range *repoConfig.Branches {
-			keys = append(keys, k)
-		}
-
-		sort.Strings(keys)
-
-		for _, key := range keys {
-			branchConfig := (*repoConfig.Branches)[key]
+		for idx, branchConfig := range branches {
+			key := keys[idx]
 
 			tfsig.AppendNewLineAndBlockIfNotNil(
 				body,
@@ -184,7 +170,7 @@ func appendBranchProtectionResourceContent(
 					// creating the branch protection
 					// /!\ do not use LinkToBranch, else branch protection will be created only after branch is created
 					// (which is useless and can be done in parallel)
-					MapBranchToBranchProtectionRes(key, branchConfig, valGen, repoConfig, repoTfId, LinkToRepository),
+					MapBranchToBranchProtectionRes(&key, branchConfig.Protection, valGen, repoConfig, repoTfId, LinkToRepository),
 				),
 			)
 		}

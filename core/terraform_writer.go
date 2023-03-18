@@ -180,5 +180,5 @@ func sortErrCollectorByFile(errCollector errorCollector) []error {
 		errList[errItem.File] = errItem.Err
 	}
 
-	return SortErrorsByKey(errList)
+	return MapToSortedList(errList)
 }

@@ -94,31 +94,31 @@ var (
 
 `func ApplyBranchesTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig) error`
 
-### func [BranchError](./errors.go#L49)
+### func [BranchError](./errors.go#L48)
 
 `func BranchError(branch string, err error) error`
 
-### func [BranchProtectionError](./errors.go#L57)
+### func [BranchProtectionError](./errors.go#L56)
 
 `func BranchProtectionError(index int, err error) error`
 
-### func [ComputationError](./errors.go#L77)
+### func [ComputationError](./errors.go#L76)
 
 `func ComputationError(errList []error) error`
 
-### func [DefaultBranchError](./errors.go#L53)
+### func [DefaultBranchError](./errors.go#L52)
 
 `func DefaultBranchError(err error) error`
 
-### func [EmptySchemaError](./errors.go#L161)
+### func [EmptySchemaError](./errors.go#L160)
 
 `func EmptySchemaError(url string) error`
 
-### func [FileError](./errors.go#L61)
+### func [FileError](./errors.go#L60)
 
 `func FileError(filepath string, err error) error`
 
-### func [FileGenerationError](./errors.go#L65)
+### func [FileGenerationError](./errors.go#L64)
 
 `func FileGenerationError(msgList []string) error`
 
@@ -126,7 +126,7 @@ var (
 
 `func GenerateHclRepoFiles(configList []*GhRepoConfig) (map[string]*hclwrite.File, error)`
 
-### func [JoinErrors](./errors.go#L199)
+### func [JoinErrors](./errors.go#L180)
 
 `func JoinErrors(errList []error, separator string) error`
 
@@ -150,11 +150,11 @@ var (
     path ...string,
 ) ([]*T, error)`
 
-### func [MapBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L400)
+### func [MapBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L392)
 
 `func MapBranchToBranchProtectionRes(
-    name string,
-    branchConfig *GhBranchConfig,
+    pattern *string,
+    protection *BaseGhBranchProtectionConfig,
     valGen tfsig.ValueGenerator,
     repo *GhRepoConfig,
     repoTfId string,
@@ -171,7 +171,7 @@ var (
     links ...MapperLink,
 ) *ghbranchprotect.Config`
 
-### func [MapToBranchProtectionRes](./gh2tf_repo_mapper.go#L430)
+### func [MapToBranchProtectionRes](./gh2tf_repo_mapper.go#L413)
 
 `func MapToBranchProtectionRes(
     branchProtectionConfig *GhBranchProtectionConfig,
@@ -206,55 +206,59 @@ var (
 
 `func MapToRepositoryRes(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string) *ghrepository.Config`
 
-### func [MaxTemplateCountReachedError](./errors.go#L119)
+### func [MapToSortedList](./utils.go#L5)
+
+`func MapToSortedList[T any](list map[string]T) []T`
+
+### func [MapToSortedListWithKeys](./utils.go#L11)
+
+`func MapToSortedListWithKeys[T any](list map[string]T) ([]string, []T)`
+
+### func [MaxTemplateCountReachedError](./errors.go#L118)
 
 `func MaxTemplateCountReachedError(tplType string, path []string) error`
 
-### func [MaxTemplateDepthReachedError](./errors.go#L135)
+### func [MaxTemplateDepthReachedError](./errors.go#L134)
 
 `func MaxTemplateDepthReachedError(tplType string, path []string) error`
 
-### func [NewHclRepository](./repo_writer.go#L17)
+### func [NewHclRepository](./repo_writer.go#L15)
 
 `func NewHclRepository(repoTfId string, repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) *hclwrite.File`
 
-### func [NoTemplateAvailableError](./errors.go#L106)
+### func [NoTemplateAvailableError](./errors.go#L105)
 
 `func NoTemplateAvailableError(tplType string) error`
 
-### func [RepositoryNameIsMandatoryForConfigIndexError](./errors.go#L81)
+### func [RepositoryNameIsMandatoryForConfigIndexError](./errors.go#L80)
 
 `func RepositoryNameIsMandatoryForConfigIndexError(index int) error`
 
-### func [RepositoryNameIsMandatoryForRepoError](./errors.go#L85)
+### func [RepositoryNameIsMandatoryForRepoError](./errors.go#L84)
 
 `func RepositoryNameIsMandatoryForRepoError(index int) error`
 
-### func [SchemaCompilationError](./errors.go#L173)
+### func [SchemaCompilationError](./errors.go#L172)
 
 `func SchemaCompilationError(url string, msg string) error`
 
-### func [SchemaIsNilError](./errors.go#L169)
+### func [SchemaIsNilError](./errors.go#L168)
 
 `func SchemaIsNilError(url string) error`
 
-### func [SchemaNotFoundError](./errors.go#L165)
+### func [SchemaNotFoundError](./errors.go#L164)
 
 `func SchemaNotFoundError(url string) error`
 
-### func [SchemaValidationError](./errors.go#L151)
+### func [SchemaValidationError](./errors.go#L150)
 
 `func SchemaValidationError(path string, location string, msg string) error`
 
-### func [SortErrorsByKey](./errors.go#L181)
-
-`func SortErrorsByKey(errList map[string]error) []error`
-
-### func [TerraformFileWritingErrors](./errors.go#L177)
+### func [TerraformFileWritingErrors](./errors.go#L176)
 
 `func TerraformFileWritingErrors(errList []error) error`
 
-### func [UnknownTemplateError](./errors.go#L89)
+### func [UnknownTemplateError](./errors.go#L88)
 
 `func UnknownTemplateError(tplType string, tplName string) error`
 
@@ -278,11 +282,11 @@ var (
 
 `func ValidateRepositoryTemplateConfig(filePath string) error`
 
-### func [WorkspacePathDoesntExistError](./errors.go#L69)
+### func [WorkspacePathDoesntExistError](./errors.go#L68)
 
 `func WorkspacePathDoesntExistError(path string) error`
 
-### func [WorkspacePathIsExpectedToBeADirectoryError](./errors.go#L73)
+### func [WorkspacePathIsExpectedToBeADirectoryError](./errors.go#L72)
 
 `func WorkspacePathIsExpectedToBeADirectoryError(path string) error`
 

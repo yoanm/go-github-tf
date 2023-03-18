@@ -3,7 +3,6 @@ package core
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 )
 
@@ -176,24 +175,6 @@ func SchemaCompilationError(url string, msg string) error {
 
 func TerraformFileWritingErrors(errList []error) error {
 	return fmt.Errorf("%w:\n\t - %w", ErrDuringWriteTerraformFiles, JoinErrors(errList, "\n\t - "))
-}
-
-func SortErrorsByKey(errList map[string]error) []error {
-	// sort file to always get a predictable output (for tests mostly)
-	newErrorList := []error{}
-	keys := make([]string, 0, len(errList))
-
-	for k := range errList {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	for _, file := range keys {
-		newErrorList = append(newErrorList, errList[file])
-	}
-
-	return newErrorList
 }
 
 func JoinErrors(errList []error, separator string) error {

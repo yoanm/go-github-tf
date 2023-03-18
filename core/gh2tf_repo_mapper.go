@@ -361,26 +361,18 @@ func MapDefaultBranchToBranchProtectionRes(
 	repoTfId string,
 	links ...MapperLink,
 ) *ghbranchprotect.Config {
-	if branchConfig == nil || branchConfig.Protection == nil {
+	if branchConfig == nil {
 		return nil
 	}
 
-	wrapper := &GhBranchProtectionConfig{
-		Pattern: branchConfig.Name,
-		Forbid:  &falseString,
-		BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-			ConfigTemplates:      branchConfig.Protection.ConfigTemplates,
-			EnforceAdmins:        branchConfig.Protection.EnforceAdmins,
-			AllowDeletion:        branchConfig.Protection.AllowDeletion,
-			RequireLinearHistory: branchConfig.Protection.RequireLinearHistory,
-			RequireSignedCommits: branchConfig.Protection.RequireSignedCommits,
-			Pushes:               branchConfig.Protection.Pushes,
-			StatusChecks:         branchConfig.Protection.StatusChecks,
-			PullRequestReviews:   branchConfig.Protection.PullRequestReviews,
-		},
-	}
-
-	res := MapToBranchProtectionRes(wrapper, valGen, repo, repoTfId, links...)
+	res := MapBranchToBranchProtectionRes(
+		branchConfig.Name,
+		branchConfig.Protection,
+		valGen,
+		repo,
+		repoTfId,
+		links...,
+	)
 	if res != nil {
 		res.Identifier = repoTfId + "-" + DefaultBranchIdentifier
 
@@ -398,30 +390,21 @@ func MapDefaultBranchToBranchProtectionRes(
 }
 
 func MapBranchToBranchProtectionRes(
-	name string,
-	branchConfig *GhBranchConfig,
+	pattern *string,
+	protection *BaseGhBranchProtectionConfig,
 	valGen tfsig.ValueGenerator,
 	repo *GhRepoConfig,
 	repoTfId string,
 	links ...MapperLink,
 ) *ghbranchprotect.Config {
-	if branchConfig == nil || branchConfig.Protection == nil {
+	if protection == nil {
 		return nil
 	}
 
 	wrapper := &GhBranchProtectionConfig{
-		Pattern: &name,
-		Forbid:  &falseString,
-		BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-			ConfigTemplates:      branchConfig.Protection.ConfigTemplates,
-			EnforceAdmins:        branchConfig.Protection.EnforceAdmins,
-			AllowDeletion:        branchConfig.Protection.AllowDeletion,
-			RequireLinearHistory: branchConfig.Protection.RequireLinearHistory,
-			RequireSignedCommits: branchConfig.Protection.RequireSignedCommits,
-			Pushes:               branchConfig.Protection.Pushes,
-			StatusChecks:         branchConfig.Protection.StatusChecks,
-			PullRequestReviews:   branchConfig.Protection.PullRequestReviews,
-		},
+		Pattern:                      pattern,
+		Forbid:                       &falseString,
+		BaseGhBranchProtectionConfig: *newBaseGhBranchProtectionConfigFromBranchProtection(protection),
 	}
 
 	return MapToBranchProtectionRes(wrapper, valGen, repo, repoTfId, links...)
@@ -533,4 +516,19 @@ func mapBranchProtectionResLink(
 	}
 
 	return repoName, pattern
+}
+
+func newBaseGhBranchProtectionConfigFromBranchProtection(
+	protection *BaseGhBranchProtectionConfig,
+) *BaseGhBranchProtectionConfig {
+	return &BaseGhBranchProtectionConfig{
+		ConfigTemplates:      protection.ConfigTemplates,
+		EnforceAdmins:        protection.EnforceAdmins,
+		AllowDeletion:        protection.AllowDeletion,
+		RequireLinearHistory: protection.RequireLinearHistory,
+		RequireSignedCommits: protection.RequireSignedCommits,
+		Pushes:               protection.Pushes,
+		StatusChecks:         protection.StatusChecks,
+		PullRequestReviews:   protection.PullRequestReviews,
+	}
 }

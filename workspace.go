@@ -95,7 +95,7 @@ func loadConfigDirectoryFiles(
 	}
 
 	if len(errList) > 0 {
-		return configDirectoryLoadingError(core.SortErrorsByKey(errList))
+		return configDirectoryLoadingError(core.MapToSortedList(errList))
 	}
 
 	return nil
@@ -215,7 +215,7 @@ func readTemplateDirectory(
 		}
 
 		if len(errList) > 0 {
-			return templateLoadingError(core.SortErrorsByKey(errList))
+			return templateLoadingError(core.MapToSortedList(errList))
 		}
 	} else {
 		return templateLoadingError([]error{readErr})

@@ -16,7 +16,7 @@ func ComputeConfig(config *Config) (*Config, error) {
 	errList := loadConfig(config, computedConfig)
 
 	if len(errList) > 0 {
-		return nil, ComputationError(SortErrorsByKey(errList))
+		return nil, ComputationError(MapToSortedList(errList))
 	}
 
 	return computedConfig, nil

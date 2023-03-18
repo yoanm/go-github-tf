@@ -418,7 +418,7 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 	}
 	cases := map[string]struct {
 		name     string
-		value    *core.GhBranchConfig
+		value    *core.BaseGhBranchProtectionConfig
 		repo     *core.GhRepoConfig
 		links    []core.MapperLink
 		expected *ghbranchprotect.Config
@@ -432,28 +432,27 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 		},
 		"empty": {
 			branchName,
-			&core.GhBranchConfig{},
+			&core.BaseGhBranchProtectionConfig{},
 			&repoConfig,
 			nil,
-			nil,
-		},
-		"without protection": {
-			branchName,
-			&core.GhBranchConfig{
-				SourceBranch: &branchName,
+			&ghbranchprotect.Config{
+				ValueGenerator:        valGen,
+				Identifier:            tfId + "-" + branchName,
+				RepositoryId:          &repoName,
+				Pattern:               &branchName,
+				EnforceAdmins:         nil,
+				AllowsDeletions:       nil,
+				AllowsForcePushes:     nil,
+				PushRestrictions:      nil,
+				RequiredLinearHistory: nil,
+				RequireSignedCommits:  nil,
+				RequiredStatusChecks:  nil,
+				RequiredPRReview:      nil,
 			},
-			&repoConfig,
-			nil,
-			nil,
 		},
 		"with all links": {
 			branch1Name,
-			&core.GhBranchConfig{
-				SourceBranch: &branch1Name,
-				BaseGhBranchConfig: core.BaseGhBranchConfig{
-					Protection: &core.BaseGhBranchProtectionConfig{},
-				},
-			},
+			&core.BaseGhBranchProtectionConfig{},
 			&repoConfig,
 			[]core.MapperLink{core.LinkToRepository, core.LinkToBranch},
 			&ghbranchprotect.Config{
@@ -483,7 +482,8 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
-				actual := core.MapBranchToBranchProtectionRes(tc.name, tc.value, valGen, tc.repo, tfId, tc.links...)
+				branchNameTmp := tc.name
+				actual := core.MapBranchToBranchProtectionRes(&branchNameTmp, tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
