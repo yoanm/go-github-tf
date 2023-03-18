@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	NoErrorExitCode                     = 0
-	ReadWorkspaceErrorExitCode          = 1
-	ComputeConfigErrorExitCode          = 2
-	GenerateTerraformFilesErrorExitCode = 3
-	WriteTerraformFilesErrorExitCode    = 4
+	noErrorExitCode                     = 0
+	readWorkspaceErrorExitCode          = 1
+	computeConfigErrorExitCode          = 2
+	generateTerraformFilesErrorExitCode = 3
+	writeTerraformFilesErrorExitCode    = 4
 )
 
 func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformDir, yamlAnchorDir string) int {
@@ -26,7 +26,7 @@ func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformD
 	if rawConfig, err = readWorkspace(workspacePath, configDir, templateDir, yamlAnchorDir); err != nil {
 		log.Error().Msgf("%s", err)
 
-		return ReadWorkspaceErrorExitCode
+		return readWorkspaceErrorExitCode
 	}
 
 	if zerolog.GlobalLevel() == zerolog.TraceLevel {
@@ -51,7 +51,7 @@ func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformD
 	if config, err = core.ComputeConfig(rawConfig); err != nil {
 		log.Error().Msgf("%s", err)
 
-		return ComputeConfigErrorExitCode
+		return computeConfigErrorExitCode
 	}
 
 	if zerolog.GlobalLevel() == zerolog.TraceLevel {
@@ -67,14 +67,14 @@ func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformD
 	if err != nil {
 		log.Error().Msgf("%s", err)
 
-		return GenerateTerraformFilesErrorExitCode
+		return generateTerraformFilesErrorExitCode
 	}
 
 	if err = core.WriteTerraformFiles(path.Join(workspacePath, terraformDir), files); err != nil {
 		log.Error().Msgf("%s", err)
 
-		return WriteTerraformFilesErrorExitCode
+		return writeTerraformFilesErrorExitCode
 	}
 
-	return NoErrorExitCode
+	return noErrorExitCode
 }

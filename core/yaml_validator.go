@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	//nolint:gochecknoglobals //Easier to manage it as global variable
+	//nolint:gochecknoglobals //Easier to manage it as exported variable
 	YamlAnchorDirectory *string
-	//nolint:gochecknoglobals //Easier to manage it as global variable
+	//nolint:gochecknoglobals //Easier to manage it as exported variable
 	Schemas = &SchemaList{
 		"map:///repo.json":                              {Content: &repositoryConfigSchema},
 		"map:///repos.json":                             {Content: &repositoriesConfigSchema},

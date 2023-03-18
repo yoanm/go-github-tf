@@ -1,3 +1,6 @@
+/*
+Package core provides core functionality for GitHub config to terraform file conversion
+*/
 package core
 
 type GhRepoConfig struct {

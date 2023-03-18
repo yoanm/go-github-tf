@@ -18,7 +18,7 @@ func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*cor
 	config := core.NewConfig()
 
 	if _, err = os.Stat(rootPath); os.IsNotExist(err) {
-		return nil, InputDirectoryDoesntExistError(rootPath)
+		return nil, inputDirectoryDoesntExistError(rootPath)
 	}
 
 	configureYamlAnchorDirectory(rootPath, yamlAnchorDir)
@@ -30,11 +30,11 @@ func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*cor
 
 	switch {
 	case confErr != nil && tplErr != nil:
-		return nil, WorkspaceLoadingError([]error{confErr, tplErr})
+		return nil, workspaceLoadingError([]error{confErr, tplErr})
 	case confErr != nil:
-		return nil, WorkspaceLoadingError([]error{confErr})
+		return nil, workspaceLoadingError([]error{confErr})
 	case tplErr != nil:
-		return nil, WorkspaceLoadingError([]error{tplErr})
+		return nil, workspaceLoadingError([]error{tplErr})
 	}
 
 	return config, nil
@@ -66,14 +66,10 @@ func readConfigDirectory(config *core.Config, rootPath string, decoderOpts []yam
 	)
 
 	if filenames, readErr = readDirectory(rootPath); readErr != nil {
-		return ConfigDirectoryLoadingError([]error{readErr})
+		return configDirectoryLoadingError([]error{readErr})
 	}
 
-	if err := loadConfigDirectoryFiles(config, rootPath, decoderOpts, filenames); err != nil {
-		return err
-	}
-
-	return nil
+	return loadConfigDirectoryFiles(config, rootPath, decoderOpts, filenames)
 }
 
 func loadConfigDirectoryFiles(
@@ -92,14 +88,14 @@ func loadConfigDirectoryFiles(
 	uniqRepoList := map[string]string{}
 	for fName, repoName := range visited {
 		if firstFName, ok := uniqRepoList[repoName]; ok {
-			errList[fName] = AlreadyImportedRepositoryError(fName, repoName, firstFName)
+			errList[fName] = alreadyImportedRepositoryError(repoName, []string{fName, firstFName})
 		} else {
 			uniqRepoList[repoName] = fName
 		}
 	}
 
 	if len(errList) > 0 {
-		return ConfigDirectoryLoadingError(core.SortErrorsByKey(errList))
+		return configDirectoryLoadingError(core.SortErrorsByKey(errList))
 	}
 
 	return nil
@@ -219,10 +215,10 @@ func readTemplateDirectory(
 		}
 
 		if len(errList) > 0 {
-			return TemplateLoadingError(core.SortErrorsByKey(errList))
+			return templateLoadingError(core.SortErrorsByKey(errList))
 		}
 	} else {
-		return TemplateLoadingError([]error{readErr})
+		return templateLoadingError([]error{readErr})
 	}
 
 	return nil
@@ -256,18 +252,19 @@ func loadTemplateFromFile(config *core.Config, filePath string, decoderOpts []ya
 
 		tpl, err := core.LoadRepositoryTemplateFromFile(filePath, decoderOpts...)
 		if err != nil {
-			//nolint:wrapcheck // Expecred to return error as is
+			//nolint:wrapcheck // Expected to return error as is
 			return err
-		} else {
-			config.Templates.Repos[tplName] = tpl
-			log.Debug().Msgf("Loaded '%s' as repository template", filePath)
 		}
+
+		config.Templates.Repos[tplName] = tpl
+
+		log.Debug().Msgf("Loaded '%s' as repository template", filePath)
 	case strings.HasSuffix(tplName, ".branch-protection"):
 		tplName = strings.TrimSuffix(tplName, ".branch-protection")
 
 		tpl, err := core.LoadBranchProtectionTemplateFromFile(filePath, decoderOpts...)
 		if err != nil {
-			//nolint:wrapcheck // Expecred to return error as is
+			//nolint:wrapcheck // Expected to return error as is
 			return err
 		} else {
 			config.Templates.BranchProtections[tplName] = tpl
@@ -278,7 +275,7 @@ func loadTemplateFromFile(config *core.Config, filePath string, decoderOpts []ya
 
 		tpl, err := core.LoadBranchTemplateFromFile(filePath, decoderOpts...)
 		if err != nil {
-			//nolint:wrapcheck // Expecred to return error as is
+			//nolint:wrapcheck // Expected to return error as is
 			return err
 		} else {
 			config.Templates.Branches[tplName] = tpl

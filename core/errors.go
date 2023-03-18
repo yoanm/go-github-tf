@@ -34,7 +34,6 @@ var (
 	ErrDuringFileGeneration      = errors.New("error while generating files")
 	ErrDuringComputation         = errors.New("error during computation")
 
-	// Json Schema and validation.
 	ErrSchemaValidation        = errors.New("schema validation error")
 	ErrEmptySchema             = errors.New("empty schema")
 	ErrSchemaNotFound          = errors.New("schema not found")

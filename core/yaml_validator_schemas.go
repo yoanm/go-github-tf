@@ -10,6 +10,7 @@ type Schema struct {
 	Content *string
 
 	compiled *jsonschema.Schema
+	mu       sync.Mutex
 }
 type SchemaList map[string]*Schema
 
@@ -19,10 +20,8 @@ func (s *SchemaList) FindCompiled(url string) *jsonschema.Schema {
 		panic(err)
 	}
 
-	var mu sync.Mutex
-
 	// Prevent race condition during compilation
-	mu.Lock()
+	schema.mu.Lock()
 
 	if schema.compiled == nil {
 		compiled, err2 := s.Compile(url)
@@ -33,7 +32,7 @@ func (s *SchemaList) FindCompiled(url string) *jsonschema.Schema {
 		schema.compiled = compiled
 	}
 
-	mu.Unlock()
+	schema.mu.Unlock()
 
 	return schema.compiled
 }

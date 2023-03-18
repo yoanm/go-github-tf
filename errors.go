@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/yoanm/github-tf/core"
 )
@@ -18,38 +20,39 @@ var (
 	errPathIsNotADirectory = errors.New("path is not a directory")
 )
 
-func WorkspaceLoadingError(errList []error) error {
+func workspaceLoadingError(errList []error) error {
 	const separator = "\n"
 
 	return fmt.Errorf("%w:%s%w", errDuringWorkspaceLoading, separator, core.JoinErrors(errList, separator))
 }
 
-func ConfigDirectoryLoadingError(errList []error) error {
+func configDirectoryLoadingError(errList []error) error {
 	const separator = "\n\t - "
 
 	return fmt.Errorf("%w:%s%w", errDuringConfigsLoading, separator, core.JoinErrors(errList, separator))
 }
 
-func TemplateLoadingError(errList []error) error {
+func templateLoadingError(errList []error) error {
 	const separator = "\n\t - "
 
 	return fmt.Errorf("%w:%s%w", errDuringTemplateLoading, separator, core.JoinErrors(errList, separator))
 }
 
-func InputDirectoryDoesntExistError(path string) error {
+func inputDirectoryDoesntExistError(path string) error {
 	return fmt.Errorf("%w: %s", errInputDirectoryDoesntExist, path)
 }
 
-func AlreadyImportedRepositoryError(fName string, repoName string, firstFName string) error {
+func alreadyImportedRepositoryError(repoName string, filepathList []string) error {
+	sort.Strings(filepathList)
+
 	return fmt.Errorf(
-		"%w: repository %s imported by %s, but already imported by %s",
+		"%w: %q imported by %s",
 		errRepositoryAlreadyImported,
 		repoName,
-		fName,
-		firstFName,
+		strings.Join(filepathList, ", "),
 	)
 }
 
-func PathIsNotADirectoryError(path string) error {
+func pathIsNotADirectoryError(path string) error {
 	return fmt.Errorf("%w: %s", errPathIsNotADirectory, path)
 }

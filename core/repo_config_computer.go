@@ -132,11 +132,7 @@ func ApplyBranchProtectionsTemplate(config *GhRepoConfig, templates *TemplatesCo
 		return err2
 	}
 
-	if err2 := applyBranchesBranchProtectionTemplate(config, templates); err2 != nil {
-		return err2
-	}
-
-	return nil
+	return applyBranchesBranchProtectionTemplate(config, templates)
 }
 
 func ApplyBranchProtectionTemplate(
