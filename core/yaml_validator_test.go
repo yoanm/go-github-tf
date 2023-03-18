@@ -127,9 +127,8 @@ func TestValidateRepositoryTemplateConfig(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // Can't be done on parallel as core.YamlAnchorDirectory is used (else race condition)
 func TestValidateBranchProtectionTemplateConfig(t *testing.T) {
-	t.Parallel()
-
 	// Reset YamlAnchorDirectory, so it's certain to cover getYamlValidatorDecoderOptions default return
 	core.YamlAnchorDirectory = nil
 
@@ -156,13 +155,9 @@ func TestValidateBranchProtectionTemplateConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				t.Parallel()
 				EnsureErrorMatching(t, tc.error, core.ValidateBranchProtectionTemplateConfig(tc.filename))
 			},
 		)

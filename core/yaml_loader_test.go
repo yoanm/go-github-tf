@@ -7,9 +7,8 @@ import (
 	"github.com/yoanm/github-tf/core"
 )
 
+//nolint:paralleltest // Can't be done on parallel as core.YamlAnchorDirectory is used (else race condition)
 func TestLoadRepositoryFromFile(t *testing.T) {
-	t.Parallel()
-
 	anchorDir := "testdata/yaml-anchors"
 	core.YamlAnchorDirectory = &anchorDir
 
@@ -52,13 +51,9 @@ func TestLoadRepositoryFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				t.Parallel()
 				conf, err := core.LoadRepositoryFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
@@ -66,9 +61,8 @@ func TestLoadRepositoryFromFile(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // Can't be done on parallel as core.YamlAnchorDirectory is used (else race condition)
 func TestLoadRepositoriesFromFile(t *testing.T) {
-	t.Parallel()
-
 	anchorDir := "testdata/yaml-anchors"
 	core.YamlAnchorDirectory = &anchorDir
 
@@ -100,13 +94,9 @@ func TestLoadRepositoriesFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				t.Parallel()
 				conf, err := core.LoadRepositoriesFromFile(tc.filename)
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
