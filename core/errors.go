@@ -3,69 +3,118 @@ package core
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 )
 
 var (
-	errDuringWriteTerraformFiles     = errors.New("error while writing terraform files")
-	errRepositoryNameIsMandatory     = errors.New("repository name is mandatory")
-	errDuringFileGeneration          = errors.New("error while generating files")
-	errFileOpenNoSuchFileOrDirectory = errors.New("no such file or directory")
-	errPathIsNotADirectory           = errors.New("path is not a directory")
-	errTemplateUnavailable           = errors.New("template unavailable")
-	errDuringComputation             = errors.New("error during computation")
-	errRepositoryNameIsMissing       = errors.New("repository name is missing")
-	errUnknownTemplate               = errors.New("unknown template")
-	errMaxTemplateCount              = errors.New("maximum template count reached")
-	errMaxTemplateDepth              = errors.New("maximum template depth reached")
+	ErrRepositoryNameIsMandatory = errors.New("repository name is mandatory")
+
+	ErrWorkspacePathDoesntExist              = errors.New("workspace path doesn't exist")
+	ErrWorkspacePathIsExpectedToBeADirectory = errors.New("workspace path is expected to be a directory")
+
+	ErrNoTemplateAvailable                 = errors.New("not found as none available")
+	ErrNoRepositoryTemplateAvailable       = fmt.Errorf("%s template %w", RepositoryTemplateType, ErrNoTemplateAvailable)
+	ErrNoBranchTemplateAvailable           = fmt.Errorf("%s template %w", BranchTemplateType, ErrNoTemplateAvailable)
+	ErrNoBranchProtectionTemplateAvailable = fmt.Errorf(
+		"%s template %w",
+		BranchProtectionTemplateType,
+		ErrNoTemplateAvailable,
+	)
+
+	ErrTemplateNotFound                 = errors.New("not found")
+	ErrRepositoryTemplateNotFound       = fmt.Errorf("%s template %w", RepositoryTemplateType, ErrTemplateNotFound)
+	ErrBranchTemplateNotFound           = fmt.Errorf("%s template %w", BranchTemplateType, ErrTemplateNotFound)
+	ErrBranchProtectionTemplateNotFound = fmt.Errorf("%s template %w", BranchProtectionTemplateType, ErrTemplateNotFound)
+
+	ErrMaxTemplateCount = errors.New("maximum template count reached")
+	ErrMaxTemplateDepth = errors.New("maximum template depth reached")
+
+	ErrDuringWriteTerraformFiles = errors.New("error while writing terraform files")
+	ErrDuringFileGeneration      = errors.New("error while generating files")
+	ErrDuringComputation         = errors.New("error during computation")
 
 	// Json Schema and validation.
-	errSchemaValidation        = errors.New("schema validation error")
-	errEmptySchema             = errors.New("empty schema")
-	errSchemaNotFound          = errors.New("schema not found")
-	errSchemaIsNil             = errors.New("schema is nil")
-	errDuringSchemaCompilation = errors.New("error during schema compilation")
+	ErrSchemaValidation        = errors.New("schema validation error")
+	ErrEmptySchema             = errors.New("empty schema")
+	ErrSchemaNotFound          = errors.New("schema not found")
+	ErrSchemaIsNil             = errors.New("schema is nil")
+	ErrDuringSchemaCompilation = errors.New("error during schema compilation")
+
+	ErrFileError             = errors.New("file")
+	ErrBranchError           = errors.New("branch")
+	ErrDefaultBranchError    = errors.New("default branch")
+	ErrBranchProtectionError = errors.New("branch protection")
 )
 
-func WriteTerraformFileError(errList []error) error {
-	msgList := []string{}
-	for _, err := range errList {
-		msgList = append(msgList, err.Error())
-	}
+func BranchError(branch string, err error) error {
+	return fmt.Errorf("%w %s: %w", ErrBranchError, branch, err)
+}
 
-	return fmt.Errorf("%w\n\t - %s", errDuringWriteTerraformFiles, strings.Join(msgList, "\n\t - "))
+func DefaultBranchError(err error) error {
+	return fmt.Errorf("%w: %w", ErrDefaultBranchError, err)
+}
+
+func BranchProtectionError(index int, err error) error {
+	return fmt.Errorf("%w #%d: %w", ErrBranchProtectionError, index, err)
+}
+
+func FileError(filepath string, err error) error {
+	return fmt.Errorf("%w %s: %w", ErrFileError, filepath, err)
 }
 
 func FileGenerationError(msgList []string) error {
-	return fmt.Errorf("%w:\n\t - %s", errDuringFileGeneration, strings.Join(msgList, "\n\t - "))
+	return fmt.Errorf("%w:\n\t - %s", ErrDuringFileGeneration, strings.Join(msgList, "\n\t - "))
 }
 
-func FileOpenNoSuchFileOrDirectoryError(path string) error {
-	return fmt.Errorf("%w: %s", errFileOpenNoSuchFileOrDirectory, path)
+func WorkspacePathDoesntExistError(path string) error {
+	return fmt.Errorf("%w: %s", ErrWorkspacePathDoesntExist, path)
 }
 
-func PathIsNotADirectoryError(path string) error {
-	return fmt.Errorf("%w: %s", errPathIsNotADirectory, path)
+func WorkspacePathIsExpectedToBeADirectoryError(path string) error {
+	return fmt.Errorf("%w: %s", ErrWorkspacePathIsExpectedToBeADirectory, path)
 }
 
-func TemplateUnavailableError(tplType string) error {
-	return fmt.Errorf("%w: unable to load %s template", errTemplateUnavailable, tplType)
-}
-
-func ComputationError(msgList []string) error {
-	return fmt.Errorf("%w:\n\t - %s", errDuringComputation, strings.Join(msgList, "\n\t - "))
+func ComputationError(errList []error) error {
+	return fmt.Errorf("%w:\n\t - %w", ErrDuringComputation, JoinErrors(errList, "\n\t - "))
 }
 
 func RepositoryNameIsMandatoryForConfigIndexError(index int) error {
-	return fmt.Errorf("%w: config #%d", errRepositoryNameIsMandatory, index)
+	return fmt.Errorf("config #%d: %w", index, ErrRepositoryNameIsMandatory)
 }
 
-func RepositoryNameIsMissingForRepoError(index int) error {
-	return fmt.Errorf("%w: repo #%d", errRepositoryNameIsMissing, index)
+func RepositoryNameIsMandatoryForRepoError(index int) error {
+	return fmt.Errorf("repo #%d: %w", index, ErrRepositoryNameIsMandatory)
 }
 
 func UnknownTemplateError(tplType string, tplName string) error {
-	return fmt.Errorf("%w: %s template %s", errUnknownTemplate, tplType, tplName)
+	var baseError error
+
+	switch tplType {
+	case RepositoryTemplateType:
+		baseError = ErrRepositoryTemplateNotFound
+	case BranchTemplateType:
+		baseError = ErrBranchTemplateNotFound
+	case BranchProtectionTemplateType:
+		baseError = ErrBranchProtectionTemplateNotFound
+	default:
+		return fmt.Errorf("\"%s\" %s template %w", tplName, tplType, ErrTemplateNotFound)
+	}
+
+	return fmt.Errorf("\"%s\" %w", tplName, baseError)
+}
+
+func NoTemplateAvailableError(tplType string) error {
+	switch tplType {
+	case RepositoryTemplateType:
+		return ErrNoRepositoryTemplateAvailable
+	case BranchTemplateType:
+		return ErrNoBranchTemplateAvailable
+	case BranchProtectionTemplateType:
+		return ErrNoBranchProtectionTemplateAvailable
+	default:
+		return fmt.Errorf("%s template %w", tplType, ErrNoTemplateAvailable)
+	}
 }
 
 func MaxTemplateCountReachedError(tplType string, path []string) error {
@@ -77,7 +126,7 @@ func MaxTemplateCountReachedError(tplType string, path []string) error {
 
 	return fmt.Errorf(
 		"%w: more than %d %s template detected for %s",
-		errMaxTemplateCount,
+		ErrMaxTemplateCount,
 		TemplateMaxCount,
 		tplType,
 		pathString,
@@ -93,7 +142,7 @@ func MaxTemplateDepthReachedError(tplType string, path []string) error {
 
 	return fmt.Errorf(
 		"%w: more than %d levels of %s template detected for %s",
-		errMaxTemplateDepth,
+		ErrMaxTemplateDepth,
 		TemplateMaxDepth,
 		tplType,
 		pathString,
@@ -103,7 +152,7 @@ func MaxTemplateDepthReachedError(tplType string, path []string) error {
 func SchemaValidationError(path string, location string, msg string) error {
 	return fmt.Errorf(
 		"%w: file %s: %s %s",
-		errSchemaValidation,
+		ErrSchemaValidation,
 		path,
 		location,
 		msg,
@@ -111,17 +160,52 @@ func SchemaValidationError(path string, location string, msg string) error {
 }
 
 func EmptySchemaError(url string) error {
-	return fmt.Errorf("%w: url %q", errEmptySchema, url)
+	return fmt.Errorf("%w: url %q", ErrEmptySchema, url)
 }
 
 func SchemaNotFoundError(url string) error {
-	return fmt.Errorf("%w: url %q", errSchemaNotFound, url)
+	return fmt.Errorf("%w: url %q", ErrSchemaNotFound, url)
 }
 
 func SchemaIsNilError(url string) error {
-	return fmt.Errorf("%w: url %q", errSchemaIsNil, url)
+	return fmt.Errorf("%w: url %q", ErrSchemaIsNil, url)
 }
 
 func SchemaCompilationError(url string, msg string) error {
-	return fmt.Errorf("%w: url %s / error %s", errDuringSchemaCompilation, url, msg)
+	return fmt.Errorf("%w: url %s / error %s", ErrDuringSchemaCompilation, url, msg)
+}
+
+func TerraformFileWritingErrors(errList []error) error {
+	return fmt.Errorf("%w:\n\t - %w", ErrDuringWriteTerraformFiles, JoinErrors(errList, "\n\t - "))
+}
+
+func SortErrorsByKey(errList map[string]error) []error {
+	// sort file to always get a predictable output (for tests mostly)
+	newErrorList := []error{}
+	keys := make([]string, 0, len(errList))
+
+	for k := range errList {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	for _, file := range keys {
+		newErrorList = append(newErrorList, errList[file])
+	}
+
+	return newErrorList
+}
+
+func JoinErrors(errList []error, separator string) error {
+	if separator == "\n" {
+		return errors.Join(errList...)
+	}
+
+	err := errList[0]
+	for _, subErr := range errList[1:] {
+		err = fmt.Errorf("%w%s%w", err, separator, subErr)
+	}
+
+	return err
 }

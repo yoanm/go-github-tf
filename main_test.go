@@ -14,14 +14,11 @@ import (
 )
 
 func TestCLIFlags(t *testing.T) {
-	t.Parallel()
 	ts := configure(t, "testdata/base")
 	ts.Run(t, false)
 }
 
 func TestCLIWrite_withLoadingErrors(t *testing.T) {
-	t.Parallel()
-
 	cases := []string{
 		"invalid-config-files",
 		"invalid-config-files-2",
@@ -37,12 +34,9 @@ func TestCLIWrite_withLoadingErrors(t *testing.T) {
 		"invalid-yaml-2",
 	}
 	for _, tcname := range cases {
-		tcname := tcname // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				t.Parallel()
 				ts := configure(t, filepath.Join("testdata/write/loading-errors", tcname))
 				// ts.KeepRootDirs = true
 				ts.Run(t, false)
@@ -52,53 +46,37 @@ func TestCLIWrite_withLoadingErrors(t *testing.T) {
 }
 
 func TestCLIWrite_withComputationErrors(t *testing.T) {
-	t.Parallel()
-
 	cases := []string{
 		"unknown-template",
 		"default-branch-template-without-default-branch",
 	}
 	for _, tcname := range cases {
-		tcname := tcname // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				t.Parallel()
-				ts := configure(t, filepath.Join("testdata/write/computation-errors", tcname))
-				// ts.KeepRootDirs = true
-				ts.Run(t, false)
+				configure(t, filepath.Join("testdata/write/computation-errors", tcname)).Run(t, false)
 			},
 		)
 	}
 }
 
 func TestCLIWrite_withTerraformErrors(t *testing.T) {
-	t.Parallel()
-
 	cases := []string{
 		"missing-terraform-directory",
 		"terraform-directory-as-file",
 		"permission-issue",
 	}
 	for _, tcname := range cases {
-		tcname := tcname // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				t.Parallel()
-				ts := configure(t, filepath.Join("testdata/write/terraform-errors", tcname))
-				// ts.KeepRootDirs = true
-				ts.Run(t, false)
+				configure(t, filepath.Join("testdata/write/terraform-errors", tcname)).Run(t, false)
 			},
 		)
 	}
 }
 
 func TestCLIWrite_working(t *testing.T) {
-	t.Parallel()
-
 	cases := []string{
 		"base",
 		"full",
@@ -109,15 +87,10 @@ func TestCLIWrite_working(t *testing.T) {
 		"default-branch-branch-protection-template-with-existing-config",
 	}
 	for _, tcname := range cases {
-		tcname := tcname // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				t.Parallel()
-				ts := configure(t, filepath.Join("testdata/write/working", tcname))
-				// ts.KeepRootDirs = true
-				ts.Run(t, false)
+				configure(t, filepath.Join("testdata/write/working", tcname)).Run(t, false)
 			},
 		)
 	}

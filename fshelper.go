@@ -1,16 +1,8 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"os"
 )
-
-var errPathIsNotADirectory = errors.New("path is not a directory")
-
-func PathIsNotADirectoryError(path string) error {
-	return fmt.Errorf("%w: %s", errPathIsNotADirectory, path)
-}
 
 func readDirectory(rootPath string) ([]string, error) {
 	directory, dirErr := openDirectory(rootPath)

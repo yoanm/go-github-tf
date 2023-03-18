@@ -1,11 +1,15 @@
 package core
 
 const (
+	RepositoryTemplateType       = "repository"
+	BranchTemplateType           = "branch"
+	BranchProtectionTemplateType = "branch protection"
+
 	TemplateMaxDepth = 10
 	TemplateMaxCount = 10
 )
 
-func loadTemplate[T any](
+func LoadTemplate[T any](
 	tplName string,
 	loaderFn func(s string) *T,
 	finderFn func(c *T) *[]string,
@@ -26,7 +30,7 @@ func loadTemplate[T any](
 		return nil, UnknownTemplateError(tplType, tplName)
 	}
 
-	if tplList, err = loadTemplateList(finderFn(tpl), loaderFn, finderFn, tplType, append(path, tplName)...); err != nil {
+	if tplList, err = LoadTemplateList(finderFn(tpl), loaderFn, finderFn, tplType, append(path, tplName)...); err != nil {
 		return nil, err
 	}
 
@@ -35,7 +39,7 @@ func loadTemplate[T any](
 	return tplList, nil
 }
 
-func loadTemplateList[T any](
+func LoadTemplateList[T any](
 	tplNameList *[]string,
 	loaderFn func(s string) *T,
 	finderFn func(c *T) *[]string,
@@ -55,7 +59,7 @@ func loadTemplateList[T any](
 		for _, tplName := range *tplNameList {
 			var subTplList []*T
 
-			if subTplList, err = loadTemplate[T](tplName, loaderFn, finderFn, tplType, path...); err != nil {
+			if subTplList, err = LoadTemplate[T](tplName, loaderFn, finderFn, tplType, path...); err != nil {
 				return nil, err
 			}
 

@@ -1,4 +1,4 @@
 $ cd testdata
 $ github-tf --no-ansi --> FAIL 4
-Error | error while writing files:
-	 - terraform is not a directory
+Error | error while writing terraform files:
+	 - workspace path is expected to be a directory: terraform

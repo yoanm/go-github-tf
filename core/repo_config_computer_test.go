@@ -472,7 +472,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			&core.GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
 			nil,
 			nil,
-			fmt.Errorf("unable to load repository template, no template available"),
+			fmt.Errorf("repository template not found as none available"),
 		},
 		"default branch - branch": {
 			&core.GhRepoConfig{
@@ -486,7 +486,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("default branch: unable to load branch template, no template available"),
+			fmt.Errorf("default branch: branch template not found as none available"),
 		},
 		"default branch - branch protection": {
 			&core.GhRepoConfig{
@@ -502,7 +502,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("default branch: unable to load branch protection template, no template available"),
+			fmt.Errorf("default branch: branch protection template not found as none available"),
 		},
 		"branch": {
 			&core.GhRepoConfig{
@@ -517,7 +517,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch branch-name: unable to load branch template, no template available"),
+			fmt.Errorf("branch branch-name: branch template not found as none available"),
 		},
 		"branch - branch protection": {
 			&core.GhRepoConfig{
@@ -534,7 +534,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch branch-name: unable to load branch protection template, no template available"),
+			fmt.Errorf("branch branch-name: branch protection template not found as none available"),
 		},
 		"branch protection": {
 			&core.GhRepoConfig{
@@ -550,7 +550,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch protection #0: unable to load branch protection template, no template available"),
+			fmt.Errorf("branch protection #0: branch protection template not found as none available"),
 		},
 	}
 
@@ -596,7 +596,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			&core.GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown repository template a-template"),
+			fmt.Errorf("\"a-template\" repository template not found"),
 		},
 		"default branch - branch": {
 			&core.GhRepoConfig{
@@ -610,7 +610,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("default branch: unknown branch template a-template"),
+			fmt.Errorf("default branch: \"a-template\" branch template not found"),
 		},
 		"default branch - branch protection": {
 			&core.GhRepoConfig{
@@ -626,7 +626,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("default branch: unknown branch protection template a-template"),
+			fmt.Errorf("default branch: \"a-template\" branch protection template not found"),
 		},
 		"branch": {
 			&core.GhRepoConfig{
@@ -641,7 +641,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch branch-name: unknown branch template a-template"),
+			fmt.Errorf("branch branch-name: \"a-template\" branch template not found"),
 		},
 		"branch - branch protection": {
 			&core.GhRepoConfig{
@@ -658,7 +658,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch branch-name: unknown branch protection template a-template"),
+			fmt.Errorf("branch branch-name: \"a-template\" branch protection template not found"),
 		},
 		"branch protection": {
 			&core.GhRepoConfig{
@@ -674,7 +674,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch protection #0: unknown branch protection template a-template"),
+			fmt.Errorf("branch protection #0: \"a-template\" branch protection template not found"),
 		},
 	}
 
@@ -779,13 +779,13 @@ func TestApplyRepositoryTemplate(t *testing.T) {
 			&core.GhRepoConfig{ConfigTemplates: &[]string{aTemplate}},
 			nil,
 			nil,
-			fmt.Errorf("unable to load repository template, no template available"),
+			fmt.Errorf("repository template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhRepoConfig{ConfigTemplates: &[]string{aTemplate}, Description: &description},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown repository template a-template"),
+			fmt.Errorf("\"a-template\" repository template not found"),
 		},
 		"no template provided": {
 			&core.GhRepoConfig{Description: &description},
@@ -858,7 +858,7 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("unable to load branch protection template, no template available"),
+			fmt.Errorf("branch protection template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhBranchProtectionConfig{
@@ -868,7 +868,7 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown branch protection template a-template"),
+			fmt.Errorf("\"a-template\" branch protection template not found"),
 		},
 		"no template provided": {
 			&core.GhBranchProtectionConfig{
@@ -963,7 +963,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch protection #0: unable to load branch protection template, no template available"),
+			fmt.Errorf("branch protection #0: branch protection template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhRepoConfig{
@@ -977,7 +977,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch protection #0: unknown branch protection template a-template"),
+			fmt.Errorf("branch protection #0: \"a-template\" branch protection template not found"),
 		},
 		"no template provided": {
 			&core.GhRepoConfig{
@@ -1086,7 +1086,7 @@ func TestApplyBranchTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("unable to load branch template, no template available"),
+			fmt.Errorf("branch template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhBranchConfig{
@@ -1098,7 +1098,7 @@ func TestApplyBranchTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown branch template a-template"),
+			fmt.Errorf("\"a-template\" branch template not found"),
 		},
 		"no template provided": {
 			&core.GhBranchConfig{SourceBranch: &sourceBranch},
@@ -1188,7 +1188,7 @@ func TestApplyBranchesTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch a-branch-name: unable to load branch template, no template available"),
+			fmt.Errorf("branch a-branch-name: branch template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhRepoConfig{
@@ -1204,7 +1204,7 @@ func TestApplyBranchesTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch a-branch-name: unknown branch template a-template"),
+			fmt.Errorf("branch a-branch-name: \"a-template\" branch template not found"),
 		},
 		"no template provided": {
 			&core.GhRepoConfig{

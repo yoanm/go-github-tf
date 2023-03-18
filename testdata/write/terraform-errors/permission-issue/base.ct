@@ -5,13 +5,13 @@ $ chmod repo.repo-name2.tf 000
 $ cd ..
 $ github-tf --no-ansi -v --> FAIL 4
 Info | Found: 2 repos / 0 repo templates / 0 branch templates / 0 branch protection templates
-Error | error while writing files:
+Error | error while writing terraform files:
 	 - open terraform/repo.repo-name2.tf: permission denied
 
 # Case 2 - permission issue on terraform directory
 $ chmod terraform 000
 $ github-tf --no-ansi -v --> FAIL 4
 Info | Found: 2 repos / 0 repo templates / 0 branch templates / 0 branch protection templates
-Error | error while writing files:
+Error | error while writing terraform files:
 	 - open terraform/repo.repo-name.tf: permission denied
 	 - open terraform/repo.repo-name2.tf: permission denied

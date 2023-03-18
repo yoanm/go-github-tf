@@ -11,15 +11,15 @@ import (
 func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (*GhRepoConfig, error) {
 	var err error
 
+	if base == nil {
+		return base, nil
+	}
+
 	//nolint:exhaustruct // No need here, it's just the base structure
 	config := &GhRepoConfig{}
 
-	if base == nil {
-		return config, nil
-	}
-
 	if base.Name == nil {
-		return nil, errRepositoryNameIsMandatory
+		return nil, ErrRepositoryNameIsMandatory
 	}
 
 	config.Merge(base)
@@ -70,7 +70,7 @@ func ApplyBranchesTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig)
 	if repoConfig.Branches != nil {
 		for k, b := range *repoConfig.Branches {
 			if b, err = ApplyBranchTemplate(b, templates); err != nil {
-				return fmt.Errorf("branch %s: %w", k, err)
+				return BranchError(k, err)
 			}
 
 			(*repoConfig.Branches)[k] = b
@@ -88,7 +88,7 @@ func ApplyBranchesTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig)
 		}
 
 		if branchConfig, err = ApplyBranchTemplate(branchConfig, templates); err != nil {
-			return fmt.Errorf("default branch: %w", err)
+			return DefaultBranchError(err)
 		}
 
 		branchConfig.Merge(
@@ -119,7 +119,7 @@ func ApplyBranchProtectionsTemplate(config *GhRepoConfig, templates *TemplatesCo
 	if config.BranchProtections != nil {
 		for k, b := range *config.BranchProtections {
 			if b, err = ApplyBranchProtectionTemplate(b, templates); err != nil {
-				return fmt.Errorf("branch protection #%d: %w", k, err)
+				return BranchProtectionError(k, err)
 			}
 
 			(*config.BranchProtections)[k] = b
@@ -266,13 +266,11 @@ func loadRepoTemplatesFor(toConfig *GhRepoConfig, templates *TemplatesConfig) ([
 		return nil, nil
 	}
 
-	const tplType = "repository"
-
 	if templates == nil {
-		return nil, TemplateUnavailableError(tplType)
+		return nil, NoTemplateAvailableError(RepositoryTemplateType)
 	}
 
-	tplList, err := loadTemplateList(
+	tplList, err := LoadTemplateList(
 		toConfig.ConfigTemplates,
 		func(s string) *GhRepoConfig {
 			return templates.GetRepo(s)
@@ -280,7 +278,7 @@ func loadRepoTemplatesFor(toConfig *GhRepoConfig, templates *TemplatesConfig) ([
 		func(c *GhRepoConfig) *[]string {
 			return c.ConfigTemplates
 		},
-		tplType,
+		RepositoryTemplateType,
 	)
 	if err != nil {
 		return nil, err
@@ -297,13 +295,11 @@ func loadBranchProtectionTemplatesFor(
 		return nil, nil
 	}
 
-	const tplType = "branch protection"
-
 	if templates == nil {
-		return nil, TemplateUnavailableError(tplType)
+		return nil, NoTemplateAvailableError(BranchProtectionTemplateType)
 	}
 
-	tplList, err := loadTemplateList(
+	tplList, err := LoadTemplateList(
 		tplNameToLoad,
 		func(s string) *GhBranchProtectionConfig {
 			return templates.GetBranchProtection(s)
@@ -311,7 +307,7 @@ func loadBranchProtectionTemplatesFor(
 		func(c *GhBranchProtectionConfig) *[]string {
 			return c.ConfigTemplates
 		},
-		tplType,
+		BranchProtectionTemplateType,
 	)
 	if err != nil {
 		return nil, err
@@ -325,13 +321,11 @@ func loadBranchTemplatesFor(tplNameToLoad *[]string, templates *TemplatesConfig)
 		return nil, nil
 	}
 
-	const tplType = "branch"
-
 	if templates == nil {
-		return nil, TemplateUnavailableError(tplType)
+		return nil, NoTemplateAvailableError(BranchTemplateType)
 	}
 
-	tplList, err := loadTemplateList(
+	tplList, err := LoadTemplateList(
 		tplNameToLoad,
 		func(s string) *GhBranchConfig {
 			return templates.GetBranch(s)
@@ -339,7 +333,7 @@ func loadBranchTemplatesFor(tplNameToLoad *[]string, templates *TemplatesConfig)
 		func(c *GhBranchConfig) *[]string {
 			return c.ConfigTemplates
 		},
-		tplType,
+		BranchTemplateType,
 	)
 	if err != nil {
 		return nil, err
@@ -363,7 +357,7 @@ func applyBranchesBranchProtectionTemplate(config *GhRepoConfig, templates *Temp
 				BaseGhBranchProtectionConfig: *branchConfig.Protection,
 			}
 			if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
-				return fmt.Errorf("branch %s: %w", branchName, err)
+				return BranchError(branchName, err)
 			}
 
 			branchConfig.Protection = &wrapper.BaseGhBranchProtectionConfig
@@ -385,7 +379,7 @@ func applyDefaultBranchProtectionTemplate(config *GhRepoConfig, templates *Templ
 			BaseGhBranchProtectionConfig: *config.DefaultBranch.Protection,
 		}
 		if wrapper, err = ApplyBranchProtectionTemplate(wrapper, templates); err != nil {
-			return fmt.Errorf("default branch: %w", err)
+			return DefaultBranchError(err)
 		}
 
 		config.DefaultBranch.Protection = &wrapper.BaseGhBranchProtectionConfig

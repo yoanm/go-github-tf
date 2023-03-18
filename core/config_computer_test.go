@@ -69,7 +69,7 @@ func TestComputeConfig(t *testing.T) {
 				},
 			},
 			nil,
-			fmt.Errorf("error during computation:\n\t - repository name is missing for repo #0\n\t - repository name is missing for repo #1"),
+			fmt.Errorf("error during computation:\n\t - repo #0: repository name is mandatory\n\t - repo #1: repository name is mandatory"),
 		},
 		"Underlying computation error": {
 			&core.Config{
@@ -82,7 +82,7 @@ func TestComputeConfig(t *testing.T) {
 				},
 			},
 			nil,
-			fmt.Errorf("error during computation:\n\t - repository a_name: unable to load repository template, no template available"),
+			fmt.Errorf("error during computation:\n\t - repository a_name: repository template not found as none available"),
 		},
 	}
 

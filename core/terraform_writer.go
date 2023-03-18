@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sort"
 	"sync"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -53,41 +52,6 @@ func GenerateHclRepoFiles(configList []*GhRepoConfig) (map[string]*hclwrite.File
 	return list, nil
 }
 
-func createFileGenerationErrorMessages(errCollector errorCollector, errList []error) []string {
-	msgList := []string{}
-
-	if len(errCollector) > 0 {
-		subErrList, keys := internalSortFileErrors(errCollector)
-
-		for _, file := range keys {
-			msgList = append(msgList, subErrList[file].Error())
-		}
-	}
-
-	if len(errList) > 0 {
-		for _, err := range errList {
-			msgList = append(msgList, err.Error())
-		}
-	}
-
-	return msgList
-}
-
-func internalSortFileErrors(errCollector errorCollector) (map[string]error, []string) {
-	// sort file to always get a predictable output (for tests mostly)
-	subErrList := map[string]error{}
-	keys := []string{}
-
-	for errItem := range errCollector {
-		subErrList[errItem.File] = errItem.Err
-		keys = append(keys, errItem.File)
-	}
-
-	sort.Strings(keys)
-
-	return subErrList, keys
-}
-
 func WriteTerraformFiles(rootPath string, files map[string]*hclwrite.File) error {
 	if len(files) == 0 {
 		return nil
@@ -113,45 +77,7 @@ func WriteTerraformFiles(rootPath string, files map[string]*hclwrite.File) error
 	close(errCollector)
 
 	if errList := generateWritingFileErrors(rootPath, exists, statError, isDir, errCollector); len(errList) > 0 {
-		return WriteTerraformFileError(errList)
-	}
-
-	return nil
-}
-
-func generateWritingFileErrors(
-	rootPath string,
-	exists bool,
-	statError error,
-	isDir bool,
-	errCollector errorCollector,
-) []error {
-	switch {
-	case !exists:
-		return []error{FileOpenNoSuchFileOrDirectoryError(rootPath)}
-	case statError != nil:
-		return []error{statError}
-	case !isDir:
-		return []error{PathIsNotADirectoryError(rootPath)}
-	case len(errCollector) > 0:
-		// sort file to always get a predictable output (for tests mostly)
-		errList := map[string]error{}
-		keys := make([]string, 0, len(errList))
-
-		for errItem := range errCollector {
-			errList[errItem.File] = errItem.Err
-			keys = append(keys, errItem.File)
-		}
-
-		sort.Strings(keys)
-
-		msgList := []error{}
-
-		for _, file := range keys {
-			msgList = append(msgList, errList[file])
-		}
-
-		return msgList
+		return TerraformFileWritingErrors(errList)
 	}
 
 	return nil
@@ -207,4 +133,52 @@ func writeTerraformFileAsync(path string, hclFile *hclwrite.File, errCollector e
 			errCollector <- errorCollectorItem{fName, err}
 		}
 	}
+}
+
+func createFileGenerationErrorMessages(errCollector errorCollector, errList []error) []string {
+	msgList := []string{}
+
+	if len(errCollector) > 0 {
+		for _, err := range sortErrCollectorByFile(errCollector) {
+			msgList = append(msgList, err.Error())
+		}
+	}
+
+	if len(errList) > 0 {
+		for _, err := range errList {
+			msgList = append(msgList, err.Error())
+		}
+	}
+
+	return msgList
+}
+
+func generateWritingFileErrors(
+	rootPath string,
+	exists bool,
+	statError error,
+	isDir bool,
+	errCollector errorCollector,
+) []error {
+	switch {
+	case !exists:
+		return []error{WorkspacePathDoesntExistError(rootPath)}
+	case statError != nil:
+		return []error{statError}
+	case !isDir:
+		return []error{WorkspacePathIsExpectedToBeADirectoryError(rootPath)}
+	case len(errCollector) > 0:
+		return sortErrCollectorByFile(errCollector)
+	}
+
+	return nil
+}
+
+func sortErrCollectorByFile(errCollector errorCollector) []error {
+	errList := map[string]error{}
+	for errItem := range errCollector {
+		errList[errItem.File] = errItem.Err
+	}
+
+	return SortErrorsByKey(errList)
 }

@@ -2,42 +2,27 @@ package core
 
 import (
 	"fmt"
-	"sort"
 )
 
 /** Public **/
 
 func ComputeConfig(config *Config) (*Config, error) {
-	computedConfig := NewConfig()
 	if config == nil {
-		return computedConfig, nil
+		return config, nil
 	}
+
+	computedConfig := NewConfig()
 
 	errList := loadConfig(config, computedConfig)
 
 	if len(errList) > 0 {
-		return nil, ComputationError(generateComputationErrorMessages(errList))
+		return nil, ComputationError(SortErrorsByKey(errList))
 	}
 
 	return computedConfig, nil
 }
 
-func generateComputationErrorMessages(errList map[string]error) []string {
-	msgList := []string{}
-	// sort file to always get a predictable output (for tests mostly)
-	keys := make([]string, 0, len(errList))
-	for k := range errList {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	for _, file := range keys {
-		msgList = append(msgList, errList[file].Error())
-	}
-
-	return msgList
-}
+/** Private **/
 
 func loadConfig(config *Config, computedConfig *Config) map[string]error {
 	errList := map[string]error{}
@@ -54,11 +39,11 @@ func loadConfig(config *Config, computedConfig *Config) map[string]error {
 
 func loadConfigRepo(config *Config, computedConfig *Config, base *GhRepoConfig, errList map[string]error, index int) {
 	if base.Name == nil {
-		errList[fmt.Sprintf("Key %d", index)] = RepositoryNameIsMissingForRepoError(index)
+		errList[fmt.Sprintf("Key %d", index)] = RepositoryNameIsMandatoryForRepoError(index)
 	} else {
 		computedRepo, computeError := ComputeRepoConfig(base, config.Templates)
 		if computeError != nil {
-			errList[*base.Name] = fmt.Errorf("%w: repository %s", computeError, *base.Name)
+			errList[*base.Name] = fmt.Errorf("repository %s: %w", *base.Name, computeError)
 		} else {
 			computedConfig.AppendRepo(computedRepo)
 		}

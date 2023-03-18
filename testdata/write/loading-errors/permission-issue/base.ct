@@ -8,10 +8,10 @@ $ chmod test.repo.yml 000
 $ chmod test.branch-protection.yml 000
 $ cd ..
 $ github-tf --no-ansi --> FAIL 1
-Error | Error during workspace loading:
-Error during configs loading:
+Error | error during workspace loading:
+error during configs loading:
 	 - open config/repos.yml: permission denied
-Error during templates loading:
+error during templates loading:
 	 - open templates/test.branch-protection.yml: permission denied
 	 - open templates/test.repo.yml: permission denied
 
@@ -19,18 +19,18 @@ Error during templates loading:
 $ chmod templates 000
 $ chmod config 000
 $ github-tf --no-ansi --> FAIL 1
-Error | Error during workspace loading:
-Error during configs loading:
+Error | error during workspace loading:
+error during configs loading:
 	 - open config: permission denied
-Error during templates loading:
+error during templates loading:
 	 - open templates: permission denied
 
 # Sub case 3 - permission issue on workspace directory
 $ cd ..
 $ chmod testdata 000
 $ github-tf --no-ansi -w testdata --> FAIL 1
-Error | Error during workspace loading:
-Error during configs loading:
+Error | error during workspace loading:
+error during configs loading:
 	 - open testdata/config: permission denied
-Error during templates loading:
+error during templates loading:
 	 - open testdata/templates: permission denied

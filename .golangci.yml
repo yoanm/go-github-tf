@@ -172,3 +172,6 @@ issues:
       linters:
         - exhaustruct # Deactivated for examples as it's easier and looks better
         - forbidigo # fmt.PrintXXX can be used
+    - path: "^main_test\\.go$"
+      linters:
+        - paralleltest # cmdtest doesn't seem to support parallel tests

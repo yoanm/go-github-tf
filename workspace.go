@@ -1,11 +1,9 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -13,52 +11,6 @@ import (
 
 	"github.com/yoanm/github-tf/core"
 )
-
-var (
-	errInputDirectoryDoesntExist = errors.New("input directory doesn't exist")
-	errDuringWorkspaceLoading    = errors.New("error during configs loading")
-	errDuringTemplateLoading     = errors.New("error during templates loading")
-	errRepositoryAlreadyImported = errors.New("repository already imported")
-)
-
-func InputDirectoryDoesntExistError(path string) error {
-	return fmt.Errorf("%w: %s", errInputDirectoryDoesntExist, path)
-}
-
-func ConfigDirectoryLoadingReadError(readErr error) error {
-	return fmt.Errorf("%w\n\t - %w", errDuringWorkspaceLoading, readErr)
-}
-
-func ConfigDirectoryLoadingError(errList map[string]error) error {
-	msgList := []string{}
-	// sort file to always get a predictable output (for tests mostly)
-	keys := make([]string, 0, len(errList))
-	for k := range errList {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	for _, file := range keys {
-		msgList = append(msgList, fmt.Sprintf("\t - %s", errList[file].Error()))
-	}
-
-	return fmt.Errorf("%w\n%s", errDuringWorkspaceLoading, strings.Join(msgList, "\n"))
-}
-
-func AlreadyImportedRepositoryError(fName string, repoName string, firstFName string) error {
-	return fmt.Errorf(
-		"%w: repository %s imported by %s, but already imported by %s",
-		errRepositoryAlreadyImported,
-		repoName,
-		fName,
-		firstFName,
-	)
-}
-
-func TemplateLoadingError(msgList []string) error {
-	return fmt.Errorf("%w:\n\t - %s", errDuringTemplateLoading, strings.Join(msgList, "\n\t - "))
-}
 
 func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*core.Config, error) {
 	var err error
@@ -76,15 +28,13 @@ func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*cor
 	confErr := readConfigDirectory(config, filepath.Join(rootPath, configDir), decoderOpts)
 	tplErr := readTemplateDirectory(config, filepath.Join(rootPath, templateDir), decoderOpts)
 
-	if confErr != nil || tplErr != nil {
-		err2 := confErr
-		if confErr != nil && tplErr != nil {
-			err2 = fmt.Errorf("%w\n%w", confErr, tplErr)
-		} else if tplErr != nil {
-			err2 = tplErr
-		}
-
-		return nil, fmt.Errorf("error during workspace loading:\n%w", err2)
+	switch {
+	case confErr != nil && tplErr != nil:
+		return nil, WorkspaceLoadingError([]error{confErr, tplErr})
+	case confErr != nil:
+		return nil, WorkspaceLoadingError([]error{confErr})
+	case tplErr != nil:
+		return nil, WorkspaceLoadingError([]error{tplErr})
 	}
 
 	return config, nil
@@ -116,7 +66,7 @@ func readConfigDirectory(config *core.Config, rootPath string, decoderOpts []yam
 	)
 
 	if filenames, readErr = readDirectory(rootPath); readErr != nil {
-		return ConfigDirectoryLoadingReadError(readErr)
+		return ConfigDirectoryLoadingError([]error{readErr})
 	}
 
 	if err := loadConfigDirectoryFiles(config, rootPath, decoderOpts, filenames); err != nil {
@@ -149,7 +99,7 @@ func loadConfigDirectoryFiles(
 	}
 
 	if len(errList) > 0 {
-		return ConfigDirectoryLoadingError(errList)
+		return ConfigDirectoryLoadingError(core.SortErrorsByKey(errList))
 	}
 
 	return nil
@@ -258,53 +208,41 @@ func readTemplateDirectory(
 		return nil
 	}
 
-	errList := map[string]error{}
-
 	dirContents, readErr := readDirectory(rootPath)
 	if readErr == nil {
 		log.Debug().Msgf("Reading template directory: %s", rootPath)
 
+		errList := map[string]error{}
+
 		for _, filename := range dirContents {
-			path := filepath.Join(rootPath, filename)
-
-			ext := filepath.Ext(filename)
-			if ext == ".yml" || ext == ".yaml" {
-				loadErr := loadTemplateFromFile(config, path, decoderOpts)
-				if loadErr != nil {
-					errList[path] = loadErr
-				}
-			} else {
-				log.Debug().Msgf("%s is not a YAML template => ignored", path)
-			}
+			readTemplateDirectoryFile(config, filepath.Join(rootPath, filename), decoderOpts, errList)
 		}
-	}
 
-	if len(errList) > 0 || readErr != nil {
-		return TemplateLoadingError(generateTemplateLoadingErrorMessages(readErr, errList))
+		if len(errList) > 0 {
+			return TemplateLoadingError(core.SortErrorsByKey(errList))
+		}
+	} else {
+		return TemplateLoadingError([]error{readErr})
 	}
 
 	return nil
 }
 
-func generateTemplateLoadingErrorMessages(readErr error, errList map[string]error) []string {
-	if readErr != nil {
-		return []string{readErr.Error()}
+func readTemplateDirectoryFile(
+	config *core.Config,
+	path string,
+	decoderOpts []yaml.DecodeOption,
+	errList map[string]error,
+) {
+	ext := filepath.Ext(path)
+	if ext == ".yml" || ext == ".yaml" {
+		loadErr := loadTemplateFromFile(config, path, decoderOpts)
+		if loadErr != nil {
+			errList[path] = loadErr
+		}
+	} else {
+		log.Debug().Msgf("%s is not a YAML template => ignored", path)
 	}
-
-	msgList := []string{}
-	// sort file to always get a predictable output (for tests mostly)
-	keys := make([]string, 0, len(errList))
-	for k := range errList {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	for _, file := range keys {
-		msgList = append(msgList, errList[file].Error())
-	}
-
-	return msgList
 }
 
 func loadTemplateFromFile(config *core.Config, filePath string, decoderOpts []yaml.DecodeOption) error {

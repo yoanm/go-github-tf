@@ -155,14 +155,14 @@ func TestWriteTerraformFiles_onError(t *testing.T) {
 			map[string]*hclwrite.File{
 				"repo.repo1.tf": file1,
 			},
-			fmt.Errorf("error while writing files:\n\t - open /an_unknown_dir/somewhere: no such file or directory"),
+			fmt.Errorf("error while writing terraform files:\n\t - workspace path doesn't exist: /an_unknown_dir/somewhere"),
 		},
 		"Unable to write": {
 			notWritableDir,
 			map[string]*hclwrite.File{
 				"repo.repo1.tf": file1,
 			},
-			fmt.Errorf("error while writing files:\n\t - open %s/repo.repo1.tf: permission denied", notWritableDir),
+			fmt.Errorf("error while writing terraform files:\n\t - open %s/repo.repo1.tf: permission denied", notWritableDir),
 		},
 	}
 

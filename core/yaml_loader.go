@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 
 	"github.com/goccy/go-yaml"
@@ -67,7 +66,7 @@ func LoadGhRepoConfigFromFile(filePath string, decoderOpts ...yaml.DecodeOption)
 	//nolint:exhaustruct // No need here, simple init
 	config := &GhRepoConfig{}
 	if err = newDecoder(content, decoderOpts...).Decode(config); err != nil {
-		return nil, fmt.Errorf("file %s: %w", filePath, err)
+		return nil, FileError(filePath, err)
 	}
 
 	return config, nil
@@ -84,7 +83,7 @@ func LoadGhRepoConfigListFromFile(filePath string, decoderOpts ...yaml.DecodeOpt
 
 	var configs []*GhRepoConfig
 	if err = newDecoder(content, decoderOpts...).Decode(&configs); err != nil {
-		return nil, fmt.Errorf("file %s: %w", filePath, err)
+		return nil, FileError(filePath, err)
 	}
 
 	return configs, nil
@@ -109,7 +108,7 @@ func LoadGhRepoBranchConfigFromFile(
 	//nolint:exhaustruct // No need here, simple init
 	config := &GhBranchConfig{}
 	if err = newDecoder(content, decoderOpts...).Decode(config); err != nil {
-		return nil, fmt.Errorf("file %s: %w", filePath, err)
+		return nil, FileError(filePath, err)
 	}
 
 	return config, nil
@@ -134,7 +133,7 @@ func LoadGhRepoBranchProtectionConfigFromFile(
 	//nolint:exhaustruct // No need here, simple init
 	config := &GhBranchProtectionConfig{}
 	if err = newDecoder(content, decoderOpts...).Decode(config); err != nil {
-		return nil, fmt.Errorf("file %s: %w", filePath, err)
+		return nil, FileError(filePath, err)
 	}
 
 	return config, nil

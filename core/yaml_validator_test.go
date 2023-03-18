@@ -24,7 +24,7 @@ func TestValidateRepositoryConfig(t *testing.T) {
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/repos/repo.unexpected-property.yml",
-			fmt.Errorf("file testdata/invalid-config-files/repos/repo.unexpected-property.yml: /unexpected-property not allowed"),
+			fmt.Errorf("schema validation error: file testdata/invalid-config-files/repos/repo.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repo.full.yml",
@@ -63,7 +63,7 @@ func TestValidateRepositoryConfigs(t *testing.T) {
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/repos/repos.unexpected-property.yml",
-			fmt.Errorf("file testdata/invalid-config-files/repos/repos.unexpected-property.yml: /0/unexpected-property not allowed"),
+			fmt.Errorf("schema validation error: file testdata/invalid-config-files/repos/repos.unexpected-property.yml: /0/unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repos.full.yml",
@@ -105,7 +105,7 @@ func TestValidateRepositoryTemplateConfig(t *testing.T) {
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/templates/repo.unexpected-property.yml",
-			fmt.Errorf("file testdata/invalid-config-files/templates/repo.unexpected-property.yml: /unexpected-property not allowed"),
+			fmt.Errorf("schema validation error: file testdata/invalid-config-files/templates/repo.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repo-template.full.yml",
@@ -147,7 +147,7 @@ func TestValidateBranchProtectionTemplateConfig(t *testing.T) {
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml",
-			fmt.Errorf("file testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml: /unexpected-property not allowed"),
+			fmt.Errorf("schema validation error: file testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/branch-protection-template.full.yml",

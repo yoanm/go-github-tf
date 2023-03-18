@@ -1,8 +1,8 @@
 $ cd testdata
 $ github-tf --no-ansi --> FAIL 1
-Error | Error during workspace loading:
-Error during configs loading:
+Error | error during workspace loading:
+error during configs loading:
 	 - file config/repos.yml: EOF
-Error during templates loading:
+error during templates loading:
 	 - file templates/test.branch-protection.yml: EOF
 	 - file templates/test.repo.yml: EOF
