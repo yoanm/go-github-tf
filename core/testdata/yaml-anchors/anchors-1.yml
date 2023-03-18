@@ -1,0 +1,4 @@
+repo-name-anchor: &repo-name-anchor
+  my-repo-name-anchor
+repo-description-anchor: &repo-description-anchor
+  my-repo-description-anchor

@@ -1,0 +1,20 @@
+$ cd testdata
+# Sub case 1 - permission issue on repo file and template file
+$ cd config
+$ cd repos
+$ chmod test.yml 000
+$ cd ..
+$ cd ..
+$ github-tf --no-ansi --> FAIL 1
+Error | error during workspace loading:
+error during configs loading:
+	 - open config/repos/test.yml: permission denied
+
+# Sub case 2 - permission issue on repos directory
+$ cd config
+$ chmod repos 000
+$ cd ..
+$ github-tf --no-ansi --> FAIL 1
+Error | error during workspace loading:
+error during configs loading:
+	 - open config/repos: permission denied

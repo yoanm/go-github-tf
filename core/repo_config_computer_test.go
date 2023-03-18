@@ -1,4 +1,4 @@
-package core
+package core_test
 
 import (
 	"fmt"
@@ -6,9 +6,13 @@ import (
 
 	differ "github.com/andreyvit/diff"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/yoanm/github-tf/core"
 )
 
 func TestComputeRepoConfig(t *testing.T) {
+	t.Parallel()
+
 	aName := "a_name"
 	pattern := "my_pattern"
 	allowDeletions := "true"
@@ -22,37 +26,37 @@ func TestComputeRepoConfig(t *testing.T) {
 	description := "my description"
 	description2 := "my description2"
 	branchName := "branch-name"
-	tplConfig := &TemplatesConfig{
-		Repos: map[string]*GhRepoConfig{
-			aTemplate: {Description: &description2, Miscellaneous: &GhRepoMiscellaneousConfig{Archived: &archived}},
+	tplConfig := &core.TemplatesConfig{
+		Repos: map[string]*core.GhRepoConfig{
+			aTemplate: {Description: &description2, Miscellaneous: &core.GhRepoMiscellaneousConfig{Archived: &archived}},
 			aTemplate2: {
-				Branches: &GhBranchesConfig{
-					"branch-name": &GhBranchConfig{
-						BaseGhBranchConfig: BaseGhBranchConfig{
+				Branches: &core.GhBranchesConfig{
+					"branch-name": &core.GhBranchConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
 				},
-				BranchProtections: &GhBranchProtectionsConfig{
-					{&pattern, &forbid, BaseGhBranchProtectionConfig{EnforceAdmins: &enforceAdmins}},
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					{&pattern, &forbid, core.BaseGhBranchProtectionConfig{EnforceAdmins: &enforceAdmins}},
 				},
 			},
 		},
-		BranchProtections: map[string]*GhBranchProtectionConfig{
+		BranchProtections: map[string]*core.GhBranchProtectionConfig{
 			aTemplate: {
 				Pattern: &pattern,
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-					Pushes: &GhBranchProtectPushesConfig{
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+					Pushes: &core.GhBranchProtectPushesConfig{
 						AllowsForcePushes: &allowForcePushes,
 					},
 				},
 			},
 		},
-		Branches: map[string]*GhBranchConfig{
+		Branches: map[string]*core.GhBranchConfig{
 			aTemplate: {SourceBranch: &sourceBranch},
 			aTemplate2: {
-				BaseGhBranchConfig: BaseGhBranchConfig{
-					Protection: &BaseGhBranchProtectionConfig{
+				BaseGhBranchConfig: core.BaseGhBranchConfig{
+					Protection: &core.BaseGhBranchProtectionConfig{
 						EnforceAdmins: &enforceAdmins,
 					},
 				},
@@ -60,40 +64,40 @@ func TestComputeRepoConfig(t *testing.T) {
 		},
 	}
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"repo template": {
-			&GhRepoConfig{Name: &aName, Description: &description, ConfigTemplates: &[]string{aTemplate}},
+			&core.GhRepoConfig{Name: &aName, Description: &description, ConfigTemplates: &[]string{aTemplate}},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name:        &aName,
 				Description: &description,
-				Miscellaneous: &GhRepoMiscellaneousConfig{
+				Miscellaneous: &core.GhRepoMiscellaneousConfig{
 					Archived: &archived,
 				},
 			},
 			nil,
 		},
 		"default branch - branch template": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
+					core.BaseGhBranchConfig{
 						ConfigTemplates: &[]string{aTemplate2},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
-						Protection: &BaseGhBranchProtectionConfig{
+					core.BaseGhBranchConfig{
+						Protection: &core.BaseGhBranchProtectionConfig{
 							EnforceAdmins: &enforceAdmins,
 						},
 					},
@@ -102,27 +106,27 @@ func TestComputeRepoConfig(t *testing.T) {
 			nil,
 		},
 		"default branch - branch protection template": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
-						Protection: &BaseGhBranchProtectionConfig{
+					core.BaseGhBranchConfig{
+						Protection: &core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
-						Protection: &BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
-							Pushes: &GhBranchProtectPushesConfig{
+					core.BaseGhBranchConfig{
+						Protection: &core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
+							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
 						},
@@ -132,20 +136,20 @@ func TestComputeRepoConfig(t *testing.T) {
 			nil,
 		},
 		"branch template": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
 						SourceBranch: &sourceBranch,
 					},
@@ -154,28 +158,28 @@ func TestComputeRepoConfig(t *testing.T) {
 			nil,
 		},
 		"branch - branch protection template": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
-							Protection: &BaseGhBranchProtectionConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
+							Protection: &core.BaseGhBranchProtectionConfig{
 								ConfigTemplates: &[]string{aTemplate},
-								AllowsDeletion:  &allowDeletions,
+								AllowDeletion:   &allowDeletions,
 							},
 						},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
-							Protection: &BaseGhBranchProtectionConfig{
-								AllowsDeletion: &allowDeletions,
-								Pushes: &GhBranchProtectPushesConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
+							Protection: &core.BaseGhBranchProtectionConfig{
+								AllowDeletion: &allowDeletions,
+								Pushes: &core.GhBranchProtectPushesConfig{
 									AllowsForcePushes: &allowForcePushes,
 								},
 							},
@@ -186,26 +190,26 @@ func TestComputeRepoConfig(t *testing.T) {
 			nil,
 		},
 		"branch protection template": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				BranchProtections: &GhBranchProtectionsConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
 					{
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
 						Pattern: &pattern,
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
-							Pushes: &GhBranchProtectPushesConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
+							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
 						},
@@ -215,86 +219,86 @@ func TestComputeRepoConfig(t *testing.T) {
 			nil,
 		},
 		"repo + default branch (+protection) + branch (+protection) + branch protection templates": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name:            &aName,
 				ConfigTemplates: &[]string{aTemplate},
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
+					core.BaseGhBranchConfig{
 						ConfigTemplates: &[]string{aTemplate2},
-						Protection: &BaseGhBranchProtectionConfig{
+						Protection: &core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							Protection: &BaseGhBranchProtectionConfig{
+							Protection: &core.BaseGhBranchProtectionConfig{
 								ConfigTemplates: &[]string{aTemplate},
-								AllowsDeletion:  &allowDeletions,
-								Pushes: &GhBranchProtectPushesConfig{
+								AllowDeletion:   &allowDeletions,
+								Pushes: &core.GhBranchProtectPushesConfig{
 									AllowsForcePushes: &allowForcePushes,
 								},
 							},
 						},
 					},
 				},
-				BranchProtections: &GhBranchProtectionsConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
 					{
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
-				Miscellaneous: &GhRepoMiscellaneousConfig{
+				Miscellaneous: &core.GhRepoMiscellaneousConfig{
 					Archived: &archived,
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name:        &aName,
 				Description: &description2,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
-						Protection: &BaseGhBranchProtectionConfig{
-							EnforceAdmins:  &enforceAdmins,
-							AllowsDeletion: &allowDeletions,
-							Pushes: &GhBranchProtectPushesConfig{
+					core.BaseGhBranchConfig{
+						Protection: &core.BaseGhBranchProtectionConfig{
+							EnforceAdmins: &enforceAdmins,
+							AllowDeletion: &allowDeletions,
+							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
 						},
 					},
 				},
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
 						SourceBranch: &sourceBranch,
-						BaseGhBranchConfig: BaseGhBranchConfig{
-							Protection: &BaseGhBranchProtectionConfig{
-								AllowsDeletion: &allowDeletions,
-								Pushes: &GhBranchProtectPushesConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
+							Protection: &core.BaseGhBranchProtectionConfig{
+								AllowDeletion: &allowDeletions,
+								Pushes: &core.GhBranchProtectPushesConfig{
 									AllowsForcePushes: &allowForcePushes,
 								},
 							},
 						},
 					},
 				},
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
 						Pattern: &pattern,
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
-							Pushes: &GhBranchProtectPushesConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
+							Pushes: &core.GhBranchProtectPushesConfig{
 								AllowsForcePushes: &allowForcePushes,
 							},
 						},
 					},
 				},
-				Miscellaneous: &GhRepoMiscellaneousConfig{
+				Miscellaneous: &core.GhRepoMiscellaneousConfig{
 					Archived: &archived,
 				},
 			},
@@ -303,10 +307,14 @@ func TestComputeRepoConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ComputeRepoConfig(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -324,6 +332,8 @@ func TestComputeRepoConfig(t *testing.T) {
 }
 
 func TestComputeRepoConfig_edgeCases(t *testing.T) {
+	t.Parallel()
+
 	aName := "a_name"
 	pattern := "my_pattern"
 	allowDeletions := "true"
@@ -336,37 +346,37 @@ func TestComputeRepoConfig_edgeCases(t *testing.T) {
 	aTemplate2 := "a-template2"
 	description2 := "my description2"
 	aSha := "a-sha"
-	tplConfig := &TemplatesConfig{
-		Repos: map[string]*GhRepoConfig{
-			aTemplate: {Description: &description2, Miscellaneous: &GhRepoMiscellaneousConfig{Archived: &archived}},
+	tplConfig := &core.TemplatesConfig{
+		Repos: map[string]*core.GhRepoConfig{
+			aTemplate: {Description: &description2, Miscellaneous: &core.GhRepoMiscellaneousConfig{Archived: &archived}},
 			aTemplate2: {
-				Branches: &GhBranchesConfig{
-					"branch-name": &GhBranchConfig{
-						BaseGhBranchConfig: BaseGhBranchConfig{
+				Branches: &core.GhBranchesConfig{
+					"branch-name": &core.GhBranchConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
 				},
-				BranchProtections: &GhBranchProtectionsConfig{
-					{&pattern, &forbid, BaseGhBranchProtectionConfig{EnforceAdmins: &enforceAdmins}},
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					{&pattern, &forbid, core.BaseGhBranchProtectionConfig{EnforceAdmins: &enforceAdmins}},
 				},
 			},
 		},
-		BranchProtections: map[string]*GhBranchProtectionConfig{
+		BranchProtections: map[string]*core.GhBranchProtectionConfig{
 			aTemplate: {
 				Pattern: &pattern,
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-					Pushes: &GhBranchProtectPushesConfig{
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+					Pushes: &core.GhBranchProtectPushesConfig{
 						AllowsForcePushes: &allowForcePushes,
 					},
 				},
 			},
 		},
-		Branches: map[string]*GhBranchConfig{
+		Branches: map[string]*core.GhBranchConfig{
 			aTemplate: {SourceBranch: &sourceBranch},
 			aTemplate2: {
-				BaseGhBranchConfig: BaseGhBranchConfig{
-					Protection: &BaseGhBranchProtectionConfig{
+				BaseGhBranchConfig: core.BaseGhBranchConfig{
+					Protection: &core.BaseGhBranchProtectionConfig{
 						EnforceAdmins: &enforceAdmins,
 					},
 				},
@@ -374,45 +384,45 @@ func TestComputeRepoConfig_edgeCases(t *testing.T) {
 		},
 	}
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"duplicated config due to templates": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name:            &aName,
 				ConfigTemplates: &[]string{aTemplate2},
-				Branches: &GhBranchesConfig{
-					"branch-name": &GhBranchConfig{
+				Branches: &core.GhBranchesConfig{
+					"branch-name": &core.GhBranchConfig{
 						SourceSha: &aSha,
 					},
 				},
-				BranchProtections: &GhBranchProtectionsConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
 					{
 						Pattern: &pattern,
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
-					"branch-name": &GhBranchConfig{
+				Branches: &core.GhBranchesConfig{
+					"branch-name": &core.GhBranchConfig{
 						SourceBranch: &sourceBranch,
 						SourceSha:    &aSha,
 					},
 				},
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
 						Pattern: &pattern,
 						Forbid:  &forbid,
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
-							EnforceAdmins:  &enforceAdmins,
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
+							EnforceAdmins: &enforceAdmins,
 						},
 					},
 				},
@@ -422,10 +432,14 @@ func TestComputeRepoConfig_edgeCases(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ComputeRepoConfig(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -443,42 +457,44 @@ func TestComputeRepoConfig_edgeCases(t *testing.T) {
 }
 
 func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
+	t.Parallel()
+
 	aName := "a_name"
 	aTemplate := "a-template"
 	branchName := "branch-name"
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"repo": {
-			&GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
+			&core.GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
 			nil,
 			nil,
-			fmt.Errorf("unable to load repository template, no template available"),
+			fmt.Errorf("repository template not found as none available"),
 		},
 		"default branch - branch": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
+					core.BaseGhBranchConfig{
 						ConfigTemplates: &[]string{aTemplate},
 					},
 				},
 			},
 			nil,
 			nil,
-			fmt.Errorf("default branch: unable to load branch template, no template available"),
+			fmt.Errorf("default branch: branch template not found as none available"),
 		},
 		"default branch - branch protection": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
-						Protection: &BaseGhBranchProtectionConfig{
+					core.BaseGhBranchConfig{
+						Protection: &core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -486,14 +502,14 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("default branch: unable to load branch protection template, no template available"),
+			fmt.Errorf("default branch: branch protection template not found as none available"),
 		},
 		"branch": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -501,15 +517,15 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch branch-name: unable to load branch template, no template available"),
+			fmt.Errorf("branch branch-name: branch template not found as none available"),
 		},
 		"branch - branch protection": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
-							Protection: &BaseGhBranchProtectionConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
+							Protection: &core.BaseGhBranchProtectionConfig{
 								ConfigTemplates: &[]string{aTemplate},
 							},
 						},
@@ -518,15 +534,15 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch branch-name: unable to load branch protection template, no template available"),
+			fmt.Errorf("branch branch-name: branch protection template not found as none available"),
 		},
 		"branch protection": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				BranchProtections: &GhBranchProtectionsConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
 					{
 						Pattern: &branchName,
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -534,15 +550,19 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch protection #0: unable to load branch protection template, no template available"),
+			fmt.Errorf("branch protection #0: branch protection template not found as none available"),
 		},
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ComputeRepoConfig(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -560,43 +580,45 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 }
 
 func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
+	t.Parallel()
+
 	aName := "a_name"
 	aTemplate := "a-template"
-	emptyTplConfig := &TemplatesConfig{}
+	emptyTplConfig := &core.TemplatesConfig{}
 	branchName := "branch-name"
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"repo": {
-			&GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
+			&core.GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown repository template a-template"),
+			fmt.Errorf("\"a-template\" repository template not found"),
 		},
 		"default branch - branch": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
+					core.BaseGhBranchConfig{
 						ConfigTemplates: &[]string{aTemplate},
 					},
 				},
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("default branch: unknown branch template a-template"),
+			fmt.Errorf("default branch: \"a-template\" branch template not found"),
 		},
 		"default branch - branch protection": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				DefaultBranch: &GhDefaultBranchConfig{
+				DefaultBranch: &core.GhDefaultBranchConfig{
 					&branchName,
-					BaseGhBranchConfig{
-						Protection: &BaseGhBranchProtectionConfig{
+					core.BaseGhBranchConfig{
+						Protection: &core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -604,14 +626,14 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("default branch: unknown branch protection template a-template"),
+			fmt.Errorf("default branch: \"a-template\" branch protection template not found"),
 		},
 		"branch": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -619,15 +641,15 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch branch-name: unknown branch template a-template"),
+			fmt.Errorf("branch branch-name: \"a-template\" branch template not found"),
 		},
 		"branch - branch protection": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				Branches: &GhBranchesConfig{
+				Branches: &core.GhBranchesConfig{
 					branchName: {
-						BaseGhBranchConfig: BaseGhBranchConfig{
-							Protection: &BaseGhBranchProtectionConfig{
+						BaseGhBranchConfig: core.BaseGhBranchConfig{
+							Protection: &core.BaseGhBranchProtectionConfig{
 								ConfigTemplates: &[]string{aTemplate},
 							},
 						},
@@ -636,15 +658,15 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch branch-name: unknown branch protection template a-template"),
+			fmt.Errorf("branch branch-name: \"a-template\" branch protection template not found"),
 		},
 		"branch protection": {
-			&GhRepoConfig{
+			&core.GhRepoConfig{
 				Name: &aName,
-				BranchProtections: &GhBranchProtectionsConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
 					{
 						Pattern: &branchName,
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -652,15 +674,19 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch protection #0: unknown branch protection template a-template"),
+			fmt.Errorf("branch protection #0: \"a-template\" branch protection template not found"),
 		},
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ComputeRepoConfig(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -678,10 +704,12 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 }
 
 func TestComputeRepoConfig_validationError(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"nil": {
@@ -691,7 +719,7 @@ func TestComputeRepoConfig_validationError(t *testing.T) {
 			nil,
 		},
 		"no repo name": {
-			&GhRepoConfig{ConfigTemplates: nil},
+			&core.GhRepoConfig{ConfigTemplates: nil},
 			nil,
 			nil,
 			fmt.Errorf("repository name is mandatory"),
@@ -699,10 +727,14 @@ func TestComputeRepoConfig_validationError(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ComputeRepoConfig(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -720,19 +752,21 @@ func TestComputeRepoConfig_validationError(t *testing.T) {
 }
 
 func TestApplyRepositoryTemplate(t *testing.T) {
+	t.Parallel()
+
 	aName := "a_name"
 	aTemplate := "a-template"
 	description := "my description"
-	emptyTplConfig := &TemplatesConfig{}
-	tplConfig := &TemplatesConfig{
-		Repos: map[string]*GhRepoConfig{
+	emptyTplConfig := &core.TemplatesConfig{}
+	tplConfig := &core.TemplatesConfig{
+		Repos: map[string]*core.GhRepoConfig{
 			aTemplate: {Description: &description},
 		},
 	}
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"nil": {
@@ -742,36 +776,40 @@ func TestApplyRepositoryTemplate(t *testing.T) {
 			nil,
 		},
 		"no template available": {
-			&GhRepoConfig{ConfigTemplates: &[]string{aTemplate}},
+			&core.GhRepoConfig{ConfigTemplates: &[]string{aTemplate}},
 			nil,
 			nil,
-			fmt.Errorf("unable to load repository template, no template available"),
+			fmt.Errorf("repository template not found as none available"),
 		},
 		"unknown template": {
-			&GhRepoConfig{ConfigTemplates: &[]string{aTemplate}, Description: &description},
+			&core.GhRepoConfig{ConfigTemplates: &[]string{aTemplate}, Description: &description},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown repository template a-template"),
+			fmt.Errorf("\"a-template\" repository template not found"),
 		},
 		"no template provided": {
-			&GhRepoConfig{Description: &description},
+			&core.GhRepoConfig{Description: &description},
 			emptyTplConfig,
-			&GhRepoConfig{Description: &description},
+			&core.GhRepoConfig{Description: &description},
 			nil,
 		},
 		"base": {
-			&GhRepoConfig{ConfigTemplates: &[]string{aTemplate}, Name: &aName},
+			&core.GhRepoConfig{ConfigTemplates: &[]string{aTemplate}, Name: &aName},
 			tplConfig,
-			&GhRepoConfig{Description: &description, Name: &aName},
+			&core.GhRepoConfig{Description: &description, Name: &aName},
 			nil,
 		},
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ApplyRepositoryTemplate(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ApplyRepositoryTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -789,19 +827,21 @@ func TestApplyRepositoryTemplate(t *testing.T) {
 }
 
 func TestApplyBranchProtectionTemplate(t *testing.T) {
+	t.Parallel()
+
 	aTemplate := "a-template"
 	pattern := "my_pattern"
 	allowDeletions := "true"
-	emptyTplConfig := &TemplatesConfig{}
-	tplConfig := &TemplatesConfig{
-		BranchProtections: map[string]*GhBranchProtectionConfig{
+	emptyTplConfig := &core.TemplatesConfig{}
+	tplConfig := &core.TemplatesConfig{
+		BranchProtections: map[string]*core.GhBranchProtectionConfig{
 			aTemplate: {Pattern: &pattern},
 		},
 	}
 	cases := map[string]struct {
-		value     *GhBranchProtectionConfig
-		templates *TemplatesConfig
-		expected  *GhBranchProtectionConfig
+		value     *core.GhBranchProtectionConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhBranchProtectionConfig
 		error     error
 	}{
 		"nil": {
@@ -811,51 +851,51 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 			nil,
 		},
 		"no template available": {
-			&GhBranchProtectionConfig{
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+			&core.GhBranchProtectionConfig{
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 					ConfigTemplates: &[]string{aTemplate},
 				},
 			},
 			nil,
 			nil,
-			fmt.Errorf("unable to load branch protection template, no template available"),
+			fmt.Errorf("branch protection template not found as none available"),
 		},
 		"unknown template": {
-			&GhBranchProtectionConfig{
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+			&core.GhBranchProtectionConfig{
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 					ConfigTemplates: &[]string{aTemplate},
 				},
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown branch protection template a-template"),
+			fmt.Errorf("\"a-template\" branch protection template not found"),
 		},
 		"no template provided": {
-			&GhBranchProtectionConfig{
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-					AllowsDeletion: &allowDeletions,
+			&core.GhBranchProtectionConfig{
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+					AllowDeletion: &allowDeletions,
 				},
 			},
 			emptyTplConfig,
-			&GhBranchProtectionConfig{
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-					AllowsDeletion: &allowDeletions,
+			&core.GhBranchProtectionConfig{
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+					AllowDeletion: &allowDeletions,
 				},
 			},
 			nil,
 		},
 		"base": {
-			&GhBranchProtectionConfig{
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+			&core.GhBranchProtectionConfig{
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 					ConfigTemplates: &[]string{aTemplate},
-					AllowsDeletion:  &allowDeletions,
+					AllowDeletion:   &allowDeletions,
 				},
 			},
 			tplConfig,
-			&GhBranchProtectionConfig{
+			&core.GhBranchProtectionConfig{
 				Pattern: &pattern,
-				BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-					AllowsDeletion: &allowDeletions,
+				BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+					AllowDeletion: &allowDeletions,
 				},
 			},
 			nil,
@@ -863,10 +903,14 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ApplyBranchProtectionTemplate(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ApplyBranchProtectionTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -884,19 +928,21 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 }
 
 func TestApplyBranchProtectionsTemplate(t *testing.T) {
+	t.Parallel()
+
 	aTemplate := "a-template"
 	pattern := "my_pattern"
 	allowDeletions := "true"
-	emptyTplConfig := &TemplatesConfig{}
-	tplConfig := &TemplatesConfig{
-		BranchProtections: map[string]*GhBranchProtectionConfig{
+	emptyTplConfig := &core.TemplatesConfig{}
+	tplConfig := &core.TemplatesConfig{
+		BranchProtections: map[string]*core.GhBranchProtectionConfig{
 			aTemplate: {Pattern: &pattern},
 		},
 	}
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"nil": {
@@ -906,10 +952,10 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			nil,
 		},
 		"no template available": {
-			&GhRepoConfig{
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+			&core.GhRepoConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -917,13 +963,13 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch protection #0: unable to load branch protection template, no template available"),
+			fmt.Errorf("branch protection #0: branch protection template not found as none available"),
 		},
 		"unknown template": {
-			&GhRepoConfig{
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+			&core.GhRepoConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -931,24 +977,24 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch protection #0: unknown branch protection template a-template"),
+			fmt.Errorf("branch protection #0: \"a-template\" branch protection template not found"),
 		},
 		"no template provided": {
-			&GhRepoConfig{
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+			&core.GhRepoConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},
 			},
 			emptyTplConfig,
-			&GhRepoConfig{
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+			&core.GhRepoConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},
@@ -956,23 +1002,23 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			nil,
 		},
 		"base": {
-			&GhRepoConfig{
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
+			&core.GhRepoConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
 							ConfigTemplates: &[]string{aTemplate},
-							AllowsDeletion:  &allowDeletions,
+							AllowDeletion:   &allowDeletions,
 						},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
-				BranchProtections: &GhBranchProtectionsConfig{
-					&GhBranchProtectionConfig{
+			&core.GhRepoConfig{
+				BranchProtections: &core.GhBranchProtectionsConfig{
+					&core.GhBranchProtectionConfig{
 						Pattern: &pattern,
-						BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-							AllowsDeletion: &allowDeletions,
+						BaseGhBranchProtectionConfig: core.BaseGhBranchProtectionConfig{
+							AllowDeletion: &allowDeletions,
 						},
 					},
 				},
@@ -982,10 +1028,14 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				err := ApplyBranchProtectionsTemplate(tc.value, tc.templates)
+				t.Parallel()
+				err := core.ApplyBranchProtectionsTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -1003,19 +1053,21 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 }
 
 func TestApplyBranchTemplate(t *testing.T) {
+	t.Parallel()
+
 	sourceSha := "source-sha"
 	aTemplate := "a-template"
 	sourceBranch := "source-branch"
-	emptyTplConfig := &TemplatesConfig{}
-	tplConfig := &TemplatesConfig{
-		Branches: map[string]*GhBranchConfig{
+	emptyTplConfig := &core.TemplatesConfig{}
+	tplConfig := &core.TemplatesConfig{
+		Branches: map[string]*core.GhBranchConfig{
 			aTemplate: {SourceBranch: &sourceBranch},
 		},
 	}
 	cases := map[string]struct {
-		value     *GhBranchConfig
-		templates *TemplatesConfig
-		expected  *GhBranchConfig
+		value     *core.GhBranchConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhBranchConfig
 		error     error
 	}{
 		"nil": {
@@ -1025,45 +1077,45 @@ func TestApplyBranchTemplate(t *testing.T) {
 			nil,
 		},
 		"no template available": {
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				nil,
 				nil,
-				BaseGhBranchConfig{
+				core.BaseGhBranchConfig{
 					ConfigTemplates: &[]string{aTemplate},
 				},
 			},
 			nil,
 			nil,
-			fmt.Errorf("unable to load branch template, no template available"),
+			fmt.Errorf("branch template not found as none available"),
 		},
 		"unknown template": {
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				&sourceBranch,
 				nil,
-				BaseGhBranchConfig{
+				core.BaseGhBranchConfig{
 					ConfigTemplates: &[]string{aTemplate},
 				},
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("unknown branch template a-template"),
+			fmt.Errorf("\"a-template\" branch template not found"),
 		},
 		"no template provided": {
-			&GhBranchConfig{SourceBranch: &sourceBranch},
+			&core.GhBranchConfig{SourceBranch: &sourceBranch},
 			emptyTplConfig,
-			&GhBranchConfig{SourceBranch: &sourceBranch},
+			&core.GhBranchConfig{SourceBranch: &sourceBranch},
 			nil,
 		},
 		"base": {
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				nil,
 				&sourceSha,
-				BaseGhBranchConfig{
+				core.BaseGhBranchConfig{
 					ConfigTemplates: &[]string{aTemplate},
 				},
 			},
 			tplConfig,
-			&GhBranchConfig{
+			&core.GhBranchConfig{
 				SourceBranch: &sourceBranch,
 				SourceSha:    &sourceSha,
 			},
@@ -1072,10 +1124,14 @@ func TestApplyBranchTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				actual, err := ApplyBranchTemplate(tc.value, tc.templates)
+				t.Parallel()
+				actual, err := core.ApplyBranchTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)
@@ -1093,20 +1149,22 @@ func TestApplyBranchTemplate(t *testing.T) {
 }
 
 func TestApplyBranchesTemplate(t *testing.T) {
+	t.Parallel()
+
 	branchName := "a-branch-name"
 	sourceSha := "source-sha"
 	aTemplate := "a-template"
 	sourceBranch := "source-branch"
-	emptyTplConfig := &TemplatesConfig{}
-	tplConfig := &TemplatesConfig{
-		Branches: map[string]*GhBranchConfig{
+	emptyTplConfig := &core.TemplatesConfig{}
+	tplConfig := &core.TemplatesConfig{
+		Branches: map[string]*core.GhBranchConfig{
 			aTemplate: {SourceBranch: &sourceBranch},
 		},
 	}
 	cases := map[string]struct {
-		value     *GhRepoConfig
-		templates *TemplatesConfig
-		expected  *GhRepoConfig
+		value     *core.GhRepoConfig
+		templates *core.TemplatesConfig
+		expected  *core.GhRepoConfig
 		error     error
 	}{
 		"nil": {
@@ -1116,12 +1174,12 @@ func TestApplyBranchesTemplate(t *testing.T) {
 			nil,
 		},
 		"no template available": {
-			&GhRepoConfig{
-				Branches: &GhBranchesConfig{
-					branchName: &GhBranchConfig{
+			&core.GhRepoConfig{
+				Branches: &core.GhBranchesConfig{
+					branchName: &core.GhBranchConfig{
 						nil,
 						nil,
-						BaseGhBranchConfig{
+						core.BaseGhBranchConfig{
 							&[]string{aTemplate},
 							nil,
 						},
@@ -1130,15 +1188,15 @@ func TestApplyBranchesTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch a-branch-name: unable to load branch template, no template available"),
+			fmt.Errorf("branch a-branch-name: branch template not found as none available"),
 		},
 		"unknown template": {
-			&GhRepoConfig{
-				Branches: &GhBranchesConfig{
-					branchName: &GhBranchConfig{
+			&core.GhRepoConfig{
+				Branches: &core.GhBranchesConfig{
+					branchName: &core.GhBranchConfig{
 						&sourceBranch,
 						nil,
-						BaseGhBranchConfig{
+						core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
@@ -1146,38 +1204,38 @@ func TestApplyBranchesTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch a-branch-name: unknown branch template a-template"),
+			fmt.Errorf("branch a-branch-name: \"a-template\" branch template not found"),
 		},
 		"no template provided": {
-			&GhRepoConfig{
-				Branches: &GhBranchesConfig{
-					branchName: &GhBranchConfig{SourceBranch: &sourceBranch},
+			&core.GhRepoConfig{
+				Branches: &core.GhBranchesConfig{
+					branchName: &core.GhBranchConfig{SourceBranch: &sourceBranch},
 				},
 			},
 			emptyTplConfig,
-			&GhRepoConfig{
-				Branches: &GhBranchesConfig{
-					branchName: &GhBranchConfig{SourceBranch: &sourceBranch},
+			&core.GhRepoConfig{
+				Branches: &core.GhBranchesConfig{
+					branchName: &core.GhBranchConfig{SourceBranch: &sourceBranch},
 				},
 			},
 			nil,
 		},
 		"base": {
-			&GhRepoConfig{
-				Branches: &GhBranchesConfig{
-					branchName: &GhBranchConfig{
+			&core.GhRepoConfig{
+				Branches: &core.GhBranchesConfig{
+					branchName: &core.GhBranchConfig{
 						nil,
 						&sourceSha,
-						BaseGhBranchConfig{
+						core.BaseGhBranchConfig{
 							ConfigTemplates: &[]string{aTemplate},
 						},
 					},
 				},
 			},
 			tplConfig,
-			&GhRepoConfig{
-				Branches: &GhBranchesConfig{
-					branchName: &GhBranchConfig{
+			&core.GhRepoConfig{
+				Branches: &core.GhBranchesConfig{
+					branchName: &core.GhBranchConfig{
 						SourceBranch: &sourceBranch,
 						SourceSha:    &sourceSha,
 					},
@@ -1188,10 +1246,14 @@ func TestApplyBranchesTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
+		tcname := tcname // Reinit var for parallel test
+		tc := tc         // Reinit var for parallel test
+
 		t.Run(
 			tcname,
 			func(t *testing.T) {
-				err := ApplyBranchesTemplate(tc.value, tc.templates)
+				t.Parallel()
+				err := core.ApplyBranchesTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
 						t.Errorf("Case %q: expected an error but everything went well", tcname)

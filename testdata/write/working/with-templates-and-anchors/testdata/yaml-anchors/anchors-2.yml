@@ -1,0 +1,4 @@
+default-requiredApprovingReviewCount: &default-requiredApprovingReviewCount
+  3
+default-branch: &default-branch
+  main

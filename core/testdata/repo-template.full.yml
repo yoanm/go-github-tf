@@ -1,0 +1,139 @@
+_templates: [ "a-repo-template1" ]
+description: "a description1"
+visibility: visibility1
+default-branch: # defaultBranch:
+  name: master1
+  _templates: [ "default-branch-template1" ]
+  protection:
+    _templates: [ "default-branch-branch-protection-template1" ]
+    enforce-admins: false
+    deletion: false # allowsDeletions: true
+    linear-history: false # requiredLinearHistory: true
+    signed-commits: false # requireSignedCommits: true
+    pushes:
+      force-push: false # allowsForcePushes: true
+      restrict-to: [ default-branch-pushRestriction1 ] # pushRestrictions
+    status-checks: # requiredStatusChecks:
+      strict: false
+      required: [ default-branch-context1 ] # contexts
+    pull-request-reviews: # requiredPullRequestReviews:
+      bypassers: [ default-branch-bypasser1 ] # TO ADD -> pull_request_bypassers
+      resolved-conversations: false # TO ADD -> require_conversation_resolution
+      codeowner-approvals: false # requireCodeOwnerReviews: true
+      approval-count: 4 # requiredApprovingReviewCount: 3
+      dismissals:
+        staled: false # dismissStaleReviews: true
+        restrict: false # restrictDismissals
+        restrict-to: [ default-branch-dismissalRestriction1 ] # dismissalRestrictions
+branches:
+  feature/branch1:
+    _templates: [ "branch1-branch-template1" ]
+    protection:
+      _templates: [ "branch1-branch-protection-template1" ]
+      enforce-admins: true
+      deletion: true # allowsDeletions: true
+      linear-history: true # requiredLinearHistory: true
+      signed-commits: true # requireSignedCommits: true
+      pushes:
+        force-push: true # allowsForcePushes: true
+        restrict-to: [ branch1-pushRestriction1 ] # pushRestrictions
+      status-checks: # requiredStatusChecks:
+        strict: true
+        required: [ branch1-context1 ] # contexts
+      pull-request-reviews: # requiredPullRequestReviews:
+        bypassers: [ branch1-bypasser1 ] # TO ADD -> pull_request_bypassers
+        resolved-conversations: true # TO ADD -> require_conversation_resolution
+        codeowner-approvals: true # requireCodeOwnerReviews: true
+        approval-count: 5 # requiredApprovingReviewCount: 3
+        dismissals:
+          staled: true # dismissStaleReviews: true
+          restrict: true # restrictDismissals
+          restrict-to: [ branch1-dismissalRestriction1 ] # dismissalRestrictions
+  feature/branch2:
+    _templates: [ "branch2-branch-template1" ]
+    source-branch: branch2-source-branch1
+    source-sha: branch2-source-sha1
+    protection:
+      _templates: [ "branch2-branch-protection-template1" ]
+      enforce-admins: false
+      deletion: false # allowsDeletions: false
+      linear-history: false # requiredLinearHistory: false
+      signed-commits: false # requireSignedCommits: false
+      pushes:
+        force-push: false # allowsForcePushes: false
+        restrict-to: [ branch2-pushRestriction1 ] # pushRestrictions
+      status-checks: # requiredStatusChecks:
+        strict: false
+        required: [ branch2-context1 ] # contexts
+      pull-request-reviews: # requiredPullRequestReviews:
+        bypassers: [ branch2-bypasser1 ] # TO ADD -> pull_request_bypassers
+        resolved-conversations: false # TO ADD -> require_conversation_resolution
+        codeowner-approvals: false # requireCodeOwnerReviews: false
+        approval-count: 6 # requiredApprovingReviewCount: 3
+        dismissals:
+          staled: false # dismissStaleReviews: false
+          restrict: false # restrictDismissals
+          restrict-to: [ branch2-dismissalRestriction1 ] # dismissalRestrictions
+branch-protections: # branchProtections:
+  - pattern: a-pattern1
+    _templates: [ "branch-protection-template1" ]
+    forbid: true # TO ADD -> blocks_creations: (forbid !== true)
+    enforce-admins: true
+    deletion: true # allowsDeletions: true
+    linear-history: true # requiredLinearHistory: true
+    signed-commits: true # requireSignedCommits: true
+    pushes:
+      force-push: true # allowsForcePushes: true
+      restrict-to: [ branch-protection-pushRestriction1 ] # pushRestrictions
+    status-checks: # requiredStatusChecks:
+      strict: true
+      required: [ branch-protection-context1 ] # contexts
+    pull-request-reviews: # requiredPullRequestReviews:
+      bypassers: [ branch-protection-bypasser1 ] # TO ADD -> pull_request_bypassers
+      resolved-conversations: true # TO ADD -> require_conversation_resolution
+      codeowner-approvals: true # requireCodeOwnerReviews: true
+      approval-count: 0 # requiredApprovingReviewCount: 3
+      dismissals:
+        staled: true # dismissStaleReviews: true
+        restrict: true # restrictDismissals
+        restrict-to: [ branch-protection-dismissalRestriction1 ] # dismissalRestrictions
+pull-requests: # pullRequest:
+  merge-strategy:
+    merge: false # allowMergeCommit: false
+    rebase: false # allowRebaseMerge: false
+    squash: false # allowSquashMerge: false
+    auto-merge: false # allowAutoMerge: false
+  merge-commit:
+    title: "aMergeCommitTitle1" # mergeCommitTitle: "aMergeCommitTitle"
+    message: "aMergeCommitMessage1" # mergeCommitMessage: "aMergeCommitMessage"
+  squash-commit:
+    title: "aSquashMergeCommitTitle1" # squashMergeCommitTitle: "aSquashMergeCommitTitle"
+    message: "aSquashMergeCommitMessage1" # squashMergeCommitMessage: "aSquashMergeCommitMessage"
+  branch:
+    suggest-update: false # TO ADD -> allow_update_branch
+    delete-on-merge: false # deleteBranchOnMerge: false
+security:
+  vulnerability-alerts: true # vulnerabilityAlerts: true
+misc: # miscellaneous:
+  auto-init: false # autoInit: false
+  archived: false
+  topics: [ topic2, topic3 ]
+  is-template: false # TO ADD -> is_template
+  homepage-url: http://localhost/1 #   homepageUrl
+  downloads: false # hasDownloads: false
+  projects: false # hasProjects: false
+  wiki: false # hasWiki: false
+  issues: false # hasIssues: false
+  template:
+    source: owner1/repository1 # template->owner + template->repository (split on '/')
+    full-clone: false # TO ADD -> template->include_all_branches
+  file-templates:
+    gitignore: gitignore-tpl-name1 # TO ADD -> gitignore_template
+    license: license-tpl-name1 # TO ADD -> license_template
+  pages:
+    domain: my.domain1 # TO ADD -> cname
+    source-branch: branch1 # source->branch
+    source-path: path1 # source->path
+terraform:
+  archive-on-destroy: true # archiveOnDestroy: true
+  ignore-vulnerability-alerts-during-read: true # TO ADD -> ignore_vulnerability_alerts_during_read

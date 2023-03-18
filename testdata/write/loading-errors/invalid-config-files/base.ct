@@ -1,0 +1,5 @@
+$ cd testdata
+$ github-tf --no-ansi --> FAIL 1
+Error | error during workspace loading:
+error during configs loading:
+	 - schema validation error: file config/repos.yml: /0/unwantedProperty not allowed

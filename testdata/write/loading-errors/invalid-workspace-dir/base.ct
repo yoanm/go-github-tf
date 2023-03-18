@@ -1,0 +1,2 @@
+$ github-tf --no-ansi -w unknown_dir --> FAIL 1
+Error | input directory doesn't exist: unknown_dir

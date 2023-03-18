@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.head_ref }}"
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: ./go.mod
+          check-latest: true
+          cache: true
+          cache-dependency-path: ./go.sum
+
+      - name: Build
+        run: make build
+
+      - name: Run tests
+        run: make test-go gotest_o="-race -covermode=atomic -coverprofile=coverage.out"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+
+      - name: Upload coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage.out
+          force-coverage-parser: go
+
+  static:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: ./go.mod
+          check-latest: true
+          cache: true
+          cache-dependency-path: ./go.sum
+
+      - name: Verify dependencies
+        run: make verify-deps
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+
+      - name: Documentation
+        env:
+          CI: false # If true, command thinks it's goreadme GHAction context (see https://github.com/posener/goreadme/issues/120)
+        run: |
+          make configure-dev-env && make build-doc
+          if [ ! "$(git status -s | wc -l)" -eq 0 ]; then
+              echo "::error::Documentation is not up to date ! Run 'make build-doc' "
+              exit 1;
+          fi
+          echo "Documentation is up to date 👌"
+          exit 0

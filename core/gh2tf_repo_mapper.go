@@ -7,9 +7,8 @@ import (
 	"github.com/yoanm/go-gh2tf/ghbranch"
 	"github.com/yoanm/go-gh2tf/ghbranchdefault"
 	"github.com/yoanm/go-gh2tf/ghbranchprotect"
-	"github.com/yoanm/go-tfsig"
-
 	"github.com/yoanm/go-gh2tf/ghrepository"
+	"github.com/yoanm/go-tfsig"
 )
 
 type MapperLink int
@@ -19,123 +18,58 @@ const (
 	LinkToBranch
 )
 
-const DefaultBranchIdentifier = "default"
+const (
+	DefaultBranchIdentifier = "default"
+)
 
-func MapToRepositoryRes(c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string) *ghrepository.Config {
-	if c == nil {
+//nolint:gochecknoglobals // Easier than duplicate it everywhere needed
+var falseString = "false"
+
+func MapToRepositoryRes(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string) *ghrepository.Config {
+	if repoConfig == nil {
 		return nil
 	}
 
-	// Miscellaneous
-	var topics *[]string
-	var autoInit *string
-	var archived *string
-	var homepageUrl *string
-	// var isTemplate *string
-	// var gitignoreTemplate *string
-	// var licenseTemplate *string
-	var hasIssues *string
-	var hasProjects *string
-	var hasWiki *string
-	var hasDownloads *string
-	// Miscellaneous -> Page
-	var page *ghrepository.PagesConfig
-	// Miscellaneous -> Template
-	var template *ghrepository.TemplateConfig
+	topics,
+		autoInit,
+		archived,
+		homepageUrl,
+		hasIssues,
+		hasProjects,
+		hasWiki,
+		hasDownloads,
+		page,
+		template := mapMiscellaneous(repoConfig, valGen)
 
-	if c.Miscellaneous != nil {
-		topics = c.Miscellaneous.Topics
-		autoInit = c.Miscellaneous.AutoInit
-		archived = c.Miscellaneous.Archived
-		homepageUrl = c.Miscellaneous.HomepageUrl
-		// isTemplate = c.Miscellaneous.IsTemplate
-		hasIssues = c.Miscellaneous.HasIssues
-		hasProjects = c.Miscellaneous.HasProjects
-		hasWiki = c.Miscellaneous.HasWiki
-		hasDownloads = c.Miscellaneous.HasDownloads
-
-		if c.Miscellaneous.Template != nil {
-			template = &ghrepository.TemplateConfig{
-				ValueGenerator: valGen,
-				// IncludeAllBranches: c.Miscellaneous.Template.FullClone,
-				Owner:      nil,
-				Repository: nil,
-			}
-			if c.Miscellaneous.Template.Source != nil {
-				sources := strings.Split(*c.Miscellaneous.Template.Source, "/")
-				if len(sources) == 2 {
-					template.Owner = &sources[0]
-					template.Repository = &sources[1]
-				}
-			}
-		}
-		if c.Miscellaneous.Pages != nil {
-			var Source *ghrepository.PagesSourceConfig
-			if c.Miscellaneous.Pages.SourcePath != nil || c.Miscellaneous.Pages.SourceBranch != nil {
-				Source = &ghrepository.PagesSourceConfig{
-					ValueGenerator: valGen,
-					Branch:         c.Miscellaneous.Pages.SourceBranch,
-					Path:           c.Miscellaneous.Pages.SourcePath,
-				}
-			}
-			page = &ghrepository.PagesConfig{Source: Source}
-		}
-		if c.Miscellaneous.FileTemplates != nil {
-			// gitignoreTemplate = c.Miscellaneous.FileTemplates.Gitignore
-			// licenseTemplate = c.Miscellaneous.FileTemplates.License
-		}
-	}
-	// PullRequest
-	var allowMergeCommit *string
-	var allowRebaseMerge *string
-	var allowSquashMerge *string
-	var allowAutoMerge *string
-	var mergeCommitTitle *string
-	var mergeCommitMessage *string
-	var squashMergeCommitTitle *string
-	var squashMergeCommitMessage *string
-	var deleteBranchOnMerge *string
-	// var suggestUpdate *string
-	if c.PullRequests != nil {
-		if c.PullRequests.MergeStrategy != nil {
-			allowMergeCommit = c.PullRequests.MergeStrategy.AllowMerge
-			allowRebaseMerge = c.PullRequests.MergeStrategy.AllowRebase
-			allowSquashMerge = c.PullRequests.MergeStrategy.AllowSquash
-			allowAutoMerge = c.PullRequests.MergeStrategy.AllowAutoMerge
-		}
-		if c.PullRequests.MergeCommit != nil {
-			mergeCommitTitle = c.PullRequests.MergeCommit.Title
-			mergeCommitMessage = c.PullRequests.MergeCommit.Message
-		}
-		if c.PullRequests.SquashCommit != nil {
-			squashMergeCommitTitle = c.PullRequests.SquashCommit.Title
-			squashMergeCommitMessage = c.PullRequests.SquashCommit.Message
-		}
-		if c.PullRequests.Branch != nil {
-			deleteBranchOnMerge = c.PullRequests.Branch.DeleteBranchOnMerge
-			// suggestUpdate = c.PullRequests.Branch.SuggestUpdate
-		}
-	}
+	allowMergeCommit,
+		allowRebaseMerge,
+		allowSquashMerge,
+		allowAutoMerge,
+		mergeCommitTitle,
+		mergeCommitMessage,
+		squashMergeCommitTitle,
+		squashMergeCommitMessage,
+		deleteBranchOnMerge := mapPullRequest(repoConfig)
 	// Security
 	var vulnerabilityAlerts *string
-	if c.Security != nil {
-		vulnerabilityAlerts = c.Security.VulnerabilityAlerts
+	if repoConfig.Security != nil {
+		vulnerabilityAlerts = repoConfig.Security.VulnerabilityAlerts
 	}
 
 	// Terraform
 	var archiveOnDestroy *string
-	if c.Terraform != nil {
-		archiveOnDestroy = c.Terraform.ArchiveOnDestroy
+	if repoConfig.Terraform != nil {
+		archiveOnDestroy = repoConfig.Terraform.ArchiveOnDestroy
 	}
 
 	return &ghrepository.Config{
 		ValueGenerator: valGen,
 		Identifier:     repoTfId,
 
-		Name:                     c.Name,
-		Visibility:               c.Visibility,
+		Name:                     repoConfig.Name,
+		Visibility:               repoConfig.Visibility,
 		Archived:                 archived,
-		Description:              c.Description,
+		Description:              repoConfig.Description,
 		AutoInit:                 autoInit,
 		HasIssues:                hasIssues,
 		HasProjects:              hasProjects,
@@ -164,47 +98,37 @@ func MapToRepositoryRes(c *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId s
 	}
 }
 
-func MapToBranchRes(name string, c *GhBranchConfig, valGen tfsig.ValueGenerator, repo *GhRepoConfig, repoTfId string, links ...MapperLink) *ghbranch.Config {
-	if c == nil {
+func MapToBranchRes(
+	name string,
+	branchConfig *GhBranchConfig,
+	valGen tfsig.ValueGenerator,
+	repo *GhRepoConfig,
+	repoTfId string,
+	links ...MapperLink,
+) *ghbranch.Config {
+	if branchConfig == nil {
 		return nil
 	}
 
+	var (
+		sourceBranch *string
+		repoName     *string
+	)
+
 	identifier := fmt.Sprintf("%s-%s", repoTfId, tfsig.ToTerraformIdentifier(name))
-	var sourceBranch *string
-	if c.SourceBranch != nil && *c.SourceBranch != name {
-		sourceBranch = c.SourceBranch
+
+	if branchConfig.SourceBranch != nil && *branchConfig.SourceBranch != name {
+		sourceBranch = branchConfig.SourceBranch
 	}
-	var repoName *string
+
 	if repo != nil {
 		repoName = repo.Name
 	}
-	for _, v := range links {
-		if v == LinkToRepository {
-			// /!\ a branch can't be configured if repository doesn't exist
-			// => Add an explicit dependency by using "github_repository.${repoTfId}.name"
-			tmp := fmt.Sprintf("github_repository.%s.name", repoTfId)
-			repoName = &tmp
-		} else if v == LinkToBranch {
-			if sourceBranch != nil {
-				if repo != nil {
-					// /!\ a branch can't be configured if source_branch branch doesn't exist
-					// => Add an explicit dependency by using "github_branch.${repoTfId}-${branchId}.branch"
-					// Or Add an explicit dependency by using "github_branch_default.${repoTfId}.branch"
-					tmp := *sourceBranch
-					if repo.Branches != nil {
-						if _, sourceBranchConfigExists := (*repo.Branches)[*sourceBranch]; sourceBranchConfigExists {
-							tmp = fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*sourceBranch))
-						}
-					}
-					// Look for default branch only if not already updated
-					if tmp == *sourceBranch && repo.DefaultBranch != nil && *repo.DefaultBranch.Name == *sourceBranch {
-						tmp = fmt.Sprintf("github_branch_default.%s.branch", repoTfId)
-					}
-					sourceBranch = &tmp
-				}
-			}
-		}
+
+	for _, link := range links {
+		repoName, sourceBranch = applyBranchResLink(link, repoTfId, repoName, sourceBranch, repo)
 	}
+
 	if repoName == nil {
 		panic("repository name is mandatory for branch config")
 	}
@@ -215,41 +139,51 @@ func MapToBranchRes(name string, c *GhBranchConfig, valGen tfsig.ValueGenerator,
 		Repository:     repoName,
 		Branch:         &name,
 		SourceBranch:   sourceBranch,
-		SourceSha:      c.SourceSha,
+		SourceSha:      branchConfig.SourceSha,
 	}
 }
 
-func MapToDefaultBranchRes(c *GhDefaultBranchConfig, valGen tfsig.ValueGenerator, repo *GhRepoConfig, repoTfId string, links ...MapperLink) *ghbranchdefault.Config {
-	if c == nil {
+func MapToDefaultBranchRes(
+	branchConfig *GhDefaultBranchConfig,
+	valGen tfsig.ValueGenerator,
+	repo *GhRepoConfig,
+	repoTfId string,
+	links ...MapperLink,
+) *ghbranchdefault.Config {
+	if branchConfig == nil {
 		return nil
 	}
-	branch := c.Name
+
 	var repository *string
+
+	branch := branchConfig.Name
+
 	if repo != nil {
 		repository = repo.Name
 	}
-	for _, v := range links {
-		if v == LinkToRepository {
+
+	for _, link := range links {
+		if link == LinkToRepository {
 			// /!\ a branch can't be configured if repository doesn't exist
 			// => Add an explicit dependency by using "github_repository.${repoTfId}.name"
 			tmp := fmt.Sprintf("github_repository.%s.name", repoTfId)
 			repository = &tmp
-		} else if v == LinkToBranch {
-			if branch != nil {
-				if repo.Branches != nil {
-					if _, branchConfigExists := (*repo.Branches)[*branch]; branchConfigExists {
-						// /!\ default branch can't be configured if related branch doesn't exist
-						// => Add an explicit dependency by using "github_branch.${repoTfId}-${branchId}.branch"
-						tmp := fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*branch))
-						branch = &tmp
-					}
+		} else if link == LinkToBranch {
+			if branch != nil && repo.Branches != nil {
+				if _, branchConfigExists := (*repo.Branches)[*branch]; branchConfigExists {
+					// /!\ default branch can't be configured if related branch doesn't exist
+					// => Add an explicit dependency by using "github_branch.${repoTfId}-${branchId}.branch"
+					tmp := fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*branch))
+					branch = &tmp
 				}
 			}
 		}
 	}
+
 	if repository == nil {
 		panic("repository is mandatory for default branch config")
 	}
+
 	return &ghbranchdefault.Config{
 		ValueGenerator: valGen,
 		Identifier:     repoTfId,
@@ -258,32 +192,33 @@ func MapToDefaultBranchRes(c *GhDefaultBranchConfig, valGen tfsig.ValueGenerator
 	}
 }
 
-func MapDefaultBranchToBranchProtectionRes(c *GhDefaultBranchConfig, valGen tfsig.ValueGenerator, repo *GhRepoConfig, repoTfId string, links ...MapperLink) *ghbranchprotect.Config {
-	if c == nil || c.Protection == nil {
+func MapDefaultBranchToBranchProtectionRes(
+	branchConfig *GhDefaultBranchConfig,
+	valGen tfsig.ValueGenerator,
+	repo *GhRepoConfig,
+	repoTfId string,
+	links ...MapperLink,
+) *ghbranchprotect.Config {
+	if branchConfig == nil {
 		return nil
 	}
 
-	wrapper := &GhBranchProtectionConfig{
-		Pattern: c.Name,
-		BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-			ConfigTemplates:      c.Protection.ConfigTemplates,
-			EnforceAdmins:        c.Protection.EnforceAdmins,
-			AllowsDeletion:       c.Protection.AllowsDeletion,
-			RequireLinearHistory: c.Protection.RequireLinearHistory,
-			RequireSignedCommits: c.Protection.RequireSignedCommits,
-			Pushes:               c.Protection.Pushes,
-			StatusChecks:         c.Protection.StatusChecks,
-			PullRequestReviews:   c.Protection.PullRequestReviews,
-		},
-	}
-
-	res := MapToBranchProtectionRes(wrapper, valGen, repo, repoTfId, links...)
+	res := MapBranchToBranchProtectionRes(
+		branchConfig.Name,
+		branchConfig.Protection,
+		valGen,
+		repo,
+		repoTfId,
+		links...,
+	)
 	if res != nil {
 		res.Identifier = repoTfId + "-" + DefaultBranchIdentifier
+
 		for _, v := range links {
 			if v == LinkToBranch {
 				tmp := fmt.Sprintf("github_branch_default.%s.branch", repoTfId)
 				res.Pattern = &tmp
+
 				break
 			}
 		}
@@ -292,89 +227,93 @@ func MapDefaultBranchToBranchProtectionRes(c *GhDefaultBranchConfig, valGen tfsi
 	return res
 }
 
-func MapBranchToBranchProtectionRes(name string, c *GhBranchConfig, valGen tfsig.ValueGenerator, repo *GhRepoConfig, repoTfId string, links ...MapperLink) *ghbranchprotect.Config {
-	if c == nil || c.Protection == nil {
+func MapBranchToBranchProtectionRes(
+	pattern *string,
+	protection *BaseGhBranchProtectionConfig,
+	valGen tfsig.ValueGenerator,
+	repo *GhRepoConfig,
+	repoTfId string,
+	links ...MapperLink,
+) *ghbranchprotect.Config {
+	if protection == nil {
 		return nil
 	}
 
 	wrapper := &GhBranchProtectionConfig{
-		Pattern: &name,
-		BaseGhBranchProtectionConfig: BaseGhBranchProtectionConfig{
-			ConfigTemplates:      c.Protection.ConfigTemplates,
-			EnforceAdmins:        c.Protection.EnforceAdmins,
-			AllowsDeletion:       c.Protection.AllowsDeletion,
-			RequireLinearHistory: c.Protection.RequireLinearHistory,
-			RequireSignedCommits: c.Protection.RequireSignedCommits,
-			Pushes:               c.Protection.Pushes,
-			StatusChecks:         c.Protection.StatusChecks,
-			PullRequestReviews:   c.Protection.PullRequestReviews,
-		},
+		Pattern:                      pattern,
+		Forbid:                       &falseString,
+		BaseGhBranchProtectionConfig: *newBaseGhBranchProtectionConfigFromBranchProtection(protection),
 	}
 
 	return MapToBranchProtectionRes(wrapper, valGen, repo, repoTfId, links...)
 }
 
-func MapToBranchProtectionRes(c *GhBranchProtectionConfig, valGen tfsig.ValueGenerator, repo *GhRepoConfig, repoTfId string, links ...MapperLink) *ghbranchprotect.Config {
-	if c == nil {
+func MapToBranchProtectionRes(
+	branchProtectionConfig *GhBranchProtectionConfig,
+	valGen tfsig.ValueGenerator,
+	repo *GhRepoConfig,
+	repoTfId string,
+	links ...MapperLink,
+) *ghbranchprotect.Config {
+	if branchProtectionConfig == nil {
 		return nil
 	}
 
-	pattern := c.Pattern
-	var repoName *string
+	var (
+		repoName             *string
+		requiredStatusChecks *ghbranchprotect.RequiredStatusChecksConfig
+		requiredPRReview     *ghbranchprotect.RequiredPRReviewConfig
+		allowsForcePushes    *string
+		pushRestrictions     *[]string
+	)
+
+	idEnd := "INVALID"
+	pattern := branchProtectionConfig.Pattern
+
 	if repo != nil {
 		repoName = repo.Name
 	}
+
 	for _, v := range links {
-		if v == LinkToRepository {
-			// /!\ a branch protection can't be configured if repository doesn't exist
-			// => Add an explicit dependency by using "github_repository.${repoTfId}.node_id"
-			tmp := fmt.Sprintf("github_repository.%s.node_id", repoTfId)
-			repoName = &tmp
-		} else if v == LinkToBranch {
-			if pattern != nil && repo != nil && repo.Branches != nil {
-				if _, branchConfigExists := (*repo.Branches)[*pattern]; branchConfigExists {
-					tmp := fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*pattern))
-					pattern = &tmp
-				}
-			}
-		}
+		repoName, pattern = mapBranchProtectionResLink(v, repoTfId, repoName, pattern, repo)
 	}
+
 	if repoName == nil {
 		panic("repository name is mandatory for branch protection config")
 	}
-	idEnd := "INVALID"
-	if c.Pattern != nil {
-		idEnd = tfsig.ToTerraformIdentifier(*c.Pattern)
+
+	if branchProtectionConfig.Pattern != nil {
+		idEnd = tfsig.ToTerraformIdentifier(*branchProtectionConfig.Pattern)
 	}
-	var requiredStatusChecks *ghbranchprotect.RequiredStatusChecksConfig
-	if c.StatusChecks != nil {
+
+	if branchProtectionConfig.StatusChecks != nil {
 		requiredStatusChecks = &ghbranchprotect.RequiredStatusChecksConfig{
 			ValueGenerator: valGen,
-			Strict:         c.StatusChecks.Strict,
-			Contexts:       c.StatusChecks.Required,
+			Strict:         branchProtectionConfig.StatusChecks.Strict,
+			Contexts:       branchProtectionConfig.StatusChecks.Required,
 		}
 	}
-	var requiredPRReview *ghbranchprotect.RequiredPRReviewConfig
-	if c.PullRequestReviews != nil {
+
+	if branchProtectionConfig.PullRequestReviews != nil {
 		requiredPRReview = &ghbranchprotect.RequiredPRReviewConfig{
 			ValueGenerator:               valGen,
 			DismissStaleReviews:          nil,
 			RestrictDismissals:           nil,
 			DismissalRestrictions:        nil,
-			RequireCodeOwnerReviews:      c.PullRequestReviews.CodeownerApprovals,
-			RequiredApprovingReviewCount: c.PullRequestReviews.ApprovalCount,
+			RequireCodeOwnerReviews:      branchProtectionConfig.PullRequestReviews.CodeownerApprovals,
+			RequiredApprovingReviewCount: branchProtectionConfig.PullRequestReviews.ApprovalCount,
 		}
-		if c.PullRequestReviews.Dismissals != nil {
-			requiredPRReview.DismissStaleReviews = c.PullRequestReviews.Dismissals.Staled
-			requiredPRReview.RestrictDismissals = c.PullRequestReviews.Dismissals.Restrict
-			requiredPRReview.DismissalRestrictions = c.PullRequestReviews.Dismissals.RestrictTo
+
+		if branchProtectionConfig.PullRequestReviews.Dismissals != nil {
+			requiredPRReview.DismissStaleReviews = branchProtectionConfig.PullRequestReviews.Dismissals.Staled
+			requiredPRReview.RestrictDismissals = branchProtectionConfig.PullRequestReviews.Dismissals.Restrict
+			requiredPRReview.DismissalRestrictions = branchProtectionConfig.PullRequestReviews.Dismissals.RestrictTo
 		}
 	}
-	var allowsForcePushes *string
-	var pushRestrictions *[]string
-	if c.Pushes != nil {
-		allowsForcePushes = c.Pushes.AllowsForcePushes
-		pushRestrictions = c.Pushes.PushRestrictions
+
+	if branchProtectionConfig.Pushes != nil {
+		allowsForcePushes = branchProtectionConfig.Pushes.AllowsForcePushes
+		pushRestrictions = branchProtectionConfig.Pushes.RestrictTo
 	}
 
 	return &ghbranchprotect.Config{
@@ -382,13 +321,214 @@ func MapToBranchProtectionRes(c *GhBranchProtectionConfig, valGen tfsig.ValueGen
 		Identifier:            repoTfId + "-" + idEnd,
 		RepositoryId:          repoName,
 		Pattern:               pattern,
-		EnforceAdmins:         c.EnforceAdmins,
-		AllowsDeletions:       c.AllowsDeletion,
+		EnforceAdmins:         branchProtectionConfig.EnforceAdmins,
+		AllowsDeletions:       branchProtectionConfig.AllowDeletion,
 		AllowsForcePushes:     allowsForcePushes,
 		PushRestrictions:      pushRestrictions,
-		RequiredLinearHistory: c.RequireLinearHistory,
-		RequireSignedCommits:  c.RequireSignedCommits,
+		RequiredLinearHistory: branchProtectionConfig.RequireLinearHistory,
+		RequireSignedCommits:  branchProtectionConfig.RequireSignedCommits,
 		RequiredStatusChecks:  requiredStatusChecks,
 		RequiredPRReview:      requiredPRReview,
 	}
+}
+
+func mapBranchProtectionResLink(
+	link MapperLink,
+	repoTfId string,
+	repoName *string,
+	pattern *string,
+	repo *GhRepoConfig,
+) (*string, *string) {
+	if link == LinkToRepository {
+		// /!\ a branch protection can't be configured if repository doesn't exist
+		// => Add an explicit dependency by using "github_repository.${repoTfId}.node_id"
+		tmp := fmt.Sprintf("github_repository.%s.node_id", repoTfId)
+		repoName = &tmp
+	} else if link == LinkToBranch {
+		if pattern != nil && repo != nil && repo.Branches != nil {
+			if _, branchConfigExists := (*repo.Branches)[*pattern]; branchConfigExists {
+				tmp := fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*pattern))
+				pattern = &tmp
+			}
+		}
+	}
+
+	return repoName, pattern
+}
+
+func newBaseGhBranchProtectionConfigFromBranchProtection(
+	protection *BaseGhBranchProtectionConfig,
+) *BaseGhBranchProtectionConfig {
+	return &BaseGhBranchProtectionConfig{
+		ConfigTemplates:      protection.ConfigTemplates,
+		EnforceAdmins:        protection.EnforceAdmins,
+		AllowDeletion:        protection.AllowDeletion,
+		RequireLinearHistory: protection.RequireLinearHistory,
+		RequireSignedCommits: protection.RequireSignedCommits,
+		Pushes:               protection.Pushes,
+		StatusChecks:         protection.StatusChecks,
+		PullRequestReviews:   protection.PullRequestReviews,
+	}
+}
+
+func mapPullRequest(
+	repoConfig *GhRepoConfig,
+) (*string, *string, *string, *string, *string, *string, *string, *string, *string) {
+	// PullRequest
+	var (
+		allowMergeCommit         *string
+		allowRebaseMerge         *string
+		allowSquashMerge         *string
+		allowAutoMerge           *string
+		mergeCommitTitle         *string
+		mergeCommitMessage       *string
+		squashMergeCommitTitle   *string
+		squashMergeCommitMessage *string
+		deleteBranchOnMerge      *string
+	)
+	// var suggestUpdate *string
+
+	if repoConfig.PullRequests != nil {
+		if repoConfig.PullRequests.MergeStrategy != nil {
+			allowMergeCommit = repoConfig.PullRequests.MergeStrategy.AllowMerge
+			allowRebaseMerge = repoConfig.PullRequests.MergeStrategy.AllowRebase
+			allowSquashMerge = repoConfig.PullRequests.MergeStrategy.AllowSquash
+			allowAutoMerge = repoConfig.PullRequests.MergeStrategy.AllowAutoMerge
+		}
+
+		if repoConfig.PullRequests.MergeCommit != nil {
+			mergeCommitTitle = repoConfig.PullRequests.MergeCommit.Title
+			mergeCommitMessage = repoConfig.PullRequests.MergeCommit.Message
+		}
+
+		if repoConfig.PullRequests.SquashCommit != nil {
+			squashMergeCommitTitle = repoConfig.PullRequests.SquashCommit.Title
+			squashMergeCommitMessage = repoConfig.PullRequests.SquashCommit.Message
+		}
+
+		if repoConfig.PullRequests.Branch != nil {
+			// suggestUpdate = c.PullRequests.Branch.SuggestUpdate
+			deleteBranchOnMerge = repoConfig.PullRequests.Branch.DeleteOnMerge
+		}
+	}
+
+	//nolint:lll
+	return allowMergeCommit, allowRebaseMerge, allowSquashMerge, allowAutoMerge, mergeCommitTitle, mergeCommitMessage, squashMergeCommitTitle, squashMergeCommitMessage, deleteBranchOnMerge
+}
+
+//nolint:nonamedreturns // Easier to understand as is
+func mapMiscellaneous(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) (
+	topics *[]string,
+	autoInit *string,
+	archived *string,
+	homepageUrl *string,
+	// isTemplate *string,
+	// gitignoreTemplate *string,
+	// licenseTemplate *string,
+	hasIssues *string,
+	hasProjects *string,
+	hasWiki *string,
+	hasDownloads *string,
+	page *ghrepository.PagesConfig,
+	template *ghrepository.TemplateConfig,
+) {
+	if repoConfig.Miscellaneous != nil {
+		topics = repoConfig.Miscellaneous.Topics
+		autoInit = repoConfig.Miscellaneous.AutoInit
+		archived = repoConfig.Miscellaneous.Archived
+		homepageUrl = repoConfig.Miscellaneous.HomepageUrl
+		// isTemplate = c.Miscellaneous.IsTemplate
+		hasIssues = repoConfig.Miscellaneous.HasIssues
+		hasProjects = repoConfig.Miscellaneous.HasProjects
+		hasWiki = repoConfig.Miscellaneous.HasWiki
+		hasDownloads = repoConfig.Miscellaneous.HasDownloads
+
+		// if c.Miscellaneous.FileTemplates != nil {
+		// gitignoreTemplate = c.Miscellaneous.FileTemplates.Gitignore
+		// licenseTemplate = c.Miscellaneous.FileTemplates.License
+		// }
+
+		template = mapTemplate(repoConfig, valGen)
+		page = mapPage(repoConfig, valGen)
+	}
+
+	return topics, autoInit, archived, homepageUrl, hasIssues, hasProjects, hasWiki, hasDownloads, page, template
+}
+
+func mapPage(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.PagesConfig {
+	if repoConfig.Miscellaneous.Pages != nil {
+		var source *ghrepository.PagesSourceConfig
+		if repoConfig.Miscellaneous.Pages.SourcePath != nil || repoConfig.Miscellaneous.Pages.SourceBranch != nil {
+			source = &ghrepository.PagesSourceConfig{
+				ValueGenerator: valGen,
+				Branch:         repoConfig.Miscellaneous.Pages.SourceBranch,
+				Path:           repoConfig.Miscellaneous.Pages.SourcePath,
+			}
+		}
+
+		return &ghrepository.PagesConfig{Source: source}
+	}
+
+	return nil
+}
+
+func mapTemplate(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepository.TemplateConfig {
+	if repoConfig.Miscellaneous.Template != nil {
+		template := &ghrepository.TemplateConfig{
+			ValueGenerator: valGen,
+			// IncludeAllBranches: c.Miscellaneous.Template.FullClone,
+			Owner:      nil,
+			Repository: nil,
+		}
+
+		if repoConfig.Miscellaneous.Template.Source != nil {
+			sources := strings.Split(*repoConfig.Miscellaneous.Template.Source, "/")
+			if len(sources) == 2 { //nolint:gomnd // Doesn't make sense here to wrap 2
+				template.Owner = &sources[0]
+				template.Repository = &sources[1]
+			}
+		}
+
+		return template
+	}
+
+	return nil
+}
+
+func applyBranchResLink(
+	link MapperLink,
+	repoTfId string,
+	repoName *string,
+	sourceBranch *string,
+	repo *GhRepoConfig,
+) (*string, *string) {
+	if link == LinkToRepository {
+		// /!\ a branch can't be configured if repository doesn't exist
+		// => Add an explicit dependency by using "github_repository.${repoTfId}.name"
+		tmp := fmt.Sprintf("github_repository.%s.name", repoTfId)
+		repoName = &tmp
+	} else if link == LinkToBranch && sourceBranch != nil && repo != nil {
+		sourceBranch = linkBranch(sourceBranch, repo, repoTfId)
+	}
+
+	return repoName, sourceBranch
+}
+
+func linkBranch(sourceBranch *string, repo *GhRepoConfig, repoTfId string) *string {
+	// /!\ a branch can't be configured if source_branch branch doesn't exist
+	// => Add an explicit dependency by using "github_branch.${repoTfId}-${branchId}.branch"
+	// Or Add an explicit dependency by using "github_branch_default.${repoTfId}.branch"
+	tmp := *sourceBranch
+
+	if repo.Branches != nil {
+		if _, sourceBranchConfigExists := (*repo.Branches)[*sourceBranch]; sourceBranchConfigExists {
+			tmp = fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*sourceBranch))
+		}
+	}
+	// Look for default branch only if not already updated
+	if tmp == *sourceBranch && repo.DefaultBranch != nil && *repo.DefaultBranch.Name == *sourceBranch {
+		tmp = fmt.Sprintf("github_branch_default.%s.branch", repoTfId)
+	}
+
+	return &tmp
 }
