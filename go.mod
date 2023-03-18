@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/hcl/v2 v2.15.0
-	github.com/rs/zerolog v1.26.0
+	github.com/rs/zerolog v1.29.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.0.2
 	github.com/spf13/pflag v1.0.5
 	github.com/yoanm/go-gh2tf v0.1.0
@@ -23,8 +23,8 @@ require (
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/zclconf/go-cty v1.12.1 // indirect
