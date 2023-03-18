@@ -1,13 +1,11 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"sort"
-	"strings"
 	"sync"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -18,17 +16,6 @@ import (
 )
 
 /** Public **/
-
-var errDuringWriteTerraformFiles = errors.New("error while writing terraform files")
-
-func WriteTerraformFileError(errList []error) error {
-	msgList := []string{}
-	for _, err := range errList {
-		msgList = append(msgList, fmt.Sprintf("\t - %s", err.Error()))
-	}
-
-	return fmt.Errorf("%w\n%s", errDuringWriteTerraformFiles, strings.Join(msgList, "\n"))
-}
 
 func GenerateHclRepoFiles(configList []*GhRepoConfig) (map[string]*hclwrite.File, error) {
 	valueGenerator := gh2tf.NewValueGenerator()
@@ -42,7 +29,7 @@ func GenerateHclRepoFiles(configList []*GhRepoConfig) (map[string]*hclwrite.File
 		waitGroup.Add(1)
 
 		if repoConfig.Name == nil {
-			errList = append(errList, fmt.Errorf("config #%d: repository name is mandatory", k))
+			errList = append(errList, RepositoryNameIsMandatoryForConfigIndexError(k))
 		} else {
 			repoTfId := tfsig.ToTerraformIdentifier(*repoConfig.Name)
 			go generateHclRepoFileAsync(repoConfig, valueGenerator, repoTfId, collector, waitGroup)
@@ -54,7 +41,7 @@ func GenerateHclRepoFiles(configList []*GhRepoConfig) (map[string]*hclwrite.File
 	close(errCollector)
 
 	if len(errCollector) > 0 || len(errList) > 0 {
-		return nil, createFileGenerationError(errCollector, errList)
+		return nil, FileGenerationError(createFileGenerationErrorMessages(errCollector, errList))
 	}
 
 	list := map[string]*hclwrite.File{}
@@ -66,25 +53,24 @@ func GenerateHclRepoFiles(configList []*GhRepoConfig) (map[string]*hclwrite.File
 	return list, nil
 }
 
-func createFileGenerationError(errCollector errorCollector, errList []error) error {
-	msgList := []string{"error while generating files:"}
+func createFileGenerationErrorMessages(errCollector errorCollector, errList []error) []string {
+	msgList := []string{}
 
 	if len(errCollector) > 0 {
 		subErrList, keys := internalSortFileErrors(errCollector)
 
 		for _, file := range keys {
-			generateErr := subErrList[file]
-			msgList = append(msgList, fmt.Sprintf("\t - %s", generateErr))
+			msgList = append(msgList, subErrList[file].Error())
 		}
 	}
 
 	if len(errList) > 0 {
 		for _, err := range errList {
-			msgList = append(msgList, fmt.Sprintf("\t - %s", err))
+			msgList = append(msgList, err.Error())
 		}
 	}
 
-	return fmt.Errorf(strings.Join(msgList, "\n"))
+	return msgList
 }
 
 func internalSortFileErrors(errCollector errorCollector) (map[string]error, []string) {
@@ -144,11 +130,11 @@ func generateWritingFileErrors(
 ) []error {
 	switch {
 	case !exists:
-		return []error{fmt.Errorf("\t - open %s: no such file or directory", rootPath)}
+		return []error{FileOpenNoSuchFileOrDirectoryError(rootPath)}
 	case statError != nil:
-		return []error{fmt.Errorf("\t - %w", statError)}
+		return []error{statError}
 	case !isDir:
-		return []error{fmt.Errorf("\t - %s is not a directory", rootPath)}
+		return []error{PathIsNotADirectoryError(rootPath)}
 	default:
 		// sort file to always get a predictable output (for tests mostly)
 		errList := map[string]error{}
@@ -164,7 +150,7 @@ func generateWritingFileErrors(
 		msgList := []error{}
 
 		for _, file := range keys {
-			msgList = append(msgList, fmt.Errorf("\t - %w", errList[file]))
+			msgList = append(msgList, errList[file])
 		}
 
 		return msgList

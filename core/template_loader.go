@@ -1,10 +1,5 @@
 package core
 
-import (
-	"fmt"
-	"strings"
-)
-
 const (
 	TemplateMaxDepth = 10
 	TemplateMaxCount = 10
@@ -18,12 +13,7 @@ func loadTemplate[T any](
 	path ...string,
 ) ([]*T, error) {
 	if len(path) > TemplateMaxDepth {
-		return nil, fmt.Errorf(
-			"more than %d levels of %s template detected for %s",
-			TemplateMaxDepth,
-			tplType,
-			strings.Join(path, "->"),
-		)
+		return nil, MaxTemplateDepthReachedError(tplType, path)
 	}
 
 	var (
@@ -33,7 +23,7 @@ func loadTemplate[T any](
 	)
 
 	if tpl = loaderFn(tplName); tpl == nil {
-		return nil, fmt.Errorf("unknown %s template %s", tplType, tplName)
+		return nil, UnknownTemplateError(tplType, tplName)
 	}
 
 	if tplList, err = loadTemplateList(finderFn(tpl), loaderFn, finderFn, tplType, append(path, tplName)...); err != nil {
@@ -59,13 +49,7 @@ func loadTemplateList[T any](
 
 	if tplNameList != nil {
 		if len(*tplNameList) > TemplateMaxCount {
-			pathString := "ROOT"
-
-			if len(path) > 0 {
-				pathString = strings.Join(path, "->")
-			}
-
-			return nil, fmt.Errorf("more than %d %s template detected for %s", TemplateMaxCount, tplType, pathString)
+			return nil, MaxTemplateCountReachedError(tplType, path)
 		}
 
 		for _, tplName := range *tplNameList {

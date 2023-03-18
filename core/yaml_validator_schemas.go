@@ -1,8 +1,6 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
@@ -38,7 +36,7 @@ func (s *SchemaList) FindContent(url string) (*string, error) {
 	}
 
 	if schema.Content == nil {
-		return nil, fmt.Errorf("%q has an empty schema", url)
+		return nil, EmptySchemaError(url)
 	}
 
 	return schema.Content, nil
@@ -47,11 +45,11 @@ func (s *SchemaList) FindContent(url string) (*string, error) {
 func (s *SchemaList) Find(url string) (*Schema, error) {
 	schema, ok := (*s)[url]
 	if !ok {
-		return nil, fmt.Errorf("%q not found", url)
+		return nil, SchemaNotFoundError(url)
 	}
 
 	if schema == nil {
-		return nil, fmt.Errorf("%q is nil", url)
+		return nil, SchemaIsNilError(url)
 	}
 
 	return schema, nil
@@ -60,7 +58,7 @@ func (s *SchemaList) Find(url string) (*Schema, error) {
 func (s *SchemaList) Compile(url string) (*jsonschema.Schema, error) {
 	val, err := jsonschema.Compile(url)
 	if err != nil {
-		return nil, fmt.Errorf("error during %q compilation: %w", url, err)
+		return nil, SchemaCompilationError(url, err.Error())
 	}
 
 	return val, nil

@@ -132,7 +132,7 @@ func GetFullConfig(id int) *core.GhRepoConfig {
 	branch2BranchProtectionContext := fmt.Sprintf("branch%d-context%d", 1+id, id)
 	// Repo->Branches[1]->Protection->PullRequestReviews
 	branch2BranchProtectionBypasser := fmt.Sprintf("branch%d-bypasser%d", 1+id, id)
-	
+
 	branch2BranchProtectionRequiredApprovingReviewCount := fmt.Sprintf("%d", (approvalCount+2)%7)
 	branch2BranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool1)
 	branch2BranchProtectionResolvedConversations := fmt.Sprintf("%s", bool1)

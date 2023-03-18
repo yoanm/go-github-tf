@@ -6,10 +6,10 @@ import (
 	"os"
 )
 
-var errPathIsNotADirectory = errors.New("is not a directory")
+var errPathIsNotADirectory = errors.New("path is not a directory")
 
 func PathIsNotADirectoryError(path string) error {
-	return fmt.Errorf("%s %w", path, errPathIsNotADirectory)
+	return fmt.Errorf("%w: %s", errPathIsNotADirectory, path)
 }
 
 func readDirectory(rootPath string) ([]string, error) {

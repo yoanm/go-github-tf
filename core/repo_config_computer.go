@@ -19,7 +19,7 @@ func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (*GhRepoC
 	}
 
 	if base.Name == nil {
-		return nil, fmt.Errorf("repository name is mandatory")
+		return nil, errRepositoryNameIsMandatory
 	}
 
 	config.Merge(base)
@@ -295,7 +295,7 @@ func loadRepoTemplatesFor(toConfig *GhRepoConfig, templates *TemplatesConfig) ([
 	const tplType = "repository"
 
 	if templates == nil {
-		return nil, fmt.Errorf("unable to load %s template, no template available", tplType)
+		return nil, TemplateUnavailableError(tplType)
 	}
 
 	tplList, err := loadTemplateList(
@@ -326,7 +326,7 @@ func loadBranchProtectionTemplatesFor(
 	const tplType = "branch protection"
 
 	if templates == nil {
-		return nil, fmt.Errorf("unable to load %s template, no template available", tplType)
+		return nil, TemplateUnavailableError(tplType)
 	}
 
 	tplList, err := loadTemplateList(
@@ -354,7 +354,7 @@ func loadBranchTemplatesFor(tplNameToLoad *[]string, templates *TemplatesConfig)
 	const tplType = "branch"
 
 	if templates == nil {
-		return nil, fmt.Errorf("unable to load %s template, no template available", tplType)
+		return nil, TemplateUnavailableError(tplType)
 	}
 
 	tplList, err := loadTemplateList(

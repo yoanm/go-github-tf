@@ -17,9 +17,11 @@ import (
 var (
 	errInputDirectoryDoesntExist = errors.New("input directory doesn't exist")
 	errDuringWorkspaceLoading    = errors.New("error during configs loading")
+	errDuringTemplateLoading     = errors.New("error during templates loading")
+	errRepositoryAlreadyImported = errors.New("repository already imported")
 )
 
-func InputDirectoryDoesntExist(path string) error {
+func InputDirectoryDoesntExistError(path string) error {
 	return fmt.Errorf("%w: %s", errInputDirectoryDoesntExist, path)
 }
 
@@ -45,7 +47,17 @@ func ConfigDirectoryLoadingError(errList map[string]error) error {
 }
 
 func AlreadyImportedRepositoryError(fName string, repoName string, firstFName string) error {
-	return fmt.Errorf("file %s imports %s, but already imported by %s", fName, repoName, firstFName)
+	return fmt.Errorf(
+		"%w: repository %s imported by %s, but already imported by %s",
+		errRepositoryAlreadyImported,
+		repoName,
+		fName,
+		firstFName,
+	)
+}
+
+func TemplateLoadingError(msgList []string) error {
+	return fmt.Errorf("%w:\n\t - %s", errDuringTemplateLoading, strings.Join(msgList, "\n\t - "))
 }
 
 func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*core.Config, error) {
@@ -54,7 +66,7 @@ func readWorkspace(rootPath, configDir, templateDir, yamlAnchorDir string) (*cor
 	config := core.NewConfig()
 
 	if _, err = os.Stat(rootPath); os.IsNotExist(err) {
-		return nil, InputDirectoryDoesntExist(rootPath)
+		return nil, InputDirectoryDoesntExistError(rootPath)
 	}
 
 	configureYamlAnchorDirectory(rootPath, yamlAnchorDir)
@@ -268,30 +280,27 @@ func readTemplateDirectory(
 	}
 
 	if len(errList) > 0 || readErr != nil {
-		msgList := generateTemplateLoadingErrorMessages(readErr, errList)
-
-		return fmt.Errorf(strings.Join(msgList, "\n"))
+		return TemplateLoadingError(generateTemplateLoadingErrorMessages(readErr, errList))
 	}
 
 	return nil
 }
 
 func generateTemplateLoadingErrorMessages(readErr error, errList map[string]error) []string {
-	msgList := []string{"Error during templates loading:"}
 	if readErr != nil {
-		msgList = append(msgList, fmt.Sprintf("\t - %s", readErr))
-	} else {
-		// sort file to always get a predictable output (for tests mostly)
-		keys := make([]string, 0, len(errList))
-		for k := range errList {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
+		return []string{readErr.Error()}
+	}
 
-		for _, file := range keys {
-			decodeErr := errList[file]
-			msgList = append(msgList, fmt.Sprintf("\t - %s", decodeErr))
-		}
+	msgList := []string{}
+	// sort file to always get a predictable output (for tests mostly)
+	keys := make([]string, 0, len(errList))
+	for k := range errList {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, file := range keys {
+		msgList = append(msgList, errList[file].Error())
 	}
 
 	return msgList

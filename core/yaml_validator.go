@@ -154,7 +154,7 @@ func _normalizeValidationError(filePath string, err interface{}) error {
 
 	validationError := _validationErrorLeaf(vErr)
 
-	return fmt.Errorf("file %s: %s %s", filePath, validationError.InstanceLocation, validationError.Message)
+	return SchemaValidationError(filePath, validationError.InstanceLocation, validationError.Message)
 }
 
 func _validationErrorLeaf(ve *jsonschema.ValidationError) *jsonschema.ValidationError {
