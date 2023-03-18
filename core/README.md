@@ -106,6 +106,10 @@ var (
 
 `func ComputationError(errList []error) error`
 
+### func [ConfigTrace](./debug.go#L9)
+
+`func ConfigTrace[T GhRepoConfig | Config](header string, c *T)`
+
 ### func [DefaultBranchError](./errors.go#L52)
 
 `func DefaultBranchError(err error) error`
@@ -150,7 +154,7 @@ var (
     path ...string,
 ) ([]*T, error)`
 
-### func [MapBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L392)
+### func [MapBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L230)
 
 `func MapBranchToBranchProtectionRes(
     pattern *string,
@@ -161,7 +165,7 @@ var (
     links ...MapperLink,
 ) *ghbranchprotect.Config`
 
-### func [MapDefaultBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L357)
+### func [MapDefaultBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L195)
 
 `func MapDefaultBranchToBranchProtectionRes(
     branchConfig *GhDefaultBranchConfig,
@@ -171,7 +175,7 @@ var (
     links ...MapperLink,
 ) *ghbranchprotect.Config`
 
-### func [MapToBranchProtectionRes](./gh2tf_repo_mapper.go#L413)
+### func [MapToBranchProtectionRes](./gh2tf_repo_mapper.go#L251)
 
 `func MapToBranchProtectionRes(
     branchProtectionConfig *GhBranchProtectionConfig,
@@ -181,7 +185,7 @@ var (
     links ...MapperLink,
 ) *ghbranchprotect.Config`
 
-### func [MapToBranchRes](./gh2tf_repo_mapper.go#L225)
+### func [MapToBranchRes](./gh2tf_repo_mapper.go#L101)
 
 `func MapToBranchRes(
     name string,
@@ -192,7 +196,7 @@ var (
     links ...MapperLink,
 ) *ghbranch.Config`
 
-### func [MapToDefaultBranchRes](./gh2tf_repo_mapper.go#L308)
+### func [MapToDefaultBranchRes](./gh2tf_repo_mapper.go#L146)
 
 `func MapToDefaultBranchRes(
     branchConfig *GhDefaultBranchConfig,

@@ -3,8 +3,6 @@ package main
 import (
 	"path"
 
-	"github.com/goccy/go-yaml"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/yoanm/github-tf/core"
@@ -29,14 +27,7 @@ func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformD
 		return readWorkspaceErrorExitCode
 	}
 
-	if zerolog.GlobalLevel() == zerolog.TraceLevel {
-		encoded, encodeError := yaml.Marshal(rawConfig)
-		if encodeError != nil {
-			log.Trace().Msgf("Decoded config: Error %s", encodeError)
-		} else {
-			log.Trace().Msgf("Decoded config: \n%s", string(encoded))
-		}
-	}
+	core.ConfigTrace("Decoded config", rawConfig)
 
 	log.Info().Msgf(
 		"Found: %d repos / %d repo templates / %d branch templates / %d branch protection templates",
@@ -54,14 +45,7 @@ func loadYamlAndWriteTerraform(workspacePath, configDir, templateDir, terraformD
 		return computeConfigErrorExitCode
 	}
 
-	if zerolog.GlobalLevel() == zerolog.TraceLevel {
-		encoded, encodeError := yaml.Marshal(&config)
-		if encodeError != nil {
-			log.Trace().Msgf("Computed config: Error %s", encodeError)
-		} else {
-			log.Trace().Msgf("Computed config: \n%s", string(encoded))
-		}
-	}
+	core.ConfigTrace("Computed config", config)
 
 	files, err := core.GenerateHclRepoFiles(config.Repos)
 	if err != nil {

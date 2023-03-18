@@ -24,25 +24,25 @@ func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (*GhRepoC
 
 	config.Merge(base)
 
-	configTrace(fmt.Sprintf("Config after merge: %s", *base.Name), config)
+	ConfigTrace(fmt.Sprintf("Config after merge: %s", *base.Name), config)
 
 	if config, err = ApplyRepositoryTemplate(config, templates); err != nil {
 		return nil, err
 	} else {
-		configTrace(fmt.Sprintf("Config after repo template: %s", *base.Name), config)
+		ConfigTrace(fmt.Sprintf("Config after repo template: %s", *base.Name), config)
 	}
 
 	if err = ApplyBranchesTemplate(config, templates); err != nil {
 		return nil, err
 	} else {
-		configTrace(fmt.Sprintf("Config after branch template: %s", *base.Name), config)
+		ConfigTrace(fmt.Sprintf("Config after branch template: %s", *base.Name), config)
 	}
 
 	if err = ApplyBranchProtectionsTemplate(config, templates); err != nil {
 		return nil, err
 	}
 
-	configTrace(fmt.Sprintf("Final config: %s", *base.Name), config)
+	ConfigTrace(fmt.Sprintf("Final config: %s", *base.Name), config)
 
 	return config, nil
 }

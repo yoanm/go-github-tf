@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func configTrace(header string, c *GhRepoConfig) {
+func ConfigTrace[T GhRepoConfig | Config](header string, c *T) {
 	if zerolog.GlobalLevel() == zerolog.TraceLevel {
 		encoded, encodeError := yaml.Marshal(*c)
 		if encodeError == nil {
