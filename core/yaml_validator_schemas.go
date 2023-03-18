@@ -1,6 +1,8 @@
 package core
 
 import (
+	"sync"
+
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
@@ -17,6 +19,11 @@ func (s *SchemaList) FindCompiled(url string) *jsonschema.Schema {
 		panic(err)
 	}
 
+	var mu sync.Mutex
+
+	// Prevent race condition during compilation
+	mu.Lock()
+
 	if schema.compiled == nil {
 		compiled, err2 := s.Compile(url)
 		if err2 != nil {
@@ -25,6 +32,8 @@ func (s *SchemaList) FindCompiled(url string) *jsonschema.Schema {
 
 		schema.compiled = compiled
 	}
+
+	mu.Unlock()
 
 	return schema.compiled
 }
