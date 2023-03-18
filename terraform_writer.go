@@ -5,7 +5,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/yoanm/github-tf/core"
+	"github.com/yoanm/go-github-tf/core"
 )
 
 const (

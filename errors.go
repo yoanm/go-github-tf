@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yoanm/github-tf/core"
+	"github.com/yoanm/go-github-tf/core"
 )
 
 var (

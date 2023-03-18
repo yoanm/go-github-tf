@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/yoanm/github-tf/core"
 	"github.com/yoanm/go-gh2tf"
 	"github.com/yoanm/go-gh2tf/ghbranch"
 	"github.com/yoanm/go-gh2tf/ghbranchdefault"
 	"github.com/yoanm/go-gh2tf/ghbranchprotect"
 	"github.com/yoanm/go-gh2tf/ghrepository"
+	"github.com/yoanm/go-github-tf/core"
 	"github.com/yoanm/go-tfsig"
 	"github.com/yoanm/go-tfsig/testutils"
 )
