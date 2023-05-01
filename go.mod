@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/goccy/go-yaml v1.10.0
+	github.com/goccy/go-yaml v1.11.0
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/hcl/v2 v2.16.2
@@ -28,7 +28,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/zclconf/go-cty v1.13.0 // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
