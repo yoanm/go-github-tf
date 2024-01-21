@@ -30,7 +30,7 @@ var falseString = "false"
 const patternToIdReplacer  = strings.NewReplacer(
 	".", "_DOT_",
 	"/", "_SLASH_",
-	"\\", "_ESC_"
+	"\\", "_ESC_",
 	// fnmatch special chars
 	"*", "_STAR_",
 	"[", "_SEQ-O_",
