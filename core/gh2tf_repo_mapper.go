@@ -26,8 +26,8 @@ const (
 var falseString = "false"
 
 // Replace branch protection pattern's special chars by dedicated string in order to avoid ID collision (pattern is used for TF ressource generation)
-// in case every special chars are replaced by the same string => "?.*", "[.]" or "?/?" would all lead to the same "---" ID for instance
-var patternToIdReplacer  = strings.NewReplacer(
+// in case every special chars are replaced by the same string => "?.*", "[.]" or "?/?" would all lead to the same "---" ID for instance.
+var patternToIdReplacer = strings.NewReplacer(
 	".", "_DOT_",
 	"/", "_SLASH_",
 	"\\", "_ESC_",
