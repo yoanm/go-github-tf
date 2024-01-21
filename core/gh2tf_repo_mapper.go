@@ -25,6 +25,20 @@ const (
 //nolint:gochecknoglobals // Easier than duplicate it everywhere needed
 var falseString = "false"
 
+// Replace branch protection pattern's special chars by dedicated string in order to avoid ID collision (pattern is used for TF ressource generation)
+// in case every special chars are replaced by the same string => "?.*", "[.]" or "?/?" would all lead to the same "---" ID for instance.
+var patternToIdReplacer = strings.NewReplacer(
+	".", "_DOT_",
+	"/", "_SLASH_",
+	"\\", "_ESC_",
+	// fnmatch special chars
+	"*", "_STAR_",
+	"[", "_SEQ-O_",
+	"]", "_SEQ-C_",
+	"?", "_Q-MARK_",
+	"!", "_EX-MARK_",
+)
+
 func MapToRepositoryRes(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator, repoTfId string) *ghrepository.Config {
 	if repoConfig == nil {
 		return nil
@@ -283,7 +297,7 @@ func MapToBranchProtectionRes(
 	}
 
 	if branchProtectionConfig.Pattern != nil {
-		idEnd = tfsig.ToTerraformIdentifier(*branchProtectionConfig.Pattern)
+		idEnd = tfsig.ToTerraformIdentifier(patternToIdReplacer.Replace(*branchProtectionConfig.Pattern))
 	}
 
 	if branchProtectionConfig.StatusChecks != nil {
