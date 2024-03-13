@@ -1,10 +1,9 @@
-# Based on https://github.com/yoanm/shared-config/blob/master/GitHub/dependabot.yml file
 version: 2
 updates:
 #
 #
 # [GHAction]
-#
+# Based on https://github.com/yoanm/shared-config/blob/master/GitHub/dependabot/github-action.yml file
 #
   - package-ecosystem: github-actions
     directory: /
@@ -29,7 +28,7 @@ updates:
 #
 #
 # [Go]
-#
+# Based on https://github.com/yoanm/shared-config/blob/master/GitHub/dependabot/gomod.yml file
 #
   - package-ecosystem: gomod
     directory: /
