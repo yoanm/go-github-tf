@@ -6,25 +6,26 @@ updates:
 # [GHAction]
 #
 #
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: 'monthly'
+      interval: weekly
+      day: sunday # Create PRs during week-ends, they will be ready on monday morning
     commit-message:
-      prefix: "[dependabot][ghaction] - " # No need to specify prod/dev for GHAction as there is only "production" updates !
-      include: "scope"
+      prefix: '[dependabot][ghaction] - ' # No need to specify prod/dev for GHAction as there is only "production" updates !
+      include: scope
     groups:
 # Group all basic updates inside the a single PR
 # No need to split prod/dev as there is only prod updates
       all-actions:
-        applies-to: "version-updates"
-        patterns: ["*"]
+        applies-to: version-updates
+        patterns: ['*']
 # Group all security updates inside the a single PR
 # No need to split prod/dev as there is only prod updates
 # +Most likely no need to split major and other updates either
       SECURITY-all:
-        applies-to: "security-updates"
-        patterns: ["*"]
+        applies-to: security-updates
+        patterns: ['*']
 #
 #
 # [Go]
@@ -32,31 +33,33 @@ updates:
 #
   - package-ecosystem: gomod
     directory: /
-    schedule:
-      interval: monthly
-#    versioning-strategy: "....." # Not applicable (currently) for gomod :/
+    schedule: # Create PRs during week-ends, they will be ready on monday morning
+      interval: weekly
+      day: sunday
+#    versioning-strategy: ... # Not applicable (currently) for gomod :/
     commit-message:
-      prefix: "[dependabot][prod][gomod] - " # No need to specify prod/dev for Go as there is only "production" packages !
-      include: "scope"
+      prefix: '[dependabot][prod][gomod] - ' # No need to specify prod/dev for Go as there is only "production" packages !
+      include: scope
     groups:
 # Split basic updates by:
 #  - ~prod vs dev~ => Not applicable for Go packages :/
 #  - major vs others (assuming packages properly follow semver !)
       prod-majors:
-        applies-to: "version-updates"
-        update-types: ["major"]
+        applies-to: version-updates
+        update-types: ['major']
+        patterns: ['*']
       prod-others:
-        applies-to: "version-updates"
-        patterns: [ "*" ]
+        applies-to: version-updates
+        patterns: ['*']
 # Split security updates by:
 #  - ~prod vs dev~ => Not applicable for Go packages :/
 #  - Major prod updates vs other prod updates
       SECURITY-prod-major:
-        applies-to: "security-updates"
-        dependency-type: "production"
-        update-types: ["major"]
-        patterns: ["*"]
+        applies-to: security-updates
+        dependency-type: production
+        update-types: ['major']
+        patterns: ['*']
       SECURITY-prod:
-        applies-to: "security-updates"
-        dependency-type: "production"
-        patterns: ["*"]
+        applies-to: security-updates
+        dependency-type: production
+        patterns: ['*']
