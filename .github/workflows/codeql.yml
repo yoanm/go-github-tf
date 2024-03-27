@@ -52,6 +52,14 @@ jobs:
         # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
+      # Ack, see https://github.com/github/codeql/issues/15647 - To remove when v1.22 will be correctly supported
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version-file: ./go.mod
+        check-latest: true
+        cache: true
+        cache-dependency-path: ./go.sum
         
     # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
