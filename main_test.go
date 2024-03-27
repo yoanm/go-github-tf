@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -109,7 +110,7 @@ func configure(t *testing.T, testdataPath string) *cmdtest.TestSuite {
 	suite.Setup = func(rootDir string) error {
 		_, testFileName, _, ok := runtime.Caller(0)
 		if !ok {
-			return fmt.Errorf("failed get real working directory from caller")
+			return errors.New("failed get real working directory from caller")
 		}
 
 		projectRootDir := filepath.Dir(testFileName)
@@ -138,7 +139,7 @@ func configure(t *testing.T, testdataPath string) *cmdtest.TestSuite {
 
 func chmodCmd(args []string, inputFile string) ([]byte, error) {
 	if inputFile != "" {
-		return nil, fmt.Errorf("input redirection not supported")
+		return nil, errors.New("input redirection not supported")
 	}
 
 	if err := checkPath(args[0]); err != nil {

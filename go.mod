@@ -1,6 +1,6 @@
 module github.com/yoanm/go-github-tf
 
-go 1.20
+go 1.22
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883

@@ -1,8 +1,6 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,25 +22,25 @@ func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (*GhRepoC
 
 	config.Merge(base)
 
-	ConfigTrace(fmt.Sprintf("Config after merge: %s", *base.Name), config)
+	ConfigTrace("Config after merge: "+(*base.Name), config)
 
 	if config, err = ApplyRepositoryTemplate(config, templates); err != nil {
 		return nil, err
 	} else {
-		ConfigTrace(fmt.Sprintf("Config after repo template: %s", *base.Name), config)
+		ConfigTrace("Config after repo template: "+(*base.Name), config)
 	}
 
 	if err = ApplyBranchesTemplate(config, templates); err != nil {
 		return nil, err
 	} else {
-		ConfigTrace(fmt.Sprintf("Config after branch template: %s", *base.Name), config)
+		ConfigTrace("Config after branch template: "+(*base.Name), config)
 	}
 
 	if err = ApplyBranchProtectionsTemplate(config, templates); err != nil {
 		return nil, err
 	}
 
-	ConfigTrace(fmt.Sprintf("Final config: %s", *base.Name), config)
+	ConfigTrace("Final config: "+(*base.Name), config)
 
 	return config, nil
 }

@@ -1,7 +1,7 @@
 package core_test
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/yoanm/go-github-tf/core"
@@ -23,17 +23,17 @@ func TestLoadRepositoryFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/repos/repo.unexpected-property.yml",
 			nil,
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/repos/repo.unexpected-property.yml: /unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/repos/repo.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repo.full.yml",
@@ -74,17 +74,17 @@ func TestLoadRepositoriesFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/repos/repos.unexpected-property.yml",
 			nil,
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/repos/repos.unexpected-property.yml: /0/unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/repos/repos.unexpected-property.yml: /0/unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repos.full.yml",
@@ -118,17 +118,17 @@ func TestLoadRepositoryTemplateFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/templates/repo.unexpected-property.yml",
 			nil,
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/templates/repo.unexpected-property.yml: /unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/templates/repo.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repo-template.full.yml",
@@ -138,14 +138,13 @@ func TestLoadRepositoryTemplateFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				conf, err := core.LoadRepositoryTemplateFromFile(tc.filename)
+
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -165,17 +164,17 @@ func TestLoadBranchTemplateFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/templates/branch.unexpected-property.yml",
 			nil,
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/templates/branch.unexpected-property.yml: /unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/templates/branch.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/branch-template.full.yml",
@@ -185,14 +184,13 @@ func TestLoadBranchTemplateFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				conf, err := core.LoadBranchTemplateFromFile(tc.filename)
+
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -212,17 +210,17 @@ func TestLoadBranchProtectionTemplateFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml",
 			nil,
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml: /unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/branch-protection-template.full.yml",
@@ -232,14 +230,13 @@ func TestLoadBranchProtectionTemplateFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				conf, err := core.LoadBranchProtectionTemplateFromFile(tc.filename)
+
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -259,12 +256,12 @@ func TestLoadGhRepoConfigFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/repos/repo.unexpected-property.yml",
@@ -282,14 +279,13 @@ func TestLoadGhRepoConfigFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				conf, err := core.LoadGhRepoConfigFromFile(tc.filename)
+
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -309,12 +305,12 @@ func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/repos/repos.unexpected-property.yml",
@@ -334,14 +330,13 @@ func TestLoadGhRepoConfigListFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				conf, err := core.LoadGhRepoConfigListFromFile(tc.filename)
+
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -362,12 +357,12 @@ func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/templates/branch.unexpected-property.yml",
@@ -382,14 +377,13 @@ func TestLoadGhRepoBranchConfigFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				conf, err := core.LoadGhRepoBranchConfigFromFile(tc.filename)
+
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)
@@ -410,12 +404,12 @@ func TestLoadGhRepoBranchProtectionConfigFromFile(t *testing.T) {
 		"Not found file": {
 			"an_unknown_file",
 			nil,
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
 			nil,
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unexpected property": {
 			"testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml",
@@ -430,14 +424,13 @@ func TestLoadGhRepoBranchProtectionConfigFromFile(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				conf, err := core.LoadGhRepoBranchProtectionConfigFromFile(tc.filename)
+
 				EnsureConfigMatching(t, tc.expected, conf, tc.error, err)
 			},
 		)

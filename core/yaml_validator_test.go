@@ -1,7 +1,7 @@
 package core_test
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/yoanm/go-github-tf/core"
@@ -16,15 +16,15 @@ func TestValidateRepositoryConfig(t *testing.T) {
 	}{
 		"Not found file": {
 			"an_unknown_file",
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/repos/repo.unexpected-property.yml",
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/repos/repo.unexpected-property.yml: /unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/repos/repo.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repo.full.yml",
@@ -33,9 +33,6 @@ func TestValidateRepositoryConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
@@ -55,15 +52,15 @@ func TestValidateRepositoryConfigs(t *testing.T) {
 	}{
 		"Not found file": {
 			"an_unknown_file",
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/repos/repos.unexpected-property.yml",
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/repos/repos.unexpected-property.yml: /0/unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/repos/repos.unexpected-property.yml: /0/unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repos.full.yml",
@@ -72,9 +69,6 @@ func TestValidateRepositoryConfigs(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
@@ -97,15 +91,15 @@ func TestValidateRepositoryTemplateConfig(t *testing.T) {
 	}{
 		"Not found file": {
 			"an_unknown_file",
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/templates/repo.unexpected-property.yml",
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/templates/repo.unexpected-property.yml: /unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/templates/repo.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/repo-template.full.yml",
@@ -114,9 +108,6 @@ func TestValidateRepositoryTemplateConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
@@ -138,15 +129,15 @@ func TestValidateBranchProtectionTemplateConfig(t *testing.T) {
 	}{
 		"Not found file": {
 			"an_unknown_file",
-			fmt.Errorf("open an_unknown_file: no such file or directory"),
+			errors.New("open an_unknown_file: no such file or directory"),
 		},
 		"Empty": {
 			"testdata/invalid-config-files/empty.yml",
-			fmt.Errorf("file testdata/invalid-config-files/empty.yml: EOF"),
+			errors.New("file testdata/invalid-config-files/empty.yml: EOF"),
 		},
 		"Unwanted property": {
 			"testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml",
-			fmt.Errorf("schema validation error: file testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml: /unexpected-property not allowed"),
+			errors.New("schema validation error: file testdata/invalid-config-files/templates/branch-protection.unexpected-property.yml: /unexpected-property not allowed"),
 		},
 		"Working": {
 			"testdata/branch-protection-template.full.yml",

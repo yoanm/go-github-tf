@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -38,13 +39,11 @@ func TestGenerateHclRepoFiles(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				files, err := core.GenerateHclRepoFiles(tc.value)
 				if err != nil {
 					t.Errorf("Case %q: %s", tcname, err)
@@ -59,6 +58,7 @@ func TestGenerateHclRepoFiles(t *testing.T) {
 							}
 						}
 					}
+
 					if !t.Failed() && len(files) != len(tc.expectedFiles) {
 						t.Errorf("Case %q: expected %d files, got %d", tcname, len(tc.expectedFiles), len(files))
 					}
@@ -101,15 +101,14 @@ func TestWriteTerraformFiles(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				root := os.TempDir()
 				err := core.WriteTerraformFiles(root, tc.value)
+
 				if err != nil {
 					t.Errorf("Case %q: %s", tcname, err)
 				} else {
@@ -155,7 +154,7 @@ func TestWriteTerraformFiles_onError(t *testing.T) {
 			map[string]*hclwrite.File{
 				"repo.repo1.tf": file1,
 			},
-			fmt.Errorf("error while writing terraform files:\n\t - workspace path doesn't exist: /an_unknown_dir/somewhere"),
+			errors.New("error while writing terraform files:\n\t - workspace path doesn't exist: /an_unknown_dir/somewhere"),
 		},
 		"Unable to write": {
 			notWritableDir,
@@ -167,13 +166,11 @@ func TestWriteTerraformFiles_onError(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				if err2 := core.WriteTerraformFiles(tc.root, tc.value); err2 == nil {
 					t.Errorf("Case %q: expected an error but everything went well", tcname)
 				} else if err2.Error() != tc.error.Error() {

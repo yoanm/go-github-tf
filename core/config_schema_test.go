@@ -35,13 +35,11 @@ func TestConfig_GetRepo(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel tests
-		tc := tc         // Reinit var for parallel tests
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := tc.value.GetRepo(tc.name)
 				if diff := cmp.Diff(tc.expected, actual); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -79,13 +77,11 @@ func TestTemplatesConfig_GetRepo(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel tests
-		tc := tc         // Reinit var for parallel tests
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := tc.value.GetRepo(tc.name)
 				if diff := cmp.Diff(tc.expected, actual); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -123,13 +119,11 @@ func TestTemplatesConfig_GetBranch(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel tests
-		tc := tc         // Reinit var for parallel tests
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := tc.value.GetBranch(tc.name)
 				if diff := cmp.Diff(tc.expected, actual); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -167,13 +161,11 @@ func TestTemplatesConfig_GetBranchProtection(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel tests
-		tc := tc         // Reinit var for parallel tests
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := tc.value.GetBranchProtection(tc.name)
 				if diff := cmp.Diff(tc.expected, actual); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
