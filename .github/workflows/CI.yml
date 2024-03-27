@@ -31,15 +31,20 @@ jobs:
       - name: Run tests
         run: make test-go gotest_o="-race -covermode=atomic -coverprofile=coverage.out"
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-
-      - name: Upload coverage to Codacy
-        uses: codacy/codacy-coverage-reporter-action@v1
+      - name: Create coverage group
+        id: tests-coverage-group
+        uses: yoanm/temp-reports-group-workspace/.github/actions/create-action@develop
         with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: coverage.out
-          force-coverage-parser: go
+          format: clover
+          files: coverage.out
+          path: build/coverage-groups
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-group
+          path: build/coverage-groups
+          if-no-files-found: error
 
   static:
     name: Static checks
@@ -60,6 +65,8 @@ jobs:
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.57
 
       - name: Documentation
         env:
