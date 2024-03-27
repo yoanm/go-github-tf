@@ -64,13 +64,11 @@ func TestMapToRepositoryRes(t *testing.T) {
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := core.MapToRepositoryRes(tc.value, valGen, tfRepoId)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -176,13 +174,11 @@ func TestMapToBranchRes(t *testing.T) {
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := core.MapToBranchRes(tc.name, tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -270,13 +266,11 @@ func TestMapToDefaultBranchRes(t *testing.T) {
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := core.MapToDefaultBranchRes(tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -380,13 +374,11 @@ func TestMapDefaultBranchToBranchProtectionRes(t *testing.T) {
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := core.MapDefaultBranchToBranchProtectionRes(tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
@@ -475,15 +467,14 @@ func TestMapBranchToBranchProtectionRes(t *testing.T) {
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				branchNameTmp := tc.name
 				actual := core.MapBranchToBranchProtectionRes(&branchNameTmp, tc.value, valGen, tc.repo, tfId, tc.links...)
+
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -575,13 +566,11 @@ func TestMapToBranchProtectionRes(t *testing.T) {
 	diffOpts := []cmp.Option{cmp.AllowUnexported(tfsig.ValueGenerator{}), cmp.AllowUnexported(tfsig.IdentTokenMatcher{})}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual := core.MapToBranchProtectionRes(tc.value, valGen, tc.repo, tfId, tc.links...)
 				if diff := cmp.Diff(tc.expected, actual, diffOpts...); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)

@@ -149,6 +149,7 @@ func loadReposConfigFile(
 		errList[filename] = loadErr
 	} else {
 		log.Debug().Msgf("Loaded '%s' as repositories config", path)
+
 		for k, v := range repoConfigs {
 			config.AppendRepo(v)
 			visited[fmt.Sprintf("%s[%d]", path, k)] = *v.Name
@@ -268,6 +269,7 @@ func loadTemplateFromFile(config *core.Config, filePath string, decoderOpts []ya
 			return err
 		} else {
 			config.Templates.BranchProtections[tplName] = tpl
+
 			log.Debug().Msgf("Loaded '%s' as branch protection template", filePath)
 		}
 	case strings.HasSuffix(tplName, ".branch"):
@@ -279,6 +281,7 @@ func loadTemplateFromFile(config *core.Config, filePath string, decoderOpts []ya
 			return err
 		} else {
 			config.Templates.Branches[tplName] = tpl
+
 			log.Debug().Msgf("Loaded '%s' as branch protection template", filePath)
 		}
 	default:

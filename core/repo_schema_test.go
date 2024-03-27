@@ -199,14 +199,12 @@ func TestGhRepoConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -261,14 +259,12 @@ func TestGhDefaultBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -287,18 +283,18 @@ func TestGhBranchesConfig_Merge(t *testing.T) {
 	initialFromStringValue := "initial_from_value"
 
 	// Init 'to' variables and create 'to'
-	toSourceBranch := fmt.Sprintf("%s", initialToStringValue)
-	toSourceSha := fmt.Sprintf("%s", initialToStringValue)
-	toEnforceAdmins := fmt.Sprintf("%s", initialToStringValue)
-	toAllowsDeletions := fmt.Sprintf("%s", initialToStringValue)
-	toAllowsForcePushes := fmt.Sprintf("%s", initialToStringValue)
-	toRequiredLinearHistory := fmt.Sprintf("%s", initialToStringValue)
-	toRequireSignedCommits := fmt.Sprintf("%s", initialToStringValue)
-	toStrict := fmt.Sprintf("%s", initialToStringValue)
-	toDismissStaleReviews := fmt.Sprintf("%s", initialToStringValue)
-	toRequireCodeOwnerReviews := fmt.Sprintf("%s", initialToStringValue)
-	toResolvedConversations := fmt.Sprintf("%s", initialToStringValue)
-	toRequiredApprovingReviewCount := fmt.Sprintf("%s", initialToStringValue)
+	toSourceBranch := fmt.Sprintf("%s", initialToStringValue)                 //nolint:perfsprint // Because :p
+	toSourceSha := fmt.Sprintf("%s", initialToStringValue)                    //nolint:perfsprint // Because :p
+	toEnforceAdmins := fmt.Sprintf("%s", initialToStringValue)                //nolint:perfsprint // Because :p
+	toAllowsDeletions := fmt.Sprintf("%s", initialToStringValue)              //nolint:perfsprint // Because :p
+	toAllowsForcePushes := fmt.Sprintf("%s", initialToStringValue)            //nolint:perfsprint // Because :p
+	toRequiredLinearHistory := fmt.Sprintf("%s", initialToStringValue)        //nolint:perfsprint // Because :p
+	toRequireSignedCommits := fmt.Sprintf("%s", initialToStringValue)         //nolint:perfsprint // Because :p
+	toStrict := fmt.Sprintf("%s", initialToStringValue)                       //nolint:perfsprint // Because :p
+	toDismissStaleReviews := fmt.Sprintf("%s", initialToStringValue)          //nolint:perfsprint // Because :p
+	toRequireCodeOwnerReviews := fmt.Sprintf("%s", initialToStringValue)      //nolint:perfsprint // Because :p
+	toResolvedConversations := fmt.Sprintf("%s", initialToStringValue)        //nolint:perfsprint // Because :p
+	toRequiredApprovingReviewCount := fmt.Sprintf("%s", initialToStringValue) //nolint:perfsprint // Because :p
 	// Do nothing with PushRestrictions, see TestGhRepoConfig_Merge2
 	// toPushRestrictions := append([]string{}, initialToSliceValue...)
 	// Do nothing with Contexts, see TestGhRepoConfig_Merge2
@@ -342,18 +338,18 @@ func TestGhBranchesConfig_Merge(t *testing.T) {
 	}
 
 	// Init 'from' variables and create 'from'
-	fromSourceBranch := fmt.Sprintf("%s", initialFromStringValue)
-	fromSourceSha := fmt.Sprintf("%s", initialFromStringValue)
-	fromEnforceAdmins := fmt.Sprintf("%s", initialFromStringValue)
-	fromAllowsDeletions := fmt.Sprintf("%s", initialFromStringValue)
-	fromAllowsForcePushes := fmt.Sprintf("%s", initialFromStringValue)
-	fromRequiredLinearHistory := fmt.Sprintf("%s", initialFromStringValue)
-	fromRequireSignedCommits := fmt.Sprintf("%s", initialFromStringValue)
-	fromStrict := fmt.Sprintf("%s", initialFromStringValue)
-	fromDismissStaleReviews := fmt.Sprintf("%s", initialFromStringValue)
-	fromRequireCodeOwnerReviews := fmt.Sprintf("%s", initialFromStringValue)
-	fromResolvedConversations := fmt.Sprintf("%s", initialToStringValue)
-	fromRequiredApprovingReviewCount := fmt.Sprintf("%s", initialFromStringValue)
+	fromSourceBranch := fmt.Sprintf("%s", initialFromStringValue)                 //nolint:perfsprint // Because :p
+	fromSourceSha := fmt.Sprintf("%s", initialFromStringValue)                    //nolint:perfsprint // Because :p
+	fromEnforceAdmins := fmt.Sprintf("%s", initialFromStringValue)                //nolint:perfsprint // Because :p
+	fromAllowsDeletions := fmt.Sprintf("%s", initialFromStringValue)              //nolint:perfsprint // Because :p
+	fromAllowsForcePushes := fmt.Sprintf("%s", initialFromStringValue)            //nolint:perfsprint // Because :p
+	fromRequiredLinearHistory := fmt.Sprintf("%s", initialFromStringValue)        //nolint:perfsprint // Because :p
+	fromRequireSignedCommits := fmt.Sprintf("%s", initialFromStringValue)         //nolint:perfsprint // Because :p
+	fromStrict := fmt.Sprintf("%s", initialFromStringValue)                       //nolint:perfsprint // Because :p
+	fromDismissStaleReviews := fmt.Sprintf("%s", initialFromStringValue)          //nolint:perfsprint // Because :p
+	fromRequireCodeOwnerReviews := fmt.Sprintf("%s", initialFromStringValue)      //nolint:perfsprint // Because :p
+	fromResolvedConversations := fmt.Sprintf("%s", initialToStringValue)          //nolint:perfsprint // Because :p
+	fromRequiredApprovingReviewCount := fmt.Sprintf("%s", initialFromStringValue) //nolint:perfsprint // Because :p
 	// Do nothing with PushRestrictions, see TestGhRepoConfig_Merge2
 	// fromPushRestrictions := append([]string{}, initialFromSliceValue...)
 	// Do nothing with Contexts, see TestGhRepoConfig_Merge2
@@ -439,14 +435,12 @@ func TestGhBranchesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -502,14 +496,12 @@ func TestGhBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -568,14 +560,12 @@ func TestBaseGhBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -596,19 +586,19 @@ func TestGhBranchProtectionsConfig_Merge(t *testing.T) {
 	initialFromSliceValue := []string{"initial_from_slice_value1", "initial_from_slice_value2"}
 
 	// Init 'to' variables and create 'to'
-	toPattern := fmt.Sprintf("%s", initialToStringValue)
-	toForbid := fmt.Sprintf("%s", initialToStringValue)
-	toEnforceAdmins := fmt.Sprintf("%s", initialToStringValue)
-	toAllowsDeletions := fmt.Sprintf("%s", initialToStringValue)
-	toAllowsForcePushes := fmt.Sprintf("%s", initialToStringValue)
-	toRequiredLinearHistory := fmt.Sprintf("%s", initialToStringValue)
-	toRequireSignedCommits := fmt.Sprintf("%s", initialToStringValue)
-	toStrict := fmt.Sprintf("%s", initialToStringValue)
-	toDismissStaleReviews := fmt.Sprintf("%s", initialToStringValue)
-	toRestrict := fmt.Sprintf("%s", initialToStringValue)
-	toRequireCodeOwnerReviews := fmt.Sprintf("%s", initialToStringValue)
-	toResolvedConversations := fmt.Sprintf("%s", initialToStringValue)
-	toRequiredApprovingReviewCount := fmt.Sprintf("%s", initialToStringValue)
+	toPattern := fmt.Sprintf("%s", initialToStringValue)                      //nolint:perfsprint // Because :p
+	toForbid := fmt.Sprintf("%s", initialToStringValue)                       //nolint:perfsprint // Because :p
+	toEnforceAdmins := fmt.Sprintf("%s", initialToStringValue)                //nolint:perfsprint // Because :p
+	toAllowsDeletions := fmt.Sprintf("%s", initialToStringValue)              //nolint:perfsprint // Because :p
+	toAllowsForcePushes := fmt.Sprintf("%s", initialToStringValue)            //nolint:perfsprint // Because :p
+	toRequiredLinearHistory := fmt.Sprintf("%s", initialToStringValue)        //nolint:perfsprint // Because :p
+	toRequireSignedCommits := fmt.Sprintf("%s", initialToStringValue)         //nolint:perfsprint // Because :p
+	toStrict := fmt.Sprintf("%s", initialToStringValue)                       //nolint:perfsprint // Because :p
+	toDismissStaleReviews := fmt.Sprintf("%s", initialToStringValue)          //nolint:perfsprint // Because :p
+	toRestrict := fmt.Sprintf("%s", initialToStringValue)                     //nolint:perfsprint // Because :p
+	toRequireCodeOwnerReviews := fmt.Sprintf("%s", initialToStringValue)      //nolint:perfsprint // Because :p
+	toResolvedConversations := fmt.Sprintf("%s", initialToStringValue)        //nolint:perfsprint // Because :p
+	toRequiredApprovingReviewCount := fmt.Sprintf("%s", initialToStringValue) //nolint:perfsprint // Because :p
 
 	toBypasserList := append([]string{}, initialToSliceValue...)
 
@@ -654,19 +644,19 @@ func TestGhBranchProtectionsConfig_Merge(t *testing.T) {
 	}
 
 	// Init 'from' variables and create 'from'
-	fromPattern := fmt.Sprintf("%s", initialFromStringValue)
-	fromForbid := fmt.Sprintf("%s", initialFromStringValue)
-	fromEnforceAdmins := fmt.Sprintf("%s", initialFromStringValue)
-	fromAllowsDeletions := fmt.Sprintf("%s", initialFromStringValue)
-	fromAllowsForcePushes := fmt.Sprintf("%s", initialFromStringValue)
-	fromRequiredLinearHistory := fmt.Sprintf("%s", initialFromStringValue)
-	fromRequireSignedCommits := fmt.Sprintf("%s", initialFromStringValue)
-	fromStrict := fmt.Sprintf("%s", initialFromStringValue)
-	fromDismissStaleReviews := fmt.Sprintf("%s", initialFromStringValue)
-	fromRestrict := fmt.Sprintf("%s", initialFromStringValue)
-	fromRequireCodeOwnerReviews := fmt.Sprintf("%s", initialFromStringValue)
-	fromResolvedConversations := fmt.Sprintf("%s", initialFromStringValue)
-	fromRequiredApprovingReviewCount := fmt.Sprintf("%s", initialFromStringValue)
+	fromPattern := fmt.Sprintf("%s", initialFromStringValue)                      //nolint:perfsprint // Because :p
+	fromForbid := fmt.Sprintf("%s", initialFromStringValue)                       //nolint:perfsprint // Because :p
+	fromEnforceAdmins := fmt.Sprintf("%s", initialFromStringValue)                //nolint:perfsprint // Because :p
+	fromAllowsDeletions := fmt.Sprintf("%s", initialFromStringValue)              //nolint:perfsprint // Because :p
+	fromAllowsForcePushes := fmt.Sprintf("%s", initialFromStringValue)            //nolint:perfsprint // Because :p
+	fromRequiredLinearHistory := fmt.Sprintf("%s", initialFromStringValue)        //nolint:perfsprint // Because :p
+	fromRequireSignedCommits := fmt.Sprintf("%s", initialFromStringValue)         //nolint:perfsprint // Because :p
+	fromStrict := fmt.Sprintf("%s", initialFromStringValue)                       //nolint:perfsprint // Because :p
+	fromDismissStaleReviews := fmt.Sprintf("%s", initialFromStringValue)          //nolint:perfsprint // Because :p
+	fromRestrict := fmt.Sprintf("%s", initialFromStringValue)                     //nolint:perfsprint // Because :p
+	fromRequireCodeOwnerReviews := fmt.Sprintf("%s", initialFromStringValue)      //nolint:perfsprint // Because :p
+	fromResolvedConversations := fmt.Sprintf("%s", initialFromStringValue)        //nolint:perfsprint // Because :p
+	fromRequiredApprovingReviewCount := fmt.Sprintf("%s", initialFromStringValue) //nolint:perfsprint // Because :p
 
 	fromPushRestrictions := append([]string{}, initialFromSliceValue...)
 
@@ -765,14 +755,12 @@ func TestGhBranchProtectionsConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -830,14 +818,12 @@ func TestGhBranchProtectionConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -915,14 +901,12 @@ func TestBaseGhBranchProtectionConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -976,14 +960,12 @@ func TestGhBranchProtectPushesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1037,14 +1019,12 @@ func TestGhBranchProtectStatusChecksConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1107,14 +1087,12 @@ func TestGhBranchProtectPRReviewConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1169,14 +1147,12 @@ func TestGhBranchProtectPRReviewDismissalsConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1253,14 +1229,12 @@ func TestGhRepoPullRequestConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1307,14 +1281,12 @@ func TestGhRepoPRMergeStrategyConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1359,14 +1331,12 @@ func TestGhRepoPRCommitConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1411,14 +1381,12 @@ func TestGhRepoPRBranchConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1462,14 +1430,12 @@ func TestGhRepoSecurityConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1550,14 +1516,12 @@ func TestGhRepoMiscellaneousConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1602,14 +1566,12 @@ func TestGhRepoTemplateConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1654,14 +1616,12 @@ func TestGhRepoFileTemplatesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1707,14 +1667,12 @@ func TestGhRepoPagesConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1759,14 +1717,12 @@ func TestGhRepoTerraformConfig_Merge_2(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
 				tc.value.Merge(tc.from)
+
 				if diff := cmp.Diff(tc.expected, tc.value); diff != "" {
 					t.Errorf("Config mismatch (-want +got):\n%s", diff)
 				}
@@ -1790,8 +1746,8 @@ func ensureMergeWithoutOverflowBetweenToAndFrom[T any](t *testing.T, empty T, me
 	initialFromStringValue := "initial_from_value"
 	initialFromSliceValue := []string{"initial_from_slice_value1", "initial_from_slice_value2"}
 
-	initialFromStringValueCopy := fmt.Sprintf("%s", initialFromStringValue)
-	initialFromSliceValueCopy := []string{fmt.Sprintf("%s", initialFromSliceValue[0]), fmt.Sprintf("%s", initialFromSliceValue[1])}
+	initialFromStringValueCopy := fmt.Sprintf("%s", initialFromStringValue)                                                         //nolint:perfsprint // Because :p
+	initialFromSliceValueCopy := []string{fmt.Sprintf("%s", initialFromSliceValue[0]), fmt.Sprintf("%s", initialFromSliceValue[1])} //nolint:perfsprint // Because :p
 
 	createCopyWithFn := func(stringVal *string, sliceVal *[]string) *T {
 		v := reflect.New(reflect.TypeOf(empty)).Interface().(*T)
@@ -1846,20 +1802,20 @@ func ensureNoOverflowBetweenToAndFrom[T any](t *testing.T, to *T, from *T, creat
 	updatedFromStringPtrValue := "updated_from_ptr_value"
 	updatedFromSlicePtrValue := []string{"updated_from_slice_ptr_value1", "updated_from_slice_ptr_value2"}
 
-	updatedToStringValueCopy := fmt.Sprintf("%s", updatedToStringValue)
-	updatedFromStringValueCopy := fmt.Sprintf("%s", updatedFromStringValue)
+	updatedToStringValueCopy := fmt.Sprintf("%s", updatedToStringValue)     //nolint:perfsprint // Because :p
+	updatedFromStringValueCopy := fmt.Sprintf("%s", updatedFromStringValue) //nolint:perfsprint // Because :p
 
-	updatedToSliceValueCopy := []string{fmt.Sprintf("%s", updatedToSliceValue[0]), fmt.Sprintf("%s", updatedToSliceValue[1])}
-	updatedFromSliceValueCopy := []string{fmt.Sprintf("%s", updatedFromSliceValue[0]), fmt.Sprintf("%s", updatedFromSliceValue[1])}
+	updatedToSliceValueCopy := []string{fmt.Sprintf("%s", updatedToSliceValue[0]), fmt.Sprintf("%s", updatedToSliceValue[1])}       //nolint:perfsprint // Because :p
+	updatedFromSliceValueCopy := []string{fmt.Sprintf("%s", updatedFromSliceValue[0]), fmt.Sprintf("%s", updatedFromSliceValue[1])} //nolint:perfsprint // Because :p
 
-	updatedToStringPtrValueCopy := fmt.Sprintf("%s", updatedToStringPtrValue)
+	updatedToStringPtrValueCopy := fmt.Sprintf("%s", updatedToStringPtrValue) //nolint:perfsprint // Because :p
 	updatedToStringPtrCopy := &updatedToStringPtrValueCopy
-	updatedFromStringPtrValueCopy := fmt.Sprintf("%s", updatedFromStringPtrValue)
+	updatedFromStringPtrValueCopy := fmt.Sprintf("%s", updatedFromStringPtrValue) //nolint:perfsprint // Because :p
 	updatedFromStringPtrCopy := &updatedFromStringPtrValueCopy
 
-	updatedToSlicePtrValueCopy := []string{fmt.Sprintf("%s", updatedToSlicePtrValue[0]), fmt.Sprintf("%s", updatedToSlicePtrValue[1])}
+	updatedToSlicePtrValueCopy := []string{fmt.Sprintf("%s", updatedToSlicePtrValue[0]), fmt.Sprintf("%s", updatedToSlicePtrValue[1])} //nolint:perfsprint // Because :p
 	updatedToSlicePtrCopy := &updatedToSlicePtrValueCopy
-	updatedFromSlicePtrValueCopy := []string{fmt.Sprintf("%s", updatedFromSlicePtrValue[0]), fmt.Sprintf("%s", updatedFromSlicePtrValue[1])}
+	updatedFromSlicePtrValueCopy := []string{fmt.Sprintf("%s", updatedFromSlicePtrValue[0]), fmt.Sprintf("%s", updatedFromSlicePtrValue[1])} //nolint:perfsprint // Because :p
 	updatedFromSlicePtrCopy := &updatedFromSlicePtrValueCopy
 
 	// All values must be equals to 'to' updated values - Use copy in case original values are updated !
@@ -1917,7 +1873,7 @@ func ensureNoOverflowBetweenToAndFrom[T any](t *testing.T, to *T, from *T, creat
 }
 
 func updateStringPtrHelper(to **string, stringToCopy *string, updatePtr bool) {
-	newString := fmt.Sprintf("%s", *stringToCopy)
+	newString := fmt.Sprintf("%s", *stringToCopy) //nolint:perfsprint //Be sure to copy the value rather than assigning the pointer !
 
 	if updatePtr {
 		*to = &newString
