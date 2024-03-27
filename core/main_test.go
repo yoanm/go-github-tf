@@ -2,6 +2,7 @@ package core_test
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	differ "github.com/andreyvit/diff"
@@ -67,24 +68,24 @@ func GetFullConfig(id int) *core.GhRepoConfig {
 	defaultBranchName := fmt.Sprintf("master%d", id)
 	// Repo->DefaultBranch->Protection
 	defaultBranchBranchProtectionTemplate := fmt.Sprintf("default-branch-branch-protection-template%d", id)
-	defaultBranchBranchProtectionEnforceAdmins := fmt.Sprintf("%s", bool1)
-	defaultBranchBranchProtectionAllowsDeletions := fmt.Sprintf("%s", bool1)
-	defaultBranchBranchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool1)
-	defaultBranchBranchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool1)
+	defaultBranchBranchProtectionEnforceAdmins := fmt.Sprintf("%s", bool1)         //nolint:perfsprint // Because :p
+	defaultBranchBranchProtectionAllowsDeletions := fmt.Sprintf("%s", bool1)       //nolint:perfsprint // Because :p
+	defaultBranchBranchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	defaultBranchBranchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool1)  //nolint:perfsprint // Because :p
 	// Repo->DefaultBranch->Protection->Pushes
-	defaultBranchBranchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool1)
+	defaultBranchBranchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	defaultBranchBranchProtectionPushRestriction := fmt.Sprintf("default-branch-pushRestriction%d", id)
 	// Repo->DefaultBranch->Protection->StatusChecks
-	defaultBranchBranchProtectionStrict := fmt.Sprintf("%s", bool1)
+	defaultBranchBranchProtectionStrict := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	defaultBranchBranchProtectionContext := fmt.Sprintf("default-branch-context%d", id)
 	// Repo->DefaultBranch->Protection->PullRequestReviews
 	defaultBranchBranchProtectionBypasser := fmt.Sprintf("default-branch-bypasser%d", id)
-	defaultBranchBranchProtectionRequiredApprovingReviewCount := fmt.Sprintf("%d", approvalCount%7)
-	defaultBranchBranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool1)
-	defaultBranchBranchProtectionResolvedConversations := fmt.Sprintf("%s", bool1)
+	defaultBranchBranchProtectionRequiredApprovingReviewCount := strconv.Itoa(approvalCount % 7)
+	defaultBranchBranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	defaultBranchBranchProtectionResolvedConversations := fmt.Sprintf("%s", bool1)   //nolint:perfsprint // Because :p
 	// Repo->DefaultBranch->Protection->PullRequestReviews->Dismissals
-	defaultBranchBranchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool1)
-	defaultBranchBranchProtectionRestrictDismissal := fmt.Sprintf("%s", bool1)
+	defaultBranchBranchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	defaultBranchBranchProtectionRestrictDismissal := fmt.Sprintf("%s", bool1)   //nolint:perfsprint // Because :p
 	defaultBranchBranchProtectionDismissalRestriction := fmt.Sprintf("default-branch-dismissalRestriction%d", id)
 	// Repo->Branches
 	// Repo->Branches[0]
@@ -94,24 +95,24 @@ func GetFullConfig(id int) *core.GhRepoConfig {
 	// branch1SourceSha := fmt.Sprintf("branch%d-source-sha%d", id, id)
 	// Repo->Branches[0]->Protection
 	branch1BranchProtectionTemplate := fmt.Sprintf("branch%d-branch-protection-template%d", id, id)
-	branch1BranchProtectionEnforceAdmins := fmt.Sprintf("%s", bool2)
-	branch1BranchProtectionAllowsDeletions := fmt.Sprintf("%s", bool2)
-	branch1BranchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool2)
-	branch1BranchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool2)
+	branch1BranchProtectionEnforceAdmins := fmt.Sprintf("%s", bool2)         //nolint:perfsprint // Because :p
+	branch1BranchProtectionAllowsDeletions := fmt.Sprintf("%s", bool2)       //nolint:perfsprint // Because :p
+	branch1BranchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
+	branch1BranchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool2)  //nolint:perfsprint // Because :p
 	// Repo->Branches[0]->Protection->Pushes
-	branch1BranchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool2)
+	branch1BranchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
 	branch1BranchProtectionPushRestriction := fmt.Sprintf("branch%d-pushRestriction%d", id, id)
 	// Repo->Branches[0]->Protection->StatusChecks
-	branch1BranchProtectionStrict := fmt.Sprintf("%s", bool2)
+	branch1BranchProtectionStrict := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
 	branch1BranchProtectionContext := fmt.Sprintf("branch%d-context%d", id, id)
 	// Repo->Branches[0]->Protection->PullRequestReviews
 	branch1BranchProtectionBypasser := fmt.Sprintf("branch%d-bypasser%d", id, id)
-	branch1BranchProtectionRequiredApprovingReviewCount := fmt.Sprintf("%d", (approvalCount+1)%7)
-	branch1BranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool2)
-	branch1BranchProtectionResolvedConversations := fmt.Sprintf("%s", bool2)
+	branch1BranchProtectionRequiredApprovingReviewCount := strconv.Itoa((approvalCount + 1) % 7)
+	branch1BranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
+	branch1BranchProtectionResolvedConversations := fmt.Sprintf("%s", bool2)   //nolint:perfsprint // Because :p
 	// Repo->Branches[0]->Protection->PullRequestReviews->Dismissals
-	branch1BranchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool2)
-	branch1BranchProtectionRestrictDismissal := fmt.Sprintf("%s", bool2)
+	branch1BranchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
+	branch1BranchProtectionRestrictDismissal := fmt.Sprintf("%s", bool2)   //nolint:perfsprint // Because :p
 	branch1BranchProtectionDismissalRestriction := fmt.Sprintf("branch%d-dismissalRestriction%d", id, id)
 	// Repo->Branches[1]
 	branch2Name := fmt.Sprintf("feature/branch%d", 1+id)
@@ -120,56 +121,56 @@ func GetFullConfig(id int) *core.GhRepoConfig {
 	branch2SourceSha := fmt.Sprintf("branch%d-source-sha%d", 1+id, id)
 	// Repo->Branches[1]->Protection
 	branch2BranchProtectionTemplate := fmt.Sprintf("branch%d-branch-protection-template%d", 1+id, id)
-	branch2BranchProtectionEnforceAdmins := fmt.Sprintf("%s", bool1)
-	branch2BranchProtectionAllowsDeletions := fmt.Sprintf("%s", bool1)
-	branch2BranchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool1)
-	branch2BranchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool1)
+	branch2BranchProtectionEnforceAdmins := fmt.Sprintf("%s", bool1)         //nolint:perfsprint // Because :p
+	branch2BranchProtectionAllowsDeletions := fmt.Sprintf("%s", bool1)       //nolint:perfsprint // Because :p
+	branch2BranchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	branch2BranchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool1)  //nolint:perfsprint // Because :p
 	// Repo->Branches[1]->Protection->Pushes
-	branch2BranchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool1)
+	branch2BranchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	branch2BranchProtectionPushRestriction := fmt.Sprintf("branch%d-pushRestriction%d", 1+id, id)
 	// Repo->Branches[1]->Protection->StatusChecks
-	branch2BranchProtectionStrict := fmt.Sprintf("%s", bool1)
+	branch2BranchProtectionStrict := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	branch2BranchProtectionContext := fmt.Sprintf("branch%d-context%d", 1+id, id)
 	// Repo->Branches[1]->Protection->PullRequestReviews
 	branch2BranchProtectionBypasser := fmt.Sprintf("branch%d-bypasser%d", 1+id, id)
 
-	branch2BranchProtectionRequiredApprovingReviewCount := fmt.Sprintf("%d", (approvalCount+2)%7)
-	branch2BranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool1)
-	branch2BranchProtectionResolvedConversations := fmt.Sprintf("%s", bool1)
+	branch2BranchProtectionRequiredApprovingReviewCount := strconv.Itoa((approvalCount + 2) % 7)
+	branch2BranchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	branch2BranchProtectionResolvedConversations := fmt.Sprintf("%s", bool1)   //nolint:perfsprint // Because :p
 	// Repo->Branches[1]->Protection->PullRequestReviews->Dismissals
-	branch2BranchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool1)
-	branch2BranchProtectionRestrictDismissal := fmt.Sprintf("%s", bool1)
+	branch2BranchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	branch2BranchProtectionRestrictDismissal := fmt.Sprintf("%s", bool1)   //nolint:perfsprint // Because :p
 	branch2BranchProtectionDismissalRestriction := fmt.Sprintf("branch%d-dismissalRestriction%d", 1+id, id)
 	// Repo->BranchProtections
 	// Repo->BranchProtections[0]
 	branchProtectionTemplate := fmt.Sprintf("branch-protection-template%d", id)
 	pattern := fmt.Sprintf("a-pattern%d", id)
-	forbid := fmt.Sprintf("%s", bool2)
-	branchProtectionEnforceAdmins := fmt.Sprintf("%s", bool2)
-	branchProtectionAllowsDeletions4 := fmt.Sprintf("%s", bool2)
-	branchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool2)
-	branchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool2)
+	forbid := fmt.Sprintf("%s", bool2)                                //nolint:perfsprint // Because :p
+	branchProtectionEnforceAdmins := fmt.Sprintf("%s", bool2)         //nolint:perfsprint // Because :p
+	branchProtectionAllowsDeletions4 := fmt.Sprintf("%s", bool2)      //nolint:perfsprint // Because :p
+	branchProtectionRequiredLinearHistory := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
+	branchProtectionRequireSignedCommits := fmt.Sprintf("%s", bool2)  //nolint:perfsprint // Because :p
 	// Repo->BranchProtections[0]->Pushes
-	branchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool2)
+	branchProtectionAllowsForcePushes := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
 	branchProtectionPushRestriction := fmt.Sprintf("branch-protection-pushRestriction%d", id)
 	// Repo->BranchProtections[0]->StatusChecks
-	branchProtectionStrict := fmt.Sprintf("%s", bool2)
+	branchProtectionStrict := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
 	branchProtectionContext := fmt.Sprintf("branch-protection-context%d", id)
 	branchProtectionBypasser := fmt.Sprintf("branch-protection-bypasser%d", id)
 	// Repo->BranchProtections[0]->PullRequestReviews
-	branchProtectionRequiredApprovingReviewCount := fmt.Sprintf("%d", (approvalCount+3)%7)
-	branchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool2)
-	branchProtectionResolvedConversations := fmt.Sprintf("%s", bool2)
+	branchProtectionRequiredApprovingReviewCount := strconv.Itoa((approvalCount + 3) % 7)
+	branchProtectionRequireCodeOwnerReviews := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
+	branchProtectionResolvedConversations := fmt.Sprintf("%s", bool2)   //nolint:perfsprint // Because :p
 	// Repo->BranchProtections[0]->PullRequestReviews->Dismissals
-	branchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool2)
-	branchProtectionRestrictDismissal := fmt.Sprintf("%s", bool2)
+	branchProtectionDismissStaleReviews := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
+	branchProtectionRestrictDismissal := fmt.Sprintf("%s", bool2)   //nolint:perfsprint // Because :p
 	branchProtectionDismissalRestriction := fmt.Sprintf("branch-protection-dismissalRestriction%d", id)
 	// Repo->PullRequests
 	// Repo->PullRequests->MergeStrategy
-	allowMergeCommit := fmt.Sprintf("%s", bool1)
-	allowRebaseMerge := fmt.Sprintf("%s", bool1)
-	allowSquashMerge := fmt.Sprintf("%s", bool1)
-	allowAutoMerge := fmt.Sprintf("%s", bool1)
+	allowMergeCommit := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	allowRebaseMerge := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	allowSquashMerge := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	allowAutoMerge := fmt.Sprintf("%s", bool1)   //nolint:perfsprint // Because :p
 	// Repo->PullRequests->MergeCommit
 	mergeCommitTitle := fmt.Sprintf("aMergeCommitTitle%d", id)
 	mergeCommitMessage := fmt.Sprintf("aMergeCommitMessage%d", id)
@@ -177,22 +178,22 @@ func GetFullConfig(id int) *core.GhRepoConfig {
 	squashMergeCommitTitle := fmt.Sprintf("aSquashMergeCommitTitle%d", id)
 	squashMergeCommitMessage := fmt.Sprintf("aSquashMergeCommitMessage%d", id)
 	// Repo->PullRequests->Branch
-	suggestUpdate := fmt.Sprintf("%s", bool1)
-	deleteBranchOnMerge := fmt.Sprintf("%s", bool1)
+	suggestUpdate := fmt.Sprintf("%s", bool1)       //nolint:perfsprint // Because :p
+	deleteBranchOnMerge := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	// Repo->Security
-	vulnerabilityAlerts := fmt.Sprintf("%s", bool2)
+	vulnerabilityAlerts := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
 	// Repo->Misc
-	archived := fmt.Sprintf("%s", bool1)
+	archived := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	topicCount := 2
 	topic1 := fmt.Sprintf("topic%d", (topicCount * id))
 	topic2 := fmt.Sprintf("topic%d", (topicCount*id)+1)
-	autoInit := fmt.Sprintf("%s", bool1)
-	isTemplate := fmt.Sprintf("%s", bool1)
+	autoInit := fmt.Sprintf("%s", bool1)   //nolint:perfsprint // Because :p
+	isTemplate := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	homepageUrl := fmt.Sprintf("http://localhost/%d", id)
-	hasDownloads := fmt.Sprintf("%s", bool1)
-	hasProjects := fmt.Sprintf("%s", bool1)
-	hasWiki := fmt.Sprintf("%s", bool1)
-	hasIssues := fmt.Sprintf("%s", bool1)
+	hasDownloads := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
+	hasProjects := fmt.Sprintf("%s", bool1)  //nolint:perfsprint // Because :p
+	hasWiki := fmt.Sprintf("%s", bool1)      //nolint:perfsprint // Because :p
+	hasIssues := fmt.Sprintf("%s", bool1)    //nolint:perfsprint // Because :p
 	// Repo->Misc->Pages
 	domain := fmt.Sprintf("my.domain%d", id)
 	branch := fmt.Sprintf("branch%d", id)
@@ -201,13 +202,13 @@ func GetFullConfig(id int) *core.GhRepoConfig {
 	owner := fmt.Sprintf("owner%d", id)
 	repository := fmt.Sprintf("repository%d", id)
 	templateSource := owner + "/" + repository
-	fullClone := fmt.Sprintf("%s", bool1)
+	fullClone := fmt.Sprintf("%s", bool1) //nolint:perfsprint // Because :p
 	// Repo->Misc->FileTemplates
 	gitignore := fmt.Sprintf("gitignore-tpl-name%d", id)
 	license := fmt.Sprintf("license-tpl-name%d", id)
 	// Repo->Terraform
-	archiveOnDestroy := fmt.Sprintf("%s", bool2)
-	ignoreVulnerabilityAlertsDuringRead := fmt.Sprintf("%s", bool2)
+	archiveOnDestroy := fmt.Sprintf("%s", bool2)                    //nolint:perfsprint // Because :p
+	ignoreVulnerabilityAlertsDuringRead := fmt.Sprintf("%s", bool2) //nolint:perfsprint // Because :p
 
 	return &core.GhRepoConfig{
 		&name,

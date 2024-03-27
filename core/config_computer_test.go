@@ -1,7 +1,7 @@
 package core_test
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	differ "github.com/andreyvit/diff"
@@ -69,7 +69,7 @@ func TestComputeConfig(t *testing.T) {
 				},
 			},
 			nil,
-			fmt.Errorf("error during computation:\n\t - repo #0: repository name is mandatory\n\t - repo #1: repository name is mandatory"),
+			errors.New("error during computation:\n\t - repo #0: repository name is mandatory\n\t - repo #1: repository name is mandatory"),
 		},
 		"Underlying computation error": {
 			&core.Config{
@@ -82,18 +82,16 @@ func TestComputeConfig(t *testing.T) {
 				},
 			},
 			nil,
-			fmt.Errorf("error during computation:\n\t - repository a_name: repository template not found as none available"),
+			errors.New("error during computation:\n\t - repository a_name: repository template not found as none available"),
 		},
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel tests
-		tc := tc         // Reinit var for parallel tests
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ComputeConfig(tc.value)
 				if tc.error != nil {
 					if err == nil {

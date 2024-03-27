@@ -86,11 +86,11 @@ var (
 
 ## Functions
 
-### func [ApplyBranchProtectionsTemplate](./repo_config_computer.go#L112)
+### func [ApplyBranchProtectionsTemplate](./repo_config_computer.go#L110)
 
 `func ApplyBranchProtectionsTemplate(config *GhRepoConfig, templates *TemplatesConfig) error`
 
-### func [ApplyBranchesTemplate](./repo_config_computer.go#L63)
+### func [ApplyBranchesTemplate](./repo_config_computer.go#L61)
 
 `func ApplyBranchesTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig) error`
 
@@ -340,7 +340,7 @@ var (
 
 `type GhBranchConfig struct { ... }`
 
-#### func [ApplyBranchTemplate](./repo_config_computer.go#L154)
+#### func [ApplyBranchTemplate](./repo_config_computer.go#L152)
 
 `func ApplyBranchTemplate(branchConfig *GhBranchConfig, templates *TemplatesConfig) (*GhBranchConfig, error)`
 
@@ -398,7 +398,7 @@ No schema validation will be performed, use loadBranchTemplateFromFile instead !
 
 `type GhBranchProtectionConfig struct { ... }`
 
-#### func [ApplyBranchProtectionTemplate](./repo_config_computer.go#L138)
+#### func [ApplyBranchProtectionTemplate](./repo_config_computer.go#L136)
 
 `func ApplyBranchProtectionTemplate(
     branchProtectionConfig *GhBranchProtectionConfig,
@@ -454,11 +454,11 @@ No schema validation will be performed, use loadBranchProtectionTemplateFromFile
 
 `type GhRepoConfig struct { ... }`
 
-#### func [ApplyRepositoryTemplate](./repo_config_computer.go#L50)
+#### func [ApplyRepositoryTemplate](./repo_config_computer.go#L48)
 
 `func ApplyRepositoryTemplate(repoConfig *GhRepoConfig, templates *TemplatesConfig) (*GhRepoConfig, error)`
 
-#### func [ComputeRepoConfig](./repo_config_computer.go#L11)
+#### func [ComputeRepoConfig](./repo_config_computer.go#L9)
 
 `func ComputeRepoConfig(base *GhRepoConfig, templates *TemplatesConfig) (*GhRepoConfig, error)`
 

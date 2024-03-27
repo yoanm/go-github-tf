@@ -28,12 +28,12 @@ help: ## ❓ Dislay this help
 .PHONY: configure-dev-env
 configure-dev-env: ## 🤖 Install required libraries for dev environment
 configure-dev-env:
-	go install github.com/posener/goreadme/cmd/goreadme@latest
+	go install github.com/posener/goreadme/cmd/goreadme@v1
 .PHONY: configure-test-env
 configure-test-env: ## 🤖 Install required libraries for test environment (golint, staticcheck, etc)
 configure-test-env: configure-dev-env
 configure-test-env:
-	# Nothing to install currently
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57
 
 ##—— 📝 Documentation —————————————————————————————————————————————————
 .PHONY: build-doc
@@ -60,7 +60,7 @@ build: ## 🗜️  Build package
 #### Use build_o="..." to specify build options
 $(eval build_o ?=)
 build:
-	go build -v $(build_o)
+	go build -v -o github-tf $(build_o)
 
 .PHONY: verify-deps
 verify-deps: ## 🗜️  Verify dependencies

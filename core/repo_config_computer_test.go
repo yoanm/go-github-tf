@@ -1,7 +1,7 @@
 package core_test
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	differ "github.com/andreyvit/diff"
@@ -307,13 +307,11 @@ func TestComputeRepoConfig(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -432,13 +430,11 @@ func TestComputeRepoConfig_edgeCases(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -472,7 +468,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			&core.GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
 			nil,
 			nil,
-			fmt.Errorf("repository template not found as none available"),
+			errors.New("repository template not found as none available"),
 		},
 		"default branch - branch": {
 			&core.GhRepoConfig{
@@ -486,7 +482,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("default branch: branch template not found as none available"),
+			errors.New("default branch: branch template not found as none available"),
 		},
 		"default branch - branch protection": {
 			&core.GhRepoConfig{
@@ -502,7 +498,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("default branch: branch protection template not found as none available"),
+			errors.New("default branch: branch protection template not found as none available"),
 		},
 		"branch": {
 			&core.GhRepoConfig{
@@ -517,7 +513,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch branch-name: branch template not found as none available"),
+			errors.New("branch branch-name: branch template not found as none available"),
 		},
 		"branch - branch protection": {
 			&core.GhRepoConfig{
@@ -534,7 +530,7 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch branch-name: branch protection template not found as none available"),
+			errors.New("branch branch-name: branch protection template not found as none available"),
 		},
 		"branch protection": {
 			&core.GhRepoConfig{
@@ -550,18 +546,16 @@ func TestComputeRepoConfig_noTemplateAvailable(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch protection #0: branch protection template not found as none available"),
+			errors.New("branch protection #0: branch protection template not found as none available"),
 		},
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -596,7 +590,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			&core.GhRepoConfig{Name: &aName, ConfigTemplates: &[]string{aTemplate}},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("\"a-template\" repository template not found"),
+			errors.New("\"a-template\" repository template not found"),
 		},
 		"default branch - branch": {
 			&core.GhRepoConfig{
@@ -610,7 +604,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("default branch: \"a-template\" branch template not found"),
+			errors.New("default branch: \"a-template\" branch template not found"),
 		},
 		"default branch - branch protection": {
 			&core.GhRepoConfig{
@@ -626,7 +620,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("default branch: \"a-template\" branch protection template not found"),
+			errors.New("default branch: \"a-template\" branch protection template not found"),
 		},
 		"branch": {
 			&core.GhRepoConfig{
@@ -641,7 +635,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch branch-name: \"a-template\" branch template not found"),
+			errors.New("branch branch-name: \"a-template\" branch template not found"),
 		},
 		"branch - branch protection": {
 			&core.GhRepoConfig{
@@ -658,7 +652,7 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch branch-name: \"a-template\" branch protection template not found"),
+			errors.New("branch branch-name: \"a-template\" branch protection template not found"),
 		},
 		"branch protection": {
 			&core.GhRepoConfig{
@@ -674,18 +668,16 @@ func TestComputeRepoConfig_unknownTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch protection #0: \"a-template\" branch protection template not found"),
+			errors.New("branch protection #0: \"a-template\" branch protection template not found"),
 		},
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -722,18 +714,16 @@ func TestComputeRepoConfig_validationError(t *testing.T) {
 			&core.GhRepoConfig{ConfigTemplates: nil},
 			nil,
 			nil,
-			fmt.Errorf("repository name is mandatory"),
+			errors.New("repository name is mandatory"),
 		},
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ComputeRepoConfig(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -779,13 +769,13 @@ func TestApplyRepositoryTemplate(t *testing.T) {
 			&core.GhRepoConfig{ConfigTemplates: &[]string{aTemplate}},
 			nil,
 			nil,
-			fmt.Errorf("repository template not found as none available"),
+			errors.New("repository template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhRepoConfig{ConfigTemplates: &[]string{aTemplate}, Description: &description},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("\"a-template\" repository template not found"),
+			errors.New("\"a-template\" repository template not found"),
 		},
 		"no template provided": {
 			&core.GhRepoConfig{Description: &description},
@@ -802,13 +792,11 @@ func TestApplyRepositoryTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ApplyRepositoryTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -858,7 +846,7 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch protection template not found as none available"),
+			errors.New("branch protection template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhBranchProtectionConfig{
@@ -868,7 +856,7 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("\"a-template\" branch protection template not found"),
+			errors.New("\"a-template\" branch protection template not found"),
 		},
 		"no template provided": {
 			&core.GhBranchProtectionConfig{
@@ -903,13 +891,11 @@ func TestApplyBranchProtectionTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ApplyBranchProtectionTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -963,7 +949,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch protection #0: branch protection template not found as none available"),
+			errors.New("branch protection #0: branch protection template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhRepoConfig{
@@ -977,7 +963,7 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch protection #0: \"a-template\" branch protection template not found"),
+			errors.New("branch protection #0: \"a-template\" branch protection template not found"),
 		},
 		"no template provided": {
 			&core.GhRepoConfig{
@@ -1028,13 +1014,11 @@ func TestApplyBranchProtectionsTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				err := core.ApplyBranchProtectionsTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -1086,7 +1070,7 @@ func TestApplyBranchTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch template not found as none available"),
+			errors.New("branch template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhBranchConfig{
@@ -1098,7 +1082,7 @@ func TestApplyBranchTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("\"a-template\" branch template not found"),
+			errors.New("\"a-template\" branch template not found"),
 		},
 		"no template provided": {
 			&core.GhBranchConfig{SourceBranch: &sourceBranch},
@@ -1124,13 +1108,11 @@ func TestApplyBranchTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				actual, err := core.ApplyBranchTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
@@ -1188,7 +1170,7 @@ func TestApplyBranchesTemplate(t *testing.T) {
 			},
 			nil,
 			nil,
-			fmt.Errorf("branch a-branch-name: branch template not found as none available"),
+			errors.New("branch a-branch-name: branch template not found as none available"),
 		},
 		"unknown template": {
 			&core.GhRepoConfig{
@@ -1204,7 +1186,7 @@ func TestApplyBranchesTemplate(t *testing.T) {
 			},
 			emptyTplConfig,
 			nil,
-			fmt.Errorf("branch a-branch-name: \"a-template\" branch template not found"),
+			errors.New("branch a-branch-name: \"a-template\" branch template not found"),
 		},
 		"no template provided": {
 			&core.GhRepoConfig{
@@ -1246,13 +1228,11 @@ func TestApplyBranchesTemplate(t *testing.T) {
 	}
 
 	for tcname, tc := range cases {
-		tcname := tcname // Reinit var for parallel test
-		tc := tc         // Reinit var for parallel test
-
 		t.Run(
 			tcname,
 			func(t *testing.T) {
 				t.Parallel()
+
 				err := core.ApplyBranchesTemplate(tc.value, tc.templates)
 				if tc.error != nil {
 					if err == nil {
