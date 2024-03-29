@@ -10,7 +10,7 @@ Debug | Config directory: config
 Debug | Template directory: templates
 Debug | YAML anchor directory: yaml-anchors
 Debug | Reading repository directory: config/repos
-Trace | File config/repos/test.yml: original validation error => jsonschema: '/unwantedProperty' does not validate with map:///repo.json#/UnevaluatedProperties: not allowed
+Trace | File config/repos/test.yml: original validation error => jsonschema: '/unwantedProperty' does not validate with map:///repo.json#/unevaluatedProperties: not allowed
 Error | error during workspace loading:
 error during configs loading:
 	 - schema validation error: file config/repos/test.yml: /unwantedProperty not allowed
