@@ -1,81 +1,29 @@
 name: CI
 
 on:
-  push:
-    branches: [master]
   pull_request:
+    types:
+      - opened
+      - synchronize
+    paths-ignore:
+      # In case of updates to those workflows, they must be pre-checked by `pre-check-CI-updates.yml` rather than this workflow !
+      # Any updates on those workflows are expected to be restricted to those workflows only ! (no update on code for instance)
+      - '.github/workflows/pre-check-CI-updates.yml'
+      - '.github/workflows/CI.yml'
+      - '.github/workflows/coverage-upload.yml'
+      - '.github/workflows/reusable-CI-workflow.yml'
+      - '.github/workflows/reusable-coverage-upload-workflow.yml'
+    branches: [master]
+  push:
     branches: [master]
 
 concurrency:
-  group: "${{ github.workflow }}-${{ github.head_ref }}"
+  group: "${{ github.workflow }}-${{ github.head_ref || github.ref }}"
   cancel-in-progress: true
 
 jobs:
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
-          check-latest: true
-          cache: true
-          cache-dependency-path: ./go.sum
-
-      - name: Build
-        run: make build
-
-      - name: Run tests
-        run: make test-go gotest_o="-race -covermode=atomic -coverprofile=coverage.out"
-
-      - name: Create coverage group
-        id: tests-coverage-group
-        uses: yoanm/temp-reports-group-workspace/.github/actions/create-action@develop
-        with:
-          format: clover
-          files: coverage.out
-          path: build/coverage-groups
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-group
-          path: build/coverage-groups
-          if-no-files-found: error
-
-  static:
-    name: Static checks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
-          check-latest: true
-          cache: true
-          cache-dependency-path: ./go.sum
-
-      - name: Verify dependencies
-        run: make verify-deps
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: v1.57
-
-      - name: Documentation
-        env:
-          CI: false # If true, command thinks it's goreadme GHAction context (see https://github.com/posener/goreadme/issues/120)
-        run: |
-          make configure-dev-env && make build-doc
-          if [ ! "$(git status -s | wc -l)" -eq 0 ]; then
-              echo "::error::Documentation is not up to date ! Run 'make build-doc' "
-              exit 1;
-          fi
-          echo "Documentation is up to date 👌"
-          exit 0
+  tests:
+    name: Tests
+    permissions:
+      contents: read
+    uses: ./.github/workflows/reusable-CI-workflow.yml
