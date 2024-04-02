@@ -87,7 +87,7 @@ resource "github_branch_protection" "repo2-default" {
   }
 }
 
-resource "github_branch_protection" "repo2-feature-branch2" {
+resource "github_branch_protection" "repo2-feature_SLASH_branch2" {
   repository_id           = github_repository.repo2.node_id
   pattern                 = "feature/branch2"
   enforce_admins          = false
@@ -111,7 +111,7 @@ resource "github_branch_protection" "repo2-feature-branch2" {
   }
 }
 
-resource "github_branch_protection" "repo2-feature-branch3" {
+resource "github_branch_protection" "repo2-feature_SLASH_branch3" {
   repository_id           = github_repository.repo2.node_id
   pattern                 = "feature/branch3"
   enforce_admins          = true
