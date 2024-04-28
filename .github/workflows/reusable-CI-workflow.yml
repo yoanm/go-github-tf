@@ -61,7 +61,7 @@ jobs:
         run: make verify-deps
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v5
         with:
           version: v1.57
 
