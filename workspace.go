@@ -61,12 +61,17 @@ func readConfigDirectory(config *core.Config, rootPath string, decoderOpts []yam
 	}
 
 	var (
-		filenames []string
-		readErr   error
+		files   []os.DirEntry
+		readErr error
 	)
 
-	if filenames, readErr = readDirectory(rootPath); readErr != nil {
+	if files, readErr = os.ReadDir(rootPath); readErr != nil {
 		return configDirectoryLoadingError([]error{readErr})
+	}
+
+	filenames := make([]string, 0, len(files))
+	for _, file := range files {
+		filenames = append(filenames, file.Name())
 	}
 
 	return loadConfigDirectoryFiles(config, rootPath, decoderOpts, filenames)
@@ -164,7 +169,7 @@ func readRepositoryDirectory(
 ) (map[string]string, map[string]error) {
 	dirName := filepath.Base(rootPath)
 
-	filenames, readErr := readDirectory(rootPath)
+	files, readErr := os.ReadDir(rootPath)
 	if readErr != nil {
 		return nil, map[string]error{dirName: readErr}
 	}
@@ -174,10 +179,10 @@ func readRepositoryDirectory(
 
 	log.Debug().Msgf("Reading repository directory: %s", rootPath)
 
-	for _, filename := range filenames {
-		filePath := filepath.Join(rootPath, filename)
+	for _, file := range files {
+		filePath := filepath.Join(rootPath, file.Name())
 
-		ext := filepath.Ext(filename)
+		ext := filepath.Ext(file.Name())
 		if ext == ".yml" || ext == ".yaml" {
 			repoConfig, loadErr := core.LoadRepositoryFromFile(filePath, decoderOpts...)
 			if loadErr != nil {
@@ -205,14 +210,14 @@ func readTemplateDirectory(
 		return nil
 	}
 
-	dirContents, readErr := readDirectory(rootPath)
+	files, readErr := os.ReadDir(rootPath)
 	if readErr == nil {
 		log.Debug().Msgf("Reading template directory: %s", rootPath)
 
 		errList := map[string]error{}
 
-		for _, filename := range dirContents {
-			readTemplateDirectoryFile(config, filepath.Join(rootPath, filename), decoderOpts, errList)
+		for _, file := range files {
+			readTemplateDirectoryFile(config, filepath.Join(rootPath, file.Name()), decoderOpts, errList)
 		}
 
 		if len(errList) > 0 {
