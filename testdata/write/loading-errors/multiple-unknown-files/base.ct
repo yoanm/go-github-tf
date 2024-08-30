@@ -6,8 +6,8 @@ Debug | Template directory: templates
 Debug | YAML anchor directory: yaml-anchors
 Debug | Reading repository directory: config/repos
 Debug | config/repos/unknown_file.txt is not a YAML template => ignored
-Debug | config/unknown_file.txt is not a known file or directory => ignored
 Debug | config/unknown_dir is not a known file or directory => ignored
+Debug | config/unknown_file.txt is not a known file or directory => ignored
 Debug | Reading template directory: templates
 Debug | templates/test.unknown_template_type.yml is not a known template type => ignored
 Debug | templates/unknown_file.txt is not a YAML template => ignored

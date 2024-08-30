@@ -5,13 +5,18 @@ import (
 )
 
 func readDirectory(rootPath string) ([]string, error) {
-	directory, dirErr := openDirectory(rootPath)
-	if dirErr != nil {
-		return nil, dirErr
+	files, err := os.ReadDir(rootPath)
+	if err != nil {
+		return nil, err
 	}
 
-	//nolint:wrapcheck // Expected to return error as is
-	return directory.Readdirnames(0)
+	var res []string
+
+	for _, file := range files {
+		res = append(res, file.Name())
+	}
+
+	return res, nil
 }
 
 func openDirectory(path string) (*os.File, error) {
