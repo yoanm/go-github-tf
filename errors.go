@@ -16,8 +16,6 @@ var (
 
 	errInputDirectoryDoesntExist = errors.New("input directory doesn't exist")
 	errRepositoryAlreadyImported = errors.New("repository already imported")
-
-	errPathIsNotADirectory = errors.New("path is not a directory")
 )
 
 func workspaceLoadingError(errList []error) error {
@@ -51,8 +49,4 @@ func alreadyImportedRepositoryError(repoName string, filepathList []string) erro
 		repoName,
 		strings.Join(filepathList, ", "),
 	)
-}
-
-func pathIsNotADirectoryError(path string) error {
-	return fmt.Errorf("%w: %s", errPathIsNotADirectory, path)
 }
