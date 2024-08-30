@@ -4,11 +4,11 @@ go 1.22
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/goccy/go-yaml v1.11.3
+	github.com/goccy/go-yaml v1.12.0
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/go-cmp v0.6.0
-	github.com/hashicorp/hcl/v2 v2.20.1
-	github.com/rs/zerolog v1.32.0
+	github.com/hashicorp/hcl/v2 v2.22.0
+	github.com/rs/zerolog v1.33.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/spf13/pflag v1.0.5
 	github.com/yoanm/go-gh2tf v0.1.3
