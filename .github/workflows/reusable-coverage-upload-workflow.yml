@@ -41,7 +41,7 @@ jobs:
     secrets:
       PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
     with:
-      artifact: coverage-group
+      artifacts-pattern: coverage-group
       run-id: ${{ needs.fetch-info.outputs.run-id }}
       force-git-commit: ${{ needs.fetch-info.outputs.commit-sha }}
       force-uploader-language: go
@@ -58,7 +58,7 @@ jobs:
     secrets:
       TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
-      artifact: coverage-group
+      artifacts-pattern: coverage-group
       run-id: ${{ needs.fetch-info.outputs.run-id }}
       force-git-commit: ${{ needs.fetch-info.outputs.commit-sha }}
       force-git-branch: ${{ needs.fetch-info.outputs.branch }}
