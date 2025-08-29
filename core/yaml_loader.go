@@ -149,7 +149,7 @@ func newDecoder(content []byte, decoderOpts ...yaml.DecodeOption) *yaml.Decoder 
 }
 
 func getYamlValidatorDecoderOptions() []yaml.DecodeOption {
-	list := []yaml.DecodeOption{yaml.DisallowDuplicateKey()}
+	list := []yaml.DecodeOption{}
 
 	if YamlAnchorDirectory != nil {
 		list = append(list, yaml.ReferenceDirs(*YamlAnchorDirectory))
