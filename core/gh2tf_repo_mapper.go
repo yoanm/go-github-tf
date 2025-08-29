@@ -163,12 +163,13 @@ func MapToDefaultBranchRes(
 	}
 
 	for _, link := range links {
-		if link == LinkToRepository {
+		switch link {
+		case LinkToRepository:
 			// /!\ a branch can't be configured if repository doesn't exist
 			// => Add an explicit dependency by using "github_repository.${repoTfId}.name"
 			tmp := fmt.Sprintf("github_repository.%s.name", repoTfId)
 			repository = &tmp
-		} else if link == LinkToBranch {
+		case LinkToBranch:
 			if branch != nil && repo.Branches != nil {
 				if _, branchConfigExists := (*repo.Branches)[*branch]; branchConfigExists {
 					// /!\ default branch can't be configured if related branch doesn't exist
@@ -339,12 +340,13 @@ func mapBranchProtectionResLink(
 	pattern *string,
 	repo *GhRepoConfig,
 ) (*string, *string) {
-	if link == LinkToRepository {
+	switch link {
+	case LinkToRepository:
 		// /!\ a branch protection can't be configured if repository doesn't exist
 		// => Add an explicit dependency by using "github_repository.${repoTfId}.node_id"
 		tmp := fmt.Sprintf("github_repository.%s.node_id", repoTfId)
 		repoName = &tmp
-	} else if link == LinkToBranch {
+	case LinkToBranch:
 		if pattern != nil && repo != nil && repo.Branches != nil {
 			if _, branchConfigExists := (*repo.Branches)[*pattern]; branchConfigExists {
 				tmp := fmt.Sprintf("github_branch.%s-%s.branch", repoTfId, tfsig.ToTerraformIdentifier(*pattern))
@@ -483,7 +485,7 @@ func mapTemplate(repoConfig *GhRepoConfig, valGen tfsig.ValueGenerator) *ghrepos
 
 		if repoConfig.Miscellaneous.Template.Source != nil {
 			sources := strings.Split(*repoConfig.Miscellaneous.Template.Source, "/")
-			if len(sources) == 2 { //nolint:gomnd // Doesn't make sense here to wrap 2
+			if len(sources) == 2 { //nolint:mnd // Doesn't make sense here to wrap 2
 				template.Owner = &sources[0]
 				template.Repository = &sources[1]
 			}
