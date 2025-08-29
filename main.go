@@ -118,9 +118,9 @@ func computeLogLevel() zerolog.Level {
 		return zerolog.Disabled
 	case verboseFlag == 1:
 		return zerolog.InfoLevel
-	case verboseFlag == 2: //nolint:gomnd // Doesn't make sense here to wrap 2
+	case verboseFlag == 2: //nolint:mnd // Doesn't make sense here to wrap 2
 		return zerolog.DebugLevel
-	case verboseFlag > 2: //nolint:gomnd // Doesn't make sense here to wrap 2
+	case verboseFlag > 2: //nolint:mnd // Doesn't make sense here to wrap 2
 		return zerolog.TraceLevel
 	}
 

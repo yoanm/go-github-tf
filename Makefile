@@ -33,7 +33,7 @@ configure-dev-env:
 configure-test-env: ## 🤖 Install required libraries for test environment (golint, staticcheck, etc)
 configure-test-env: configure-dev-env
 configure-test-env:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1
 
 ##—— 📝 Documentation —————————————————————————————————————————————————
 .PHONY: build-doc

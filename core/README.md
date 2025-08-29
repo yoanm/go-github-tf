@@ -154,7 +154,7 @@ var (
     path ...string,
 ) ([]*T, error)`
 
-### func [MapBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L230)
+### func [MapBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L231)
 
 `func MapBranchToBranchProtectionRes(
     pattern *string,
@@ -165,7 +165,7 @@ var (
     links ...MapperLink,
 ) *ghbranchprotect.Config`
 
-### func [MapDefaultBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L195)
+### func [MapDefaultBranchToBranchProtectionRes](./gh2tf_repo_mapper.go#L196)
 
 `func MapDefaultBranchToBranchProtectionRes(
     branchConfig *GhDefaultBranchConfig,
@@ -175,7 +175,7 @@ var (
     links ...MapperLink,
 ) *ghbranchprotect.Config`
 
-### func [MapToBranchProtectionRes](./gh2tf_repo_mapper.go#L251)
+### func [MapToBranchProtectionRes](./gh2tf_repo_mapper.go#L252)
 
 `func MapToBranchProtectionRes(
     branchProtectionConfig *GhBranchProtectionConfig,
