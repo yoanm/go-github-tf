@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/goccy/go-yaml v1.15.23 // Pinned at v1.15.23 since v1.16.0 seems to badly handle anchor
+	github.com/goccy/go-yaml v1.18.0 // Pinned at v1.15.23 since v1.16.0 seems to badly handle anchor
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/go-cmp v0.7.0
 	github.com/hashicorp/hcl/v2 v2.24.0
