@@ -114,10 +114,10 @@ func loadConfigDirectoryFile(
 	errList map[string]error,
 	visited map[string]string,
 ) {
-	switch filename {
-	case "repos.yaml", "repos.yml":
+	switch {
+	case filename == "repos.yaml" || filename == "repos.yml":
 		loadReposConfigFile(config, filename, path, decoderOpts, errList, visited)
-	case "repos":
+	case filename == "repos":
 		loadReposConfigDirectory(config, path, decoderOpts, errList, visited)
 	default:
 		log.Debug().Msgf("%s is not a known file or directory => ignored", path)
