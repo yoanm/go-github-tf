@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/rs/zerolog v1.34.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
-	github.com/spf13/pflag v1.0.7
+	github.com/spf13/pflag v1.0.10
 	github.com/yoanm/go-gh2tf v0.1.4
 	github.com/yoanm/go-tfsig v0.2.4
 )
